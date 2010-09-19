@@ -33,7 +33,7 @@ from spam.lib.base import SPAMBaseController
 from spam.model import User, Group, Permission, Project
 from spam.controllers.error import ErrorController
 from spam.controllers.sandbox import SandboxController
-from spam.controllers import user, category, tag, note, journal
+from spam.controllers import user, category, tag, note, journal, profile
 from spam.controllers import project, scene, shot, asset, libgroup
 from spam.lib.decorators import project_set_active
 from spam.lib.predicates import is_project_user, is_project_admin
@@ -63,6 +63,7 @@ class RootController(SPAMBaseController):
     tag = tag.Controller()
     note = note.Controller()
     journal = journal.Controller()
+    profile = profile.Controller()
     
     @expose()
     def index(self):
