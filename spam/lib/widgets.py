@@ -913,6 +913,7 @@ class FormUserEdit(RestForm):
     user_id = twf.HiddenField()
     user_name_ = twf.LabelField()
     display_name = twf.TextField(validator=StringLength(max=255, required=True))
+    email = twf.TextField(validator=StringLength(max=255))
 
 
 class FormUserConfirm(RestForm):

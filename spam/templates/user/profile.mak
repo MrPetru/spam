@@ -21,38 +21,27 @@
 <%inherit file="spam.templates.master"/>
 
 <div class="content">
-
     
-    ${c.user.user_name} - Profile Page - created: ${str(c.user.created)[0:19]}
+    Profile Page - created: ${str(c.user.created)[0:19]}
     <hr />
-
-    <table>
-        <tr>
-            <td>Name:</td>
-            <td>${c.user.display_name}</td>
-            <td><div title="edit" class="lw_icon icon_edit "></td>
-        </tr>
-        <tr>
-            <td>Email:</td>
-            <td>
-                % if c.user.email_address == None:
-                    not specified
-                % else:
-                    ${c.user.email_address}
-                % endif
-            </td>
-            <td><div title="edit" class="lw_icon icon_edit "></div></td>
-        </tr>
-        <tr>
-            <td>Password:</td>
-            <td>**********</td>
-            <td>
-                <a class="dialog" href="${tg.url('./user/get_change_password')}">
-                    <div title="edit" class="lw_icon icon_edit "></div>
-                </a>
-            </td>
-        </tr>
-    </table>
+    
+    <img src="http://www.gravatar.com/avatar/2445c0701dc412883154fe6cedf09ff3?s=140&d=http%3A%2F%2Fgithub.com%2Fimages%2Fgravatars%2Fgravatar-140.png" width="120" heght="160" /> 
+    <br /><br />
+    Username: <b>${c.user.user_name}</b>
+    <br />
+    Display Name: <b>${c.user.display_name}</b>
+    <br />
+    % if c.user.email_address == None:
+        Email Address: <b>not specified
+    % else:
+        Email Address: <b>${c.user.email_address}
+    % endif
+    </b>
+    <br /><br />
+    
+    <a class="button dialog" href="${tg.url('./%s/edit') % c.user.user_name}">${_('edit details')}</a>
+   
+    <a class="button dialog" href="${tg.url('./get_change_password')}">${_('change password')}</a>
 
 </div>
 

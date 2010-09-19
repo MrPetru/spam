@@ -122,22 +122,25 @@ class Controller(RestController):
 
         return dict(msg=msg, status='ok', updates=updates)
 
-    @require(in_group('administrators'))
+    
+    @require(not_anonymous())
     @expose('spam.templates.forms.form')
     def edit(self, user_id, **kwargs):
         """Display a EDIT form."""
         user = user_get(user_id)
         f_edit.value = dict(user_id=user.user_id,
                             user_name_=user.user_name,
-                            display_name=user.display_name)
+                            display_name=user.display_name,
+                            email=user.email_address)
         tmpl_context.form = f_edit
         return dict(title='%s %s' % (_('Edit user:'), user.user_id))
         
-    @require(in_group('administrators'))
+#    @require(in_group('administrators'))
+    @require(not_anonymous())
     @expose('json')
     @expose('spam.templates.forms.result')
     @validate(f_edit, error_handler=edit)
-    def put(self, user_id, display_name=None):
+    def put(self, user_id, display_name=None, email=None):
         """Edit a user"""
         session = session_get()
         user = tmpl_context.user
@@ -147,6 +150,10 @@ class Controller(RestController):
         modified = False
         if display_name and not edituser.display_name == display_name:
             edituser.display_name = display_name
+            modified = True
+            
+        if email and not edituser.email_address == email:
+            edituser.email_address = email
             modified = True
         
         if modified:
@@ -598,3 +605,13 @@ class Controller(RestController):
                 remuser.user_id, _('is not an artist for:'), project.id),
                 status='error', updates=[])
 
+
+
+    @require(not_anonymous())
+    @expose('json')
+    @expose('spam.templates.user.profile')
+    def profile_page(self):
+        """Return de profile page for curent user"""
+        
+        return dict(page="%s's profile" % tmpl_context.user.user_name,
+                                                    sidebar=('user', 'profile'))

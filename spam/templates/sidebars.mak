@@ -28,7 +28,7 @@
                 <div class="toggleable">
                     <ul class="links">
                         <li class="home"><a href="${tg.url('/user/home')}">${_('home')}</a></li>
-                        <li class="profile"><a href="${tg.url('/profile')}">${_('profile')}</a></li>
+                        <li class="profile"><a href="${tg.url('/user/profile_page')}">${_('profile')}</a></li>
                     </ul>
                 </div>
             </div>
