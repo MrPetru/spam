@@ -15,6 +15,7 @@
 ##
 ## Original Copyright (c) 2010, Lorenzo Pierfederici <lpierfederici@gmail.com>
 ## Contributor(s): 
+## Petru Ciobanu <petrea.email@gmail.com>
 ##
 
 <%inherit file="spam.templates.master"/>

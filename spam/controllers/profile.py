@@ -17,16 +17,11 @@
 #
 # Original Copyright (c) 2010, Lorenzo Pierfederici <lpierfederici@gmail.com>
 # Contributor(s): 
+# Petru Ciobanu <petrea.email@gmail.com>
 #
 """Profile Page controller"""
 
-from tg import expose, url, tmpl_context, require
-from tg.decorators import paginate
-from pylons.i18n import ugettext as _, lazy_ugettext as l_
-from sqlalchemy import desc
-from spam.lib.base import SPAMBaseController
-from spam.model import session_get, Journal
-from spam.lib.widgets import TableJournal
+from tg import expose, tmpl_context, require
 from repoze.what.predicates import in_group, not_anonymous
 from tg.controllers import RestController
 
@@ -40,7 +35,7 @@ class Controller(RestController):
     @expose('json')
     @expose('spam.templates.profile.profile')
     def default(self):
-        """Return a `full` page with a paginated table of journal entries."""
+        """Return de profile page for curent user"""
         
         return dict(page="%s's profile" % tmpl_context.user.user_name,
                                                     sidebar=('user', 'profile'))
