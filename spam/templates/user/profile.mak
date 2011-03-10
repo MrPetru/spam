@@ -25,7 +25,7 @@
     ${_('Your Details, registered:')} ${str(c.user.created)[0:19]}
     <hr />
     
-    <img src="http://www.gravatar.com/avatar/2445c0701dc412883154fe6cedf09ff3?s=140&d=http%3A%2F%2Fgithub.com%2Fimages%2Fgravatars%2Fgravatar-140.png" width="120" heght="160" /> 
+    <img src="/spam/themes/greentango/images/logo.png" width="120" heght="160" /> 
     <br /><br />
     ${_('Username:')} <b>${c.user.user_name}</b>
     <br />
