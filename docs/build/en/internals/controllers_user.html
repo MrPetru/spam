@@ -55,7 +55,7 @@
 <p>In addition to the standard REST verbs this controller defines the following
 REST-like methods:</p>
 <blockquote>
-<ul class="simple">
+<div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">add_to_group</span></tt>      (<a class="reference internal" href="#spam.controllers.user.main.Controller.get_add_to_group" title="spam.controllers.user.main.Controller.get_add_to_group"><tt class="xref py py-meth docutils literal"><span class="pre">get_add_to_group()</span></tt></a>, <a class="reference internal" href="#spam.controllers.user.main.Controller.post_add_to_group" title="spam.controllers.user.main.Controller.post_add_to_group"><tt class="xref py py-meth docutils literal"><span class="pre">post_add_to_group()</span></tt></a>)</li>
 <li><tt class="docutils literal"><span class="pre">remove_from_group</span></tt> (<a class="reference internal" href="#spam.controllers.user.main.Controller.remove_from_group" title="spam.controllers.user.main.Controller.remove_from_group"><tt class="xref py py-meth docutils literal"><span class="pre">remove_from_group()</span></tt></a>)</li>
 <li><tt class="docutils literal"><span class="pre">add_admins</span></tt>        (<a class="reference internal" href="#spam.controllers.user.main.Controller.get_add_admins" title="spam.controllers.user.main.Controller.get_add_admins"><tt class="xref py py-meth docutils literal"><span class="pre">get_add_admins()</span></tt></a>, <a class="reference internal" href="#spam.controllers.user.main.Controller.post_add_admins" title="spam.controllers.user.main.Controller.post_add_admins"><tt class="xref py py-meth docutils literal"><span class="pre">post_add_admins()</span></tt></a>)</li>
@@ -65,7 +65,7 @@ REST-like methods:</p>
 <li><tt class="docutils literal"><span class="pre">add_artists</span></tt>       (<a class="reference internal" href="#spam.controllers.user.main.Controller.get_add_artists" title="spam.controllers.user.main.Controller.get_add_artists"><tt class="xref py py-meth docutils literal"><span class="pre">get_add_artists()</span></tt></a>, <a class="reference internal" href="#spam.controllers.user.main.Controller.post_add_artists" title="spam.controllers.user.main.Controller.post_add_artists"><tt class="xref py py-meth docutils literal"><span class="pre">post_add_artists()</span></tt></a>)</li>
 <li><tt class="docutils literal"><span class="pre">remove_artist</span></tt>     (<a class="reference internal" href="#spam.controllers.user.main.Controller.remove_artist" title="spam.controllers.user.main.Controller.remove_artist"><tt class="xref py py-meth docutils literal"><span class="pre">remove_artist()</span></tt></a>)</li>
 </ul>
-</blockquote>
+</div></blockquote>
 <dl class="method">
 <dt id="spam.controllers.user.main.Controller.edit">
 <tt class="descname">edit</tt><big>(</big><em>user_id</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#spam.controllers.user.main.Controller.edit" title="Permalink to this definition">¶</a></dt>
@@ -100,6 +100,12 @@ REST-like methods:</p>
 <dt id="spam.controllers.user.main.Controller.get_all">
 <tt class="descname">get_all</tt><big>(</big><big>)</big><a class="headerlink" href="#spam.controllers.user.main.Controller.get_all" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a <cite>tabbed</cite> page for user tabs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spam.controllers.user.main.Controller.get_change_password">
+<tt class="descname">get_change_password</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#spam.controllers.user.main.Controller.get_change_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display a NEW form.</p>
 </dd></dl>
 
 <dl class="method">
@@ -148,6 +154,12 @@ REST-like methods:</p>
 <dt id="spam.controllers.user.main.Controller.post_add_to_group">
 <tt class="descname">post_add_to_group</tt><big>(</big><em>group_id</em>, <em>userids</em><big>)</big><a class="headerlink" href="#spam.controllers.user.main.Controller.post_add_to_group" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add users to a group</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spam.controllers.user.main.Controller.post_change_password">
+<tt class="descname">post_change_password</tt><big>(</big><em>new_password</em>, <em>retype_password</em><big>)</big><a class="headerlink" href="#spam.controllers.user.main.Controller.post_change_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the current user password</p>
 </dd></dl>
 
 <dl class="method">
@@ -268,7 +280,7 @@ project&#8217;s <tt class="docutils literal"><span class="pre">users</span></tt>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Lorenzo Pierfederici.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
     </div>
   </body>
 </html>

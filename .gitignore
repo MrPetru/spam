@@ -19,3 +19,5 @@ paster.log
 paster.pid
 */public/themes/local_*
 
+# builded doc files
+docs/build/
