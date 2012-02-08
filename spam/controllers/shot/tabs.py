@@ -29,9 +29,10 @@ from spam.model import scene_get, shot_get
 from spam.lib.predicates import is_project_user
 from spam.lib.widgets import TableNotes
 #from spam.lib.widgets import BoxTags, BoxCategoriesStatus
+from spam.lib.widgets import BoxCategoriesStatus
 
 # live widgets
-#b_categories_status = BoxCategoriesStatus()
+b_categories_status = BoxCategoriesStatus()
 #b_tags = BoxTags()
 t_notes = TableNotes()
 
@@ -55,13 +56,13 @@ class TabController(SPAMBaseController):
         user = tmpl_context.user
         shot = tmpl_context.shot
 
-#        tmpl_context.b_categories_status = b_categories_status
+        tmpl_context.b_categories_status = b_categories_status
 #        tmpl_context.b_tags = b_tags
         tmpl_context.t_notes = t_notes
-#        cat_extra_data = dict(proj_id=shot.proj_id, container_type='shot',
-#                                                        container_id=shot.id)
+        cat_extra_data = dict(proj_id=shot.proj_id, container_type='shot',
+                                                        container_id=shot.id)
 #        tag_extra_data = dict(taggable_id=shot.id, user_id=user.user_id,
 #                                                                project=project)
         note_extra_data = dict(user_id=user.user_id)
-        return dict(note_extra_data=note_extra_data)
+        return dict(note_extra_data=note_extra_data, cat_extra_data=cat_extra_data)
 

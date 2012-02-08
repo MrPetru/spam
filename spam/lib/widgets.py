@@ -33,25 +33,27 @@ from spam.lib import notifications
 ############################################################
 # Custom Live widgets
 ############################################################
-#class StatusIcon(LiveWidget):
-#    """Custom livewidget to show a status icon."""
-#    params = ['icon_class']
-#    template = 'mako:spam.templates.widgets.statusicon'
-#    
-#    css_class = 'lw_status'
-#    show_header = False
-#    sortable = False
+class StatusIcon(twl.LiveWidget):
+    """Custom livewidget to show a status icon."""
+    params = ['icon_class']
+    template = 'mako:spam.templates.widgets.statusicon'
+    maker_template = 'mako:spam.templates.widgets.statusicon_maker'
+    
+    css_class = 'lw_status'
+    show_header = False
+    sortable = False
 
 
-#class StatusIconBox(LiveWidget):
-#    """Custom livewidget to show a box of status icons."""
-#    params = ['icon_class', 'dest']
-#    template = 'mako:spam.templates.widgets.statusiconbox'
-#    
-#    css_class = 'statusiconbox'
-#    show_header = False
-#    sortable = False
-
+##class StatusIconBox(twl.LiveRepeating):
+##    """Custom livewidget to show a box of status icons."""
+##    params = ['icon_class', 'dest']
+##    template = 'mako:spam.templates.widgets.statusiconbox'
+##    maker_template = 'mako:spam.templates.widgets.statusiconbox_maker'
+##    update_condition = 'false'
+##    child = twl.StatusBox
+##    css_class = 'statusiconbox'
+##    show_header = False
+##    sortable = False
 
 ############################################################
 # Live tables
@@ -250,16 +252,7 @@ class TableScenes(twl.LiveTable):
     """Scene livetable."""
     update_topic = notifications.TOPIC_SCENES
     show_headers = False
-    thumbnail = twl.Box(
-        css_class='thumbnail',
-        children=[
-            twl.Image(id='thumbnail',
-                help_text='thumbnail',
-                css_class='thumbnail',
-                condition='data.has_preview',
-                src=url('/repo/%(thumbnail)s')
-            )
-    ])
+    thumbnail = twl.LiveThumbnail()
     namelink = twl.Link(
         dest=url('/scene/%(proj_id)s/%(name)s/'),
         sort_default=True,
@@ -267,11 +260,11 @@ class TableScenes(twl.LiveTable):
             twl.Text(id='name', help_text='name')
     ])
     description = twl.Text()
-#    shots = StatusIconBox(
-#        dest=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s/'),
-#        children=[
-#            StatusIcon(help_text='')
-#    ])
+    shots = twl.StatusIconBox(
+        children=[
+            twl.Link(dest=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s/'), children = [StatusIcon(id='status', help_text='')]),
+            
+    ])
     actions = twl.Box(
         condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
         children=[
@@ -292,22 +285,14 @@ class TableScenes(twl.LiveTable):
                         help_text='delete'),
             ]),
     ])
+        
 
 
 class TableShots(twl.LiveTable):
     """Shot livetable."""
     update_topic = notifications.TOPIC_SHOTS
     show_headers = False
-    thumbnail = twl.Box(
-        css_class='thumbnail',
-        children=[
-            twl.Image(id='thumbnail',
-                help_text='thumbnail',
-                css_class='thumbnail',
-                condition='data.has_preview',
-                src=url('/repo/%(thumbnail)s')
-            ),
-    ])
+    thumbnail = twl.LiveThumbnail()
     namelink = twl.Link(
         dest=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s/'),
         sort_default=True,
@@ -316,18 +301,18 @@ class TableShots(twl.LiveTable):
     ])
     description = twl.Text()
     frames = twl.Text()
-    categories = twl.Box(
+    categories =  twl.StatusIconBox(
         css_class='statusiconbox',
-        children=[
-            twl.Link(
+        condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+        child=twl.Link(
                 dest='%s#%s' % (
                       url('/shot/%(proj_id)s/%(parent_name)s/%(name)s'),
                       url('/asset/%(proj_id)s/%(container_type)s/%(id)s')),
                 children=[
-#                    StatusIcon(id='item_status',
-#                        help_text='%(item_name)s: %(item_status)s'),
+                    StatusIcon(id='status',
+                        help_text='%(item_name)s: %(item_status)s'),
             ])
-    ])
+    )
     actions = twl.Box(
         condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
         children=[
@@ -355,15 +340,7 @@ class TableLibgroups(twl.LiveTable):
     parent_id = twc.Param('Libgroup parent id', default=None)
     update_topic = notifications.TOPIC_LIBGROUPS
     show_headers = False
-    thumbnail = twl.Box(
-        css_class='thumbnail',
-        children=[
-            twl.Image(
-                help_text='thumbnail',
-                css_class='thumbnail',
-                condition='data.has_preview',
-                src=url('/repo/%(thumbnail)s'))
-    ])
+    thumbnail = twl.LiveThumbnail()
     namelink = twl.Link(
         dest=url('/libgroup/%(proj_id)s/%(id)s/'),
         sort_default=True,
@@ -372,23 +349,23 @@ class TableLibgroups(twl.LiveTable):
                 help_text='name')
     ])
     description = twl.Text()
-#    subgroups = StatusIconBox(
-#        dest=url('/libgroup/%(proj_id)s/%(id)s'),
-#        children=[
-#          StatusIcon(help_text='')
-#    ])
-    categories = twl.Box(
-        css_class='statusiconbox',
+    subgroups = twl.StatusIconBox(
+        ##dest=url('/libgroup/%(proj_id)s/%(id)s'),
         children=[
-            twl.Link(
+            twl.Link(dest=url('/libgroup/%(proj_id)s/%(id)s'),
+                children = [StatusIcon(id='status', help_text='')]),
+    ])
+    categories = twl.StatusIconBox(
+        css_class='statusiconbox',
+        child=twl.Link(
                 dest='%s#%s' % (
                       url('/libgroup/%(proj_id)s/%(id)s'),
                       url('/asset/%(proj_id)s/%(container_type)s/%(id)s')),
                 children=[
-#                    StatusIcon(id='item_status',
-#                        help_text='%(item_name)s: %(item_status)s')
+                    StatusIcon(id='status',
+                        help_text='%(item_name)s: %(item_status)s')
             ])
-    ])
+    )
     actions = twl.Box(
         condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
         children=[
@@ -422,19 +399,7 @@ class TableAssets(twl.LiveTable):
     
     update_topic = notifications.TOPIC_ASSETS
     show_headers = False
-#    thumbnail = twl.Box(
-#        css_class='thumbnail status %(status)s',
-#        children=[
-#            twl.Link(
-#                dest=url('/repo/%(proj_id)s/preview.png'),
-#                condition='data.has_preview',
-#                children=[
-#                    twl.Image(
-#                        help_text='preview',
-#                        css_class='thumbnail',
-#                        src=url('/repo/%(thumbnail)s'))
-#            ])
-#    ])
+    thumbnail = twl.LiveThumbnail()
     name = twl.Box(
         css_class='status %(status)s',
         children=[
@@ -605,6 +570,7 @@ class TableAssetHistory(twl.LiveTable):
                         src=url('/repo/%(thumbnail)s'))
             ])
     ])
+    thumbnail = twl.LiveThumbnail()
     fmtver = twl.Text(help_text='ver')
     note = twl.Box(
         children=[
@@ -720,24 +686,24 @@ class ListProjects(twl.LiveList):
 ############################################################
 # Live boxes
 ############################################################
-#class BoxTags(LiveBox):
-#    """Tag livebox."""
-#    params = ['taggable_id']
-#    container_class = 'tagbox'
-#    update_topic = notifications.TOPIC_TAGS
-#    id = Box(children=[
-#        Text(id='id', help_text=''),
-#        Button(id='remove',
-#          condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
-#          action=url('/tag/%(taggable_id)s/%(id)s/remove'),
-#          children=[Icon(id='remove', icon_class='icon_delete',
-#            help_text='remove'),
-#        ]),
-#        Text(id='separator', help_text='', text=', '),
-#    ])
-#    
-#    def update_params(self, d):
-#        super(BoxTags, self).update_params(d)
+class BoxTags(twl.LiveBox):
+    """Tag livebox."""
+    params = ['taggable_id']
+    container_class = 'tagbox'
+    update_topic = notifications.TOPIC_TAGS
+    id = twl.Box(children=[
+        twl.Text(id='id', help_text=''),
+        twl.Button(id='remove',
+          condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+          action=url('/tag/%(taggable_id)s/%(id)s/remove'),
+          children=[twl.Icon(id='remove', icon_class='icon_delete',
+            help_text='remove'),
+        ]),
+        twl.Text(id='separator', help_text='', text=', '),
+    ])
+    
+    def update_params(self, d):
+        super(BoxTags, self).update_params(d)
 #        d['update_condition'] = 'msg.taggable_id=="%s"' % d['taggable_id']
 
 
@@ -769,78 +735,78 @@ class ListProjects(twl.LiveList):
 #''')
 
 
-#class BoxScenesStatus(LiveBox):
-#    """Scene status livebox."""
-#    params = ['proj_id']
-#    container_class = 'statusbox'
-#    update_topic = notifications.TOPIC_SCENES
-#    show_update = False
-#    
-#    link = Link(dest=url('/scene/%(proj_id)s/%(name)s'),
-#        children=[
-#          StatusIcon(id='status', help_text='%(name)s: %(status)s')
-#    ])
-#    
-#    def update_params(self, d):
-#        super(BoxScenesStatus, self).update_params(d)
-#        d['update_condition'] = 'msg.ob.proj_id=="%s"' % d['proj_id']
+class BoxScenesStatus(twl.LiveBox):
+    """Scene status livebox."""
+    params = ['proj_id']
+    container_class = 'statusbox'
+    update_topic = notifications.TOPIC_SCENES
+    show_update = False
+    
+    link = twl.Link(dest=url('/scene/%(proj_id)s/%(name)s'),
+        children=[
+          StatusIcon(id='status', help_text='%(name)s: %(status)s')
+    ])
+    
+    def update_params(self, d):
+        super(BoxScenesStatus, self).update_params(d)
+        d['update_condition'] = 'msg.ob.proj_id=="%s"' % d['proj_id']
 
 
-#class BoxShotsStatus(LiveBox):
-#    """Shot status livebox."""
-#    params = ['scene_id']
-#    container_class = 'statusbox'
-#    update_topic = notifications.TOPIC_SHOTS
-#    show_update = False
-#    
-#    link = Link(dest=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s'),
-#        children=[
-#          StatusIcon(id='status', help_text='%(name)s: %(status)s')
-#    ])
-#    
-#    def update_params(self, d):
-#        super(BoxShotsStatus, self).update_params(d)
-#        d['update_condition'] = 'msg.ob.parent_id=="%s"' % d['scene_id']
+class BoxShotsStatus(twl.LiveBox):
+    """Shot status livebox."""
+    params = ['scene_id']
+    container_class = 'statusbox'
+    update_topic = notifications.TOPIC_SHOTS
+    show_update = False
+    
+    link = twl.Link(dest=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s'),
+        children=[
+          StatusIcon(id='status', help_text='%(name)s: %(status)s')
+    ])
+    
+    def update_params(self, d):
+        super(BoxShotsStatus, self).update_params(d)
+        d['update_condition'] = 'msg.ob.parent_id=="%s"' % d['scene_id']
 
 
-#class BoxLibgroupsStatus(LiveBox):
-#    """Libgroup status livebox."""
-#    params = ['libgroup_id']
-#    container_class = 'statusbox'
-#    update_topic = notifications.TOPIC_LIBGROUPS
-#    show_update = False
-#    
-#    link = Link(dest=url('/libgroup/%(proj_id)s/%(id)s'),
-#        children=[
-#          StatusIcon(id='status', help_text='%(name)s: %(status)s')
-#    ])
-#    
-#    def update_params(self, d):
-#        super(BoxLibgroupsStatus, self).update_params(d)
-#        libgroup_id = d['libgroup_id'] and '"%s"' % d['libgroup_id'] or 'null'
-#        d['update_condition'] = 'msg.ob.parent_id==%s' % libgroup_id
+class BoxLibgroupsStatus(twl.LiveBox):
+    """Libgroup status livebox."""
+    params = ['libgroup_id']
+    container_class = 'statusbox'
+    update_topic = notifications.TOPIC_LIBGROUPS
+    show_update = False
+    
+    link = twl.Link(dest=url('/libgroup/%(proj_id)s/%(id)s'),
+        children=[
+          StatusIcon(id='status', help_text='%(name)s: %(status)s')
+    ])
+    
+    def update_params(self, d):
+        super(BoxLibgroupsStatus, self).update_params(d)
+        libgroup_id = d['libgroup_id'] and '"%s"' % d['libgroup_id'] or 'null'
+        d['update_condition'] = 'msg.ob.parent_id==%s' % libgroup_id
 
 
-#class BoxCategoriesStatus(LiveBox):
-#    """Asset categories status livebox."""
-#    params = ['container_id']
-#    javascript = [statusbox_js]
-#    container_class = 'statusbox'
-#    update_topic = notifications.TOPIC_ASSETS
-#    update_functions = ('{"added": add_categories,'
-#                        ' "deleted": delete_categories,'
-#                        ' "updated": update_categories}')
-#    show_update = False
-#    
-#    category = Link(
-#          dest='#/asset/%(proj_id)s/%(container_type)s/%(container_id)s',
-#          children=[
-#            StatusIcon(id='status', help_text='%(name)s: %(status)s')
-#    ])
-#    
-#    def update_params(self, d):
-#        super(BoxCategoriesStatus, self).update_params(d)
-#        d['update_condition'] = 'msg.ob.parent_id=="%s"' % d['container_id']
+class BoxCategoriesStatus(twl.LiveBox):
+    """Asset categories status livebox."""
+    params = ['container_id']
+    #javascript = [statusbox_js]
+    container_class = 'statusbox'
+    update_topic = notifications.TOPIC_ASSETS
+    update_functions = ('{"added": add_categories,'
+                        ' "deleted": delete_categories,'
+                        ' "updated": update_categories}')
+    show_update = False
+    
+    category = twl.Link(
+          dest='#/asset/%(proj_id)s/%(container_type)s/%(container_id)s',
+          children=[
+            StatusIcon(id='status', help_text='%(name)s: %(status)s')
+    ])
+    
+    def update_params(self, d):
+        super(BoxCategoriesStatus, self).update_params(d)
+        d['update_condition'] = 'msg.ob.parent_id=="%s"' % d['container_id']
 
 
 #class BoxStatus(LiveBox):
