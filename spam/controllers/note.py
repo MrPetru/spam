@@ -99,7 +99,7 @@ class Controller(RestController):
     @project_set_active
     @require(is_project_user())
     @expose('json')
-    @expose('spam.templates.forms.result')
+    #@expose('spam.templates.forms.result')
     @validate(f_new, error_handler=new)
     def post(self, proj, annotable_id, text):
         """Add notes to a ``annotable`` obect."""
@@ -122,7 +122,7 @@ class Controller(RestController):
             updates.append(dict(item=ob, topic=TOPICS[ob.__class__]))
         notify.send(updates)
 
-        return dict(msg=msg, status='ok', updates=updates)
+        return dict(msg=msg, status='ok', updates=[])
     
     @project_set_active
     @require(is_project_admin())

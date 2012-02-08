@@ -221,10 +221,17 @@ class Scene(DeclarativeBase):
     def path(self):
         return os.path.join(G.SCENES, self.name)
     
+##    @property
+##    def thumbnail(self):
+##        for sh in self.shots:
+##            if sh.has_tags(['key']) and sh.has_preview:
+##                return sh.thumbnail
+##        return ''
+        
     @property
     def thumbnail(self):
         for sh in self.shots:
-            if sh.has_tags(['key']) and sh.has_preview:
+            if sh.has_preview:
                 return sh.thumbnail
         return ''
     
@@ -658,7 +665,7 @@ class Asset(DeclarativeBase):
         for ver in self.versions:
             if ver.has_preview:
                 return ver.thumbnail
-        return None
+        return ''
     
     @property
     def has_preview(self):
@@ -848,7 +855,7 @@ class AssetVersion(DeclarativeBase):
             name = '%s_v%03d-thumb.png' % (name, self.ver)
             return os.path.join(self.asset.proj_id, G.PREVIEWS,
                     self.asset.parent.owner.path, self.asset.category.id, name)
-        return None
+        return ''
     
     @property
     def has_preview(self):

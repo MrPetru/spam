@@ -137,6 +137,13 @@ body {
     border: 0;
 }
 
+.thumbnail_image_not_found{
+    width: 120px;
+    height: 68px;
+    border: 0;
+    background-image: url(../images/preview_not_found.png);
+}
+
 .thumbnail img {
     display: block;
     width: 120px;

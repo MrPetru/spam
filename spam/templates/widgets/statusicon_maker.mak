@@ -18,18 +18,22 @@
 ##
 
 function(data, id) {
-    var field = '<div class="statusiconbox">';
-    $.each(data[id], function(index, item) {
-        % if dest:
-            field += '<a href="' + $.sprintf('${dest or '' | n}', item) + '">';
-        % endif
-        field += '<div class="statusicon ' + item['name'] + ' ' + item['status'] + '" ';
-        field += 'title="' + item['name'] + ': ' + item['status'] + '"></div>';
-        % if dest:
-            field += '</a>';
-        % endif
-    });
-    field += '</div>';
+    var data_id = '';
+    if (data[id] != undefined)
+    {
+        data_id = data[id];
+    }
+    else
+    {
+        data_id = "new";
+    }
+    var field = '<div class="statusicon ${icon_class or ''} ' + data_id + '" ';
+    field += 'title="' + $.sprintf('${label_text or '' | n}', data) + '"';
+    field += '></div>';
     return field;
 }
 
+
+## ## da agiungere il data[id]
+##<div class="statusicon ${w.value} ${icon_class or ''}" title="${w.help_text}">
+##</div>

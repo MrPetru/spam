@@ -20,9 +20,9 @@
 <%inherit file="spam.templates.tab"/>
 
 <h2>${_('assets')}</h2>
-##${c.b_categories_status(id="status_%s" % c.shot.id, items=c.shot.categories,
-##                    container_id=c.shot.id, extra_data=cat_extra_data,
-##                    update_listener_adder="notify.add_listener_tab") | n}
+${c.b_categories_status(id="status_%s" % c.shot.id, items=c.shot.categories,
+                    container_id=c.shot.id, extra_data=cat_extra_data,
+                    update_listener_adder="notify.add_listener_tab").display(value=c.shot.categories) | n}
 <br/>
 <br/>
 
