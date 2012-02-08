@@ -109,7 +109,6 @@ upload.file_upload = function(queue_id, fileData) {
 
     var boundary = "S-P-A-M----u-p-l-o-a-d--X30";
 
-    var fileData = new FileReader();
 
     var content = new String();
     content += '--' + boundary + '\r\n';
