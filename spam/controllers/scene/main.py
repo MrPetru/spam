@@ -64,9 +64,14 @@ class Controller(RestController):
         """
         project = tmpl_context.project
         user = tmpl_context.user
+        display = 0
+        for p in user.projects_as_admin:
+            if project.id == p.id:
+                display = 1
 
         t_scenes.value = project.scenes
         t_scenes.extra_data = dict(project=project, user_id=user.user_id)
+        t_scenes.display_w=display
         tmpl_context.t_scenes = t_scenes
         return dict(page='scenes', sidebar=('projects', project.id))
 

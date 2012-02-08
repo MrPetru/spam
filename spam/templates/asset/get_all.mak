@@ -42,7 +42,7 @@
             ${c.t_assets(id="assets_%s_%s_%s" % (container_type, container_id, cat.id),
                     value=container.assets[cat],
                     category=cat.id,
-                    extra_data=dict(user_id=c.user.id),
+                    extra_data=dict(user_id=c.user.id, actions_display_status = actions_display_status),
                 ).display() | n}
         </div>
     </div>
