@@ -475,8 +475,6 @@ class TableAssets(twl.LiveTable):
             ]),
             twl.Button(id='addnote',
                 action=url('/note/%(proj_id)s/%(current_id)s/new'),
-                icon_class='icon_edit',
-                help_text='add note',
                 dialog=True,
                 children=[
                     twl.Icon(id='addnote',
@@ -611,11 +609,14 @@ class TableAssetHistory(twl.LiveTable):
             twl.Text(id='header',
                 css_class='note_header',
                 help_text=''),
-            twl.Box(id='lines',
-                children=[
-                    twl.Text(id='item_line',
-                        help_text='')
-            ]),
+            twl.Text(id='text',
+                #css_class='note_header',
+                help_text=''),
+#            twl.Box(id='lines',
+#                children=[
+#                    twl.Text(id='item_line',
+#                        help_text='')
+#            ]),
     ])
     actions = twl.Box(
         children=[
