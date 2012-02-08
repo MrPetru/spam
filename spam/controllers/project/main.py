@@ -64,6 +64,7 @@ class Controller(RestController):
     tab = TabController()
     
     @require(in_group('administrators'))
+    @expose('json')
     @expose('spam.templates.project.get_all')
     def get_all(self):
         """Return a `full` page for managing active and archived projects.
@@ -74,7 +75,7 @@ class Controller(RestController):
         t_projects_archived.value = query_projects_archived().all()
         tmpl_context.t_projects_active = t_projects_active
         tmpl_context.t_projects_archived = t_projects_archived
-        return dict(page='admin/project', sidebar=('admin', 'projects'))
+        return dict(page='admin/project', sidebar=('admin', 'projects'), projects=query_projects().all())
 
     @project_set_active
     @require(is_project_user())
