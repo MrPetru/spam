@@ -71,7 +71,207 @@ class Controller(RestController):
         * ``approve``  (:meth:`get_approve`, :meth:`post_approve`)
         * ``revoke``  (:meth:`get_revoke`, :meth:`post_revoke`)
         * ``download``  (:meth:`download`)
+        * ``open``  (:meth:`open`)
     """
+    
+    ## help classes
+    class widget_actions():
+        display_flags = [
+            1, # 0,  history - vedi tutta la histori
+            1, # 1,  addnote - agiunge una nota
+            1, # 2,  download - download last version 
+            1, # 3,  checkout - prendi in carrico
+            0, # 4,  release - lasciare l'incarico
+            0, # 5,  publish - publicare una nuova versione
+            0, # 6,  submit - manda per essere revisionato
+            0, # 7,  recall - richiama dalla revisione
+            0, # 8,  approve - approvare il asset
+            0, # 9,  sendback - rimandare in dietro per fare le modifiche
+            0, # 10, delete - cancelare l'asset
+            0, # 11, revoke - anulare l'approvazione
+            1, # 12, open - apri il asset tramite il servizio locale di spam
+            ]
+        
+        user_type_flags = [
+            0, # 0, admin
+            0, # 1, supervisor
+            0, # 2, artist
+            0, # 3, owner
+            ]
+            
+        asset_status_flags = [
+            0, # 0, checked_in
+            0, # 1, submited true=submited, false=(not-submited or sent back_to)
+            ]
+            
+        def set_user_type_flags(self, asset, user):
+            #reset user_type_flags
+            self.user_type_flags = [0,0,0,0]
+
+            # set flags in user_type_flags based on proprietes of user
+            for admin in asset.admins:
+                if admin.id == user:
+                    self.user_type_flags[0] = 1
+            for supervisor in asset.supervisors:
+                if supervisor.id == user:
+                    self.user_type_flags[1] = 1
+            for artist in asset.artists:
+                if artist.id == user:
+                    self.user_type_flags[2] = 1
+            if asset.owner_id == user:
+                self.user_type_flags[3] = 1
+            #print (asset.owner_id, 'asset owner')
+            # for debug        
+            #print(self.user_type_flags, '[admin, supervisor, user] for user:', user)
+            
+        def set_asset_status_flags(self, asset):
+        #    # reset asset_status_flags 
+        #    self.asset_status_flags = [0,0]
+
+            if asset.checkedout:
+                self.display_flags[3] = 0
+            
+            if asset.checkedout and (not self.user_type_flags[1]) and (not self.user_type_flags[3]):
+                self.display_flags[4] = 0
+            
+            if not asset.checkedout and self.user_type_flags[1]:
+                self.display_flags[4] = 0
+            
+            if asset.submitted and self.user_type_flags[3]:
+                self.display_flags[6] = 0
+                self.display_flags[5] = 0
+                
+            if asset.submitted and not self.user_type_flags[1]:
+                self.display_flags[12] = 0
+                
+            if not asset.submitted and self.user_type_flags[3]:
+                self.display_flags[7] = 0
+                
+            if not asset.submitted:# and user_type_flags[1]:
+                self.display_flags[9] = 0
+                self.display_flags[8] = 0
+                
+            if asset.approved:
+                self.display_flags[8] = 0
+                self.display_flags[9] = 0
+                self.display_flags[4] = 0
+                self.display_flags[7] = 0
+                self.display_flags[5] = 0
+                self.display_flags[3] = 0
+                
+            if asset.approved and not self.user_type_flags[1]:
+                self.display_flags[4] = 0
+                
+            if not asset.approved and not asset.submitted:
+                self.display_flags[9] = 0
+                
+            if not asset.approved:
+                self.display_flags[11] = 0
+                
+
+        def list_union(self,list_A, list_B): # A union B
+            union = []
+            if len(list_A)==0:
+                if len(list_B)==0:
+                    return (union)
+                else:
+                    return (list_B)
+            elif len(list_B)==0:
+                return (list_A)
+            else:
+                for index in range(len(list_A)):
+                    union.append(list_A[index] or list_B[index])
+                return (union)
+                
+        def set_display_flags_by_user(self):
+            # set display_flags based on user type
+            admin_display_status=supervisor_display_status=[0,0,0,0,0,0,0,0,0,0,0,0,0]
+            artist_display_status = owner_display_status = [0,0,0,0,0,0,0,0,0,0,0,0,0]
+            if self.user_type_flags[0]:
+                # set display for admin
+                admin_display_status = [
+                    1, # 0,  history
+                    1, # 1,  addnote
+                    1, # 2,  download
+                    0, # 3,  checkout
+                    0, # 4,  release
+                    0, # 5,  publish
+                    0, # 6,  submit
+                    0, # 7,  recall
+                    0, # 8,  approuve
+                    0, # 9,  sendback
+                    1, # 10, delete
+                    0, # 11, revoke
+                    0, # 12, open
+                    ]
+            if self.user_type_flags[1]:
+                # set display for supervisor
+                supervisor_display_status = [
+                    1, # 0,  history
+                    1, # 1,  addnote
+                    1, # 2,  download
+                    0, # 3,  checkout
+                    1, # 4,  release
+                    0, # 5,  publish
+                    0, # 6,  submit
+                    0, # 7,  recall
+                    1, # 8,  approve
+                    1, # 9,  sendback
+                    0, # 10, delete
+                    1, # 11, revoke
+                    1, # 12, open
+                    ]
+                
+            if self.user_type_flags[2]:
+                # set display for user
+                artist_display_status = [
+                    1, # 0,  history
+                    1, # 1,  addnote
+                    1, # 2,  download
+                    1, # 3,  checkout
+                    0, # 4,  release
+                    0, # 5,  publish
+                    0, # 6,  submit
+                    0, # 7,  recall
+                    0, # 8,  approve
+                    0, # 9,  sendback
+                    0, # 10, delete
+                    0, # 11, revoke
+                    0, # 12, open
+                    ]
+            if self.user_type_flags[3]:
+                # set display for user
+                owner_display_status = [
+                    1, # 0,  history
+                    1, # 1,  addnote
+                    1, # 2,  download
+                    0, # 3,  checkout
+                    1, # 4,  release
+                    1, # 5,  publish
+                    1, # 6,  submit
+                    1, # 7,  recall
+                    0, # 8,  approve
+                    0, # 9,  sendback
+                    0, # 10, delete
+                    0, # 11, revoke
+                    1, # 12, open
+                    ]
+            #print (self.list_union(admin_display_status, self.list_union(supervisor_display_status,artist_display_status)))
+            self.display_flags = self.list_union(
+                admin_display_status, self.list_union(
+                    supervisor_display_status,self.list_union(artist_display_status, owner_display_status)))
+            
+        def main(self, asset, cur_user):
+            self.set_user_type_flags(asset, cur_user)
+            self.set_display_flags_by_user()
+            self.set_asset_status_flags(asset)
+            
+            #print (asset.category_id)
+            #print (asset.owner_id)
+            #print (self.display_flags)
+            return (self.display_flags)
+    
+    wa = widget_actions()
     
     @project_set_active
     @require(is_project_user())
@@ -85,13 +285,18 @@ class Controller(RestController):
             * :meth:`spam.controllers.libgroup.main.get_one`.
         """
         project = tmpl_context.project
+        
+        user = tmpl_context.user
+        t_assets.user = user
+        actions_display_status = []
+#        tmpl_context.actions_display_status = actions_display_status
         tmpl_context.t_assets = t_assets
 #        tmpl_context.b_status = b_status
         container = container_get(proj, container_type, container_id)
         
         return dict(page='assets', sidebar=('projects', project.id),
                 container_type=container_type, container_id=container_id,
-                container=container)
+                container=container,actions_display_status = actions_display_status)
 
     @expose('spam.templates.asset.get_all')
     def _default(self, proj, container_type, container_id, *args, **kwargs):
@@ -181,7 +386,7 @@ class Controller(RestController):
         journal.add(user, '%s - %s' % (msg, asset))
 
         # notify clients
-        updates = [dict(item=asset, type='added', topic=TOPIC_ASSETS)]
+        updates = [dict(item=asset, type='added', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
         notify.send(updates)
 
         return dict(msg=msg, status='ok', updates=updates)
@@ -246,7 +451,8 @@ class Controller(RestController):
     # Custom REST-like actions
     _custom_actions = ['checkout', 'release', 'publish', 'submit', 'recall',
                       'sendback', 'approve', 'revoke', 'download']
-
+    
+    
     @project_set_active
     @asset_set_active
     @require(Any(is_asset_supervisor(), is_asset_artist()))
@@ -261,12 +467,12 @@ class Controller(RestController):
         session = session_get()
         asset = asset_get(proj, asset_id)
         user = tmpl_context.user
-
+        
         if not asset.checkedout:
             asset.checkout(user)
-
+            asset2 = asset_get(proj, asset_id)
             msg = '%s %s' % (_('Checkedout Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS)]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset2, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -278,7 +484,6 @@ class Controller(RestController):
             msg = '%s %s' % (_('Asset is already checkedout:'), asset.path)
             updates = []
             status = 'error'
-
         return dict(msg=msg, status=status, updates=updates)
 
 
@@ -297,9 +502,8 @@ class Controller(RestController):
 
         if asset.checkedout:
             asset.release()
-
             msg = '%s %s' % (_('Released Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS)]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -394,7 +598,7 @@ class Controller(RestController):
         preview.make_preview(asset)
 
         msg = '%s %s v%03d' % (_('Published'), asset.path, newver.ver)
-        updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS)]
+        updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
 
         # log into Journal
         journal.add(user, '%s - %s' % (msg, asset))
@@ -443,7 +647,7 @@ class Controller(RestController):
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Submitted Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS)]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -497,7 +701,7 @@ class Controller(RestController):
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Recall submission for Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS)]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -552,7 +756,7 @@ class Controller(RestController):
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Asset sent back for revisions:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS)]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -607,7 +811,7 @@ class Controller(RestController):
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Approved Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS)]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -661,7 +865,7 @@ class Controller(RestController):
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Revoked approval for Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS)]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -702,4 +906,3 @@ class Controller(RestController):
         shutil.copyfileobj(f, response.body_file)
         f.close()
         return
-

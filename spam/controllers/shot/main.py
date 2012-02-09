@@ -65,9 +65,14 @@ class Controller(RestController):
         project = tmpl_context.project
         user = tmpl_context.user
         scene = scene_get(proj, sc)
+        display = 0
+        for p in user.projects_as_admin:
+            if project.id == p.id:
+                display = 1
         tmpl_context.scene = scene
 
         t_shots.value = scene.shots
+        t_shots.display_w = display
         t_shots.extra_data = dict(project=project,
                                   user_id=user.user_id,
                                   proj_id=project.id,

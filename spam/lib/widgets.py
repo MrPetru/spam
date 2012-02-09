@@ -267,6 +267,7 @@ class TableScenes(twl.LiveTable):
     ])
     actions = twl.Box(
         condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+        type_w = 0,
         children=[
             twl.Button(id='edit',
                 action=url('/scene/%(proj_id)s/%(name)s/edit'),
@@ -315,6 +316,7 @@ class TableShots(twl.LiveTable):
     )
     actions = twl.Box(
         condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+        type_w = 0,
         children=[
             twl.Button(id='edit',
                 action=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s/edit'),
@@ -427,10 +429,11 @@ class TableAssets(twl.LiveTable):
             twl.Text(id='current_summary',
                 help_text='latest comment'),
     ])
-    actions = twl.Box(
+    actions = twl.BoxAction(
         css_class='status %(status)s',
         children=[
-            twl.Button(id='history',
+            twl.ActionButton(id='history',
+                index = '0',
                 action=url('/asset/%(proj_id)s/%(id)s'),
                 dialog=True,
                 children=[
@@ -438,17 +441,17 @@ class TableAssets(twl.LiveTable):
                         icon_class='icon_history',
                         help_text='asset history'),
             ]),
-            twl.Button(id='addnote',
+            twl.ActionButton(id='addnote',
+                index = '1',
                 action=url('/note/%(proj_id)s/%(current_id)s/new'),
-                icon_class='icon_edit',
-                help_text='add note',
                 dialog=True,
                 children=[
                     twl.Icon(id='addnote',
                         icon_class='icon_edit',
                         help_text='add note'),
             ]),
-            twl.Button(id='checkout',
+            twl.ActionButton(id='checkout',
+                index = '3',
                 condition=('!data.checkedout && !data.approved '
                     '&& ($.inArray(data.user_id, data.supervisor_ids)>=0 '
                     '|| $.inArray(data.user_id, data.artist_ids)>=0)'),
@@ -458,7 +461,8 @@ class TableAssets(twl.LiveTable):
                         icon_class='icon_checkout',
                         help_text='checkout'),
             ]),
-            twl.Button(id='release',
+            twl.ActionButton(id='release',
+                index = '4',
                 condition=('data.checkedout && !data.submitted && '
                     '&& !data.approved && (data.user_id==data.owner_id '
                     '|| $.inArray(data.user_id, data.supervisor_ids)>=0)'),
@@ -468,7 +472,8 @@ class TableAssets(twl.LiveTable):
                         icon_class='icon_release',
                         help_text='release'),
             ]),
-            twl.Button(id='publish',
+            twl.ActionButton(id='publish',
+                index = '5',
                 condition=('data.checkedout '
                     '&& data.user_id==data.owner_id'),
                 action=url('/asset/%(proj_id)s/%(id)s/publish'),
@@ -478,7 +483,8 @@ class TableAssets(twl.LiveTable):
                         icon_class='icon_publish',
                         help_text='publish a new version'),
             ]),
-            twl.Button(id='submit', icon_class='submit',
+            twl.ActionButton(id='submit', icon_class='submit',
+                index = '6',
                 condition=('data.checkedout && data.current_ver>0 '
                     '&& !data.submitted && !data.approved '
                     '&& data.user_id==data.owner_id'),
@@ -489,7 +495,8 @@ class TableAssets(twl.LiveTable):
                         icon_class='icon_submit',
                         help_text='submit for approval'),
             ]),
-            twl.Button(id='recall',
+            twl.ActionButton(id='recall',
+                index = '7',
                 condition=('data.submitted && !data.approved '
                     '&& data.user_id==data.owner_id'),
                 action=url('/asset/%(proj_id)s/%(id)s/recall'),
@@ -499,7 +506,8 @@ class TableAssets(twl.LiveTable):
                         icon_class='icon_recall',
                         help_text='recall submission'),
             ]),
-            twl.Button(id='sendback',
+            twl.ActionButton(id='sendback',
+                index = '9',
                 condition=('data.submitted && !data.approved '
                     '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
                 action=url('/asset/%(proj_id)s/%(id)s/sendback'),
@@ -509,7 +517,8 @@ class TableAssets(twl.LiveTable):
                         icon_class='icon_sendback',
                         help_text='send back for revisions'),
             ]),
-            twl.Button(id='approve',
+            twl.ActionButton(id='approve',
+                index = '8',
                 condition=('data.submitted && !data.approved '
                     '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
                 action=url('/asset/%(proj_id)s/%(id)s/approve'),
@@ -519,7 +528,8 @@ class TableAssets(twl.LiveTable):
                         icon_class='icon_approve',
                         help_text='approve'),
             ]),
-            twl.Button(id='revoke',
+            twl.ActionButton(id='revoke',
+                index = '11',
                 condition=('data.approved '
                     '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
                 action=url('/asset/%(proj_id)s/%(id)s/revoke'),
@@ -530,6 +540,7 @@ class TableAssets(twl.LiveTable):
                         help_text='revoke approval'),
             ]),
             twl.Link(id='download_link',
+                index = '2',
                 condition='data.current_ver && data.current_ver>0',
                 dest=url('/asset/%(proj_id)s/%(current_id)s/download'),
                 children=[
@@ -538,7 +549,19 @@ class TableAssets(twl.LiveTable):
                         help_text='download',
                     )
             ]),
-            twl.Button(id='delete',
+            twl.ActionButton(id='open_link',
+                index = '12',
+                condition=('data.approved '
+                    '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
+                action=('http://localhost:8083/open?%(proj_id)s/%(path)s'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='open',
+                        icon_class='icon_open',
+                        help_text='open'),
+            ]),
+            twl.ActionButton(id='delete',
+                index = '10',
                 condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
                 action=url('/asset/%(proj_id)s/%(id)s/delete'),
                 dialog=True,
@@ -564,11 +587,14 @@ class TableAssetHistory(twl.LiveTable):
             twl.Text(id='header',
                 css_class='note_header',
                 help_text=''),
-            twl.Box(id='lines',
-                children=[
-                    twl.Text(id='item_line',
-                        help_text='')
-            ]),
+            twl.Text(id='text',
+                #css_class='note_header',
+                help_text=''),
+#            twl.Box(id='lines',
+#                children=[
+#                    twl.Text(id='item_line',
+#                        help_text='')
+#            ]),
     ])
     actions = twl.Box(
         children=[

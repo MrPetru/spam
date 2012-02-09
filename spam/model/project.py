@@ -700,8 +700,11 @@ class Asset(DeclarativeBase):
     
     @property
     def supervisors(self):
-        return (set(self.project.supervisors[self.category]) |
-                set(self.project.admins))
+        return (set(self.project.supervisors[self.category]))
+                
+    @property
+    def admins(self):
+        return (set(self.project.admins))
     
     @property
     def artists(self):
