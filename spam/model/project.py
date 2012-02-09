@@ -687,6 +687,11 @@ class Asset(DeclarativeBase):
         
     @property
     def current_summary(self):
+        for n in self.current.notes:
+            if n.summary[0] != '[':
+                return (self.current.notes and n.summary or '')
+            elif len(n.summary) > (n.summary.find(']')+2):
+                return (self.current.notes and n.summary or '')
         return (self.current.notes and self.current.notes[0].summary or '')
     
     @property
