@@ -677,6 +677,18 @@ class Asset(DeclarativeBase):
     def current(self):
         return self.versions[0]
     
+    @property    
+    def current_fmtver(self):
+        return self.current.fmtver
+    
+    @property    
+    def current_header(self):
+        return (self.current.notes and self.current.notes[0].header or '')
+        
+    @property
+    def current_summary(self):
+        return (self.current.notes and self.current.notes[0].summary or '')
+    
     @property
     def is_sequence(self):
         return G.pattern_seq.match(self.name) and True or False
