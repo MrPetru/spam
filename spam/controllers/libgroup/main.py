@@ -60,6 +60,7 @@ class Controller(RestController):
     
     @project_set_active
     @require(is_project_user())
+    @expose('json')
     @expose('spam.templates.libgroup.get_all')
     def get_all(self, proj):
         """Return a `tab` page with a list of libgroups for a project and a
@@ -75,7 +76,7 @@ class Controller(RestController):
         t_libgroups.parent_id = None
         t_libgroups.extra_data = dict(project=project, user_id=user.user_id)
         tmpl_context.t_libgroups = t_libgroups
-        return dict(page='libgroups', sidebar=('projects', project.id))
+        return dict(page='libgroups', sidebar=('projects', project.id), libgroups=project.libgroups)
 
     @expose('spam.templates.libgroup.get_all')
     def _default(self, proj, *args, **kwargs):
@@ -284,6 +285,7 @@ class Controller(RestController):
 
     @project_set_active
     @require(is_project_user())
+    @expose('json')
     @expose('spam.templates.libgroup.get_all')
     def get_subgroups(self, proj, parent_id):
         """Return a `tab` page with a list of subgroups for a libgroup.
@@ -300,6 +302,6 @@ class Controller(RestController):
         t_libgroups.parent_id = parent_id
         t_libgroups.extra_data = dict(project=project, user_id=user.user_id)
         tmpl_context.t_libgroups = t_libgroups
-        return dict()
+        return dict(libgroups=parent.subgroups)
 
 

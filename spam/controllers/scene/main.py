@@ -54,6 +54,7 @@ class Controller(RestController):
     
     @project_set_active
     @require(is_project_user())
+    @expose('json')
     @expose('spam.templates.scene.get_all')
     def get_all(self, proj):
         """Return a `tab` page with a list of scenes for a project and a
@@ -73,7 +74,7 @@ class Controller(RestController):
         t_scenes.extra_data = dict(project=project, user_id=user.user_id)
         t_scenes.display_w=display
         tmpl_context.t_scenes = t_scenes
-        return dict(page='scenes', sidebar=('projects', project.id))
+        return dict(page='scenes', sidebar=('projects', project.id), scenes=project.scenes)
 
     @expose('spam.templates.scene.get_all')
     def _default(self, proj, *args, **kwargs):

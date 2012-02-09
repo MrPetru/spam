@@ -54,6 +54,7 @@ class Controller(RestController):
     
     @project_set_active
     @require(is_project_user())
+    @expose('json')
     @expose('spam.templates.shot.get_all')
     def get_all(self, proj, sc):
         """Return a `tab` page with a list of shots for a scene and a button to
@@ -80,7 +81,7 @@ class Controller(RestController):
                                   container_type='shot',
                                  )
         tmpl_context.t_shots = t_shots
-        return dict(page='shot', sidebar=('projects', scene.project.id))
+        return dict(page='shot', sidebar=('projects', scene.project.id), shots=scene.shots)
 
     @expose('spam.templates.shot.get_all')
     def _default(self, proj, sc, *args, **kwargs):

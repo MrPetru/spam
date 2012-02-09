@@ -45,6 +45,7 @@ class Controller(RestController):
     """REST controller for managing categories."""
     
     @require(in_group('administrators'))
+    @expose('json')
     @expose('spam.templates.category.get_all')
     def get_all(self):
         """Return a `full` page with a list of all categories and a button to
@@ -54,7 +55,7 @@ class Controller(RestController):
 
         t_categories.value = categories.all()
         tmpl_context.t_categories = t_categories
-        return dict(page='admin/categories', sidebar=('admin', 'categories'))
+        return dict(page='admin/categories', sidebar=('admin', 'categories'), categories=categories.all())
 
     @require(in_group('administrators'))
     @expose('json')
