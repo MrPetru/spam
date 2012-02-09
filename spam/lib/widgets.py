@@ -557,19 +557,6 @@ class TableAssets(twl.LiveTable):
 class TableAssetHistory(twl.LiveTable):
     """Asset history livetable."""
     show_headers = False
-    thumbnail = twl.Box(
-        css_class='thumbnail',
-        children=[
-            twl.Link(
-#                dest=url('/repo/%(preview_path)s'),
-                condition='data.has_preview',
-                children=[
-                    twl.Image(
-                        help_text='preview',
-                        css_class='thumbnail',
-                        src=url('/repo/%(thumbnail)s'))
-            ])
-    ])
     thumbnail = twl.LiveThumbnail()
     fmtver = twl.Text(help_text='ver')
     note = twl.Box(
