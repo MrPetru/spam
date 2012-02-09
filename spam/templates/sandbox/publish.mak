@@ -70,7 +70,7 @@
         var boundaryString = "AaBbCcX30";
         var boundary = "--"+boundaryString;
 
-        var fileData = file.getAsBinary();
+        var fileData = new FileReader();
 
         var postContent = 
             '\r\n' + boundary + '\r\n' +
