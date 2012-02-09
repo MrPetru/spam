@@ -15,11 +15,33 @@
 ##
 ## Original Copyright (c) 2010, Lorenzo Pierfederici <lpierfederici@gmail.com>
 ## Contributor(s): 
+## Petru Ciobanu <petrea.email@gmail.com>
 ##
 
 <%inherit file="spam.templates.master"/>
 
 <div class="content">
-    Home
+    
+    ${_('Your Details, registered:')} ${str(c.user.created)[0:19]}
+    <hr />
+    
+    <img src="/spam/themes/greentango/images/logo.png" width="120" heght="160" /> 
+    <br /><br />
+    ${_('Username:')} <b>${c.user.user_name}</b>
+    <br />
+    ${_('Display Name:')} <b>${c.user.display_name}</b>
+    <br />
+    % if c.user.email_address == None:
+        ${_('Email Address:')} <b> ${_('not specified')}
+    % else:
+        ${_('Email Address:')} <b>${c.user.email_address}
+    % endif
+    </b>
+    <br /><br />
+    
+    <a class="button dialog" href="${tg.url('./%s/edit') % c.user.user_name}">${_('edit details')}</a>
+   
+    <a class="button dialog" href="${tg.url('./get_change_password')}">${_('change password')}</a>
+
 </div>
 
