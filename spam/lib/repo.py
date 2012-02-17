@@ -82,6 +82,7 @@ def commit_single(proj, asset, filename, text, username=None):
     if not os.path.exists(os.path.dirname(target_repo_path)):
         os.makedirs(os.path.dirname(target_repo_path))
     shutil.move(uploadedfile, target_repo_path)
+    shutil.os.chmod(target_repo_path, 0775) 
     
     if not target_path in repo['tip']:
         commands.add(repo_ui, repo, target_repo_path)
@@ -116,6 +117,7 @@ def commit_multi(proj, asset, filenames, text, username=None):
         if not os.path.exists(os.path.dirname(target_repo_path)):
             os.makedirs(os.path.dirname(target_repo_path))
         shutil.move(uploadedfile, target_repo_path)
+        shutil.os.chmod(target_repo_path, 0775)
         
         if not target_path in repo['tip']:
             commands.add(repo_ui, repo, target_repo_path)
