@@ -263,6 +263,11 @@ table td.icon {
     background-color: #64ff64;
 }
 
+.statusicon.rejected {
+    /* background-color: #73d216; /* Chameleon 2 */
+    background-color: #ff0000;
+}
+
 .status.new {
     /* background-color: #f6f6f4; /* Aluminium 0 */
     background-color: #dddddd;
@@ -287,6 +292,11 @@ table td.icon {
 .status.approved {
     /* background-color: #d0f3af; /* Chameleon 0 */
     background-color: #64ff64;
+}
+
+.status.rejected {
+    /* background-color: #d0f3af; /* Chameleon 0 */
+    background-color: #ff0000;
 }
 
 .statusbox {

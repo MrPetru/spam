@@ -113,7 +113,7 @@ def diff_dicts(a, b):
 def compute_status(objects):
     """Compute the status of an object from the objects it contains."""
     tot = len(objects)
-    count = dict(new=0, idle=0, wip=0, submitted=0, approved=0)
+    count = dict(new=0, idle=0, wip=0, submitted=0, approved=0, rejected=0)
     for ob in objects:
         if isinstance(ob, basestring):
             count[ob] += 1
@@ -130,6 +130,8 @@ def compute_status(objects):
         return 'approved'
     elif count['new'] == tot:
         return 'new'
+    elif count['rejected']:
+        return 'rejected'
     else:
         return 'idle'
         

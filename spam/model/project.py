@@ -620,6 +620,8 @@ class Asset(DeclarativeBase):
     owner_id = Column(Integer, ForeignKey('users.user_id'))
     submitted = Column(Boolean, default=False)
     submitter_id = Column(Integer, ForeignKey('users.user_id'))
+    rejected = Column(Boolean, default=False)
+    rejected_id = Column(Integer, ForeignKey('users.user_id'))
     submitted_date =  Column(DateTime)
     approved = Column(Boolean, default=False)
     approver_id = Column(Integer, ForeignKey('users.user_id'))
@@ -641,6 +643,9 @@ class Asset(DeclarativeBase):
     
     approved_by = relation('User', primaryjoin=approver_id==User.user_id,
                                         backref=backref('approved_assets'))
+                                        
+    rejected_by = relation('User', primaryjoin=rejected_id==User.user_id,
+                                        backref=backref('rejected_assets'))
 
     # Properties
     @property
@@ -708,6 +713,8 @@ class Asset(DeclarativeBase):
             return 'approved'
         elif self.submitted:
             return 'submitted'
+        elif self.checkedout and self.rejected:
+            return 'rejected'
         elif self.checkedout:
             return 'wip'
         elif self.current.ver == 0:
@@ -754,6 +761,10 @@ class Asset(DeclarativeBase):
         self.submitted = False
         self.submitted_by = None
         self.submitted_date = None
+        self.rejected = True
+        self.rejected_by = user
+        self.rejected_date = datetime.now()
+        
     
     def approve(self, user):
         self.approved = True
