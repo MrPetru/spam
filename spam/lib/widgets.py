@@ -401,9 +401,10 @@ class TableAssets(twl.LiveTable):
     
     update_topic = notifications.TOPIC_ASSETS
     show_headers = False
-    thumbnail = twl.LiveThumbnail()
+    thumbnail = twl.LiveThumbnail(parent_css_class = 'thumbnail')
     name = twl.Box(
         css_class='status %(status)s',
+        parent_css_class = 'asset_name',
         children=[
             twl.Text(id='name', sort_default=True),
             twl.Text(id='owner_id',
@@ -415,7 +416,8 @@ class TableAssets(twl.LiveTable):
     ])
     current_fmtver = twl.Text(
         css_class='status %(status)s',
-        help_text='version')
+        help_text='version',
+        parent_css_class = 'asset_version')
 #    status = StatusIcon(
 #        css_class='status %(status)s',
 #        icon_class='asset',
@@ -431,6 +433,7 @@ class TableAssets(twl.LiveTable):
     ])
     actions = twl.BoxAction(
         css_class='status %(status)s',
+        parent_css_class = 'asset_actions',
         children=[
             twl.ActionButton(id='history',
                 index = '0',

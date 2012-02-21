@@ -190,7 +190,7 @@ body {
 table {
     /*border: 1px solid black;*/
     width: 100%;
-    border-spacing: 2px;
+    border-spacing: 4px;
 }
 
 .update_on_assets table {
@@ -777,3 +777,15 @@ ul.tabs a.current {
     /*vertical-align: middle;*/
 }
 
+
+.asset_name {
+    width: 255px;
+}
+
+.asset_version {
+    width: 75px;
+}
+
+.asset_actions {
+    width: 160px;
+}

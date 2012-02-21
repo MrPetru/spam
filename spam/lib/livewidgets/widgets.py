@@ -332,6 +332,7 @@ class Box(LiveCompoundWidget):
     maker_template = 'mako:spam.lib.livewidgets.templates.box_maker'
 
     widget_class = 'lw_box'
+    parent_css_class = ''
         
 class BoxAction(LiveCompoundWidget):
     """A simple container widget
@@ -346,6 +347,7 @@ class BoxAction(LiveCompoundWidget):
     maker_template = 'mako:spam.lib.livewidgets.templates.box_maker'
 
     widget_class = 'lw_box'
+    parent_css_class = ''
     def prepare(self):
         wa = widget_actions()
         self.display_data=wa.main(self.value, self.parent.parent.user.id)
@@ -421,6 +423,7 @@ class Text(LiveWidget):
         'widget\'s value', default=None)
 
     widget_class = 'lw_text'
+    parent_css_class = ''
 
     def prepare(self):
         super(Text, self).prepare()
@@ -472,6 +475,7 @@ class ItemLayout(twc.CompoundWidget, LiveWidget):
     def prepare(self):
         # set item_id
         self.item_id = getattr(self.value, 'id', '')
+        self.item_status = getattr(self.value, 'status', '')
 
         # extract a dictionary from value
         if isinstance(self.value, dict):
@@ -613,6 +617,7 @@ class LiveThumbnail(LiveCompoundWidget):
 
     widget_class = 'lw_thumbnail'
     css_class = 'thumbnail'
+    parent_css_class = ''
     children = [
         Image(
             id='thumbnail',
