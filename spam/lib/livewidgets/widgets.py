@@ -600,6 +600,7 @@ class StatusIconBox(LiveRepeating):
     update_condition = 'true'
     child = StatusBox
     css_class = 'statusiconbox'
+    parent_css_class = ''
     show_header = False
     sortable = False
 

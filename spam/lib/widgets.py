@@ -424,6 +424,7 @@ class TableAssets(twl.LiveTable):
 #        help_text='status: ')
     note = twl.Box(
         css_class='status %(status)s',
+        parent_css_class = 'asset_note',
         children=[
             twl.Text(id='current_header',
                 css_class='note_header',

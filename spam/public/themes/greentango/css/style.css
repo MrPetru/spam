@@ -779,13 +779,23 @@ ul.tabs a.current {
 
 
 .asset_name {
-    width: 450px;
+    width: 350px;
+    vertical-align: middle;
+    text-align: left;
 }
 
 .asset_version {
     width: 75px;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .asset_actions {
-    width: 160px;
+    width: 60px;
+    vertical-align: middle;
+    text-align: left;
+}
+
+.asset_note {
+    vertical-align: middle;
 }
