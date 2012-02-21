@@ -24,7 +24,7 @@ from tg import config, url
 from tg import app_globals as G
 from pylons.i18n import ugettext as _, lazy_ugettext as l_
 import tw2.core as twc, tw2.forms as twf
-import tw2.livewidgets as twl
+import spam.lib.livewidgets as twl
 from tw2.core import StringLengthValidator as StringLength
 from spam.lib.validators import CategoryNamingConvention
 from spam.lib import notifications

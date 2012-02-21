@@ -21,7 +21,6 @@ setup(
         "tw2.core",
         "tw2.forms",
         "tw2.dynforms",
-        "tw2.livewidgets",
         "zope.sqlalchemy >= 0.4 ",
         "repoze.tm2 >= 1.0a4",
         "repoze.what-quickstart >= 1.0",
