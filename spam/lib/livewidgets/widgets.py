@@ -367,6 +367,7 @@ class Link(LiveCompoundWidget):
         'attribute', default='')
 
     widget_class = 'lw_link'
+    parent_css_class = ''
 
 class ActionButton(LiveCompoundWidget):
     """An button widget
