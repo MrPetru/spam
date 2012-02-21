@@ -193,6 +193,12 @@ table {
     border-spacing: 2px;
 }
 
+.update_on_assets table {
+    border: 1px solid #bbbbbb;   
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+
 table thead th {
     font-weight: bold;
 }
@@ -236,11 +242,12 @@ table td.icon {
     width: 16px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
+    border: 1px solid #666666;
 }
 
 .statusicon.new {
     /* background-color: #babdb6; /* Aluminium 3 */
-    background-color: #dddddd;
+    background-color: #dedede;
 }
 
 .statusicon.idle {
@@ -250,27 +257,27 @@ table td.icon {
 
 .statusicon.wip {
     /* background-color: #fce94f; /* Butter 1 */
-    background-color: #99ccff;
+    background-color: #b3d6ee;
 }
 
 .statusicon.submitted {
     /* background-color: #f57900; /* Orange 2 */
-    background-color: #ffff00;
+    background-color: #ffe97c;
 }
 
 .statusicon.approved {
     /* background-color: #73d216; /* Chameleon 2 */
-    background-color: #64ff64;
+    background-color: #a3ed92;
 }
 
 .statusicon.rejected {
     /* background-color: #73d216; /* Chameleon 2 */
-    background-color: #ff0000;
+    background-color: #e87e6f;
 }
 
 .status.new {
     /* background-color: #f6f6f4; /* Aluminium 0 */
-    background-color: #dddddd;
+    background-color: #dedede;
 }
 
 .status.idle {
@@ -280,23 +287,23 @@ table td.icon {
 
 .status.wip {
     /* background-color: #fafbb5; /* Butter 0 */
-    background-color: #99ccff;
+    background-color: #b3d6ee;
 
 }
 
 .status.submitted {
     /* background-color: #fde79f; /* Orange 0 */
-    background-color: #ffff00;
+    background-color: #ffe97c;
 }
 
 .status.approved {
     /* background-color: #d0f3af; /* Chameleon 0 */
-    background-color: #64ff64;
+    background-color: #a3ed92;
 }
 
 .status.rejected {
     /* background-color: #d0f3af; /* Chameleon 0 */
-    background-color: #ff0000;
+    background-color: #e87e6f;
 }
 
 .statusbox {
