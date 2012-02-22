@@ -21,7 +21,7 @@
 if (typeof(lw)=='undefined') {
     lw = new(Object);
     lw.widgets = new(Object);
-    lw.ANISPEED = 1250;
+    lw.ANISPEED = 450;
 
     /* Common */
     lw.render_content = function(widget_id, data) {
@@ -41,10 +41,16 @@ if (typeof(lw)=='undefined') {
 
     lw.updated = function(container, data, show_updates) {
         $('.item-' + data.id, $(container)).each(function(i, element) {
+            var tmp = $('.item-' + data.id, $(container)).attr('class').split(' ');
+            var old_class = tmp[tmp.length -1]; 
             $(element).replaceWith(lw.render_content(container.id, data));
+            var tmp2 = $('.item-' + data.id, $(container)).attr('class').split(' ');
+            var new_class = tmp2[tmp2.length -1];
+            $('.item-' + data.id, $(container)).removeClass(new_class)
+            $('.item-' + data.id, $(container)).addClass(old_class)
             if (show_updates) {
-                $('.item-' + data.id, $(container)).addClass('updated', lw.ANISPEED, function() {
-                    $('.item-' + data.id, $(container)).removeClass('updated', lw.ANISPEED);
+                $('.item-' + data.id, $(container)).removeClass(old_class, lw.ANISPEED, function() {
+                    $('.item-' + data.id, $(container)).addClass(new_class, lw.ANISPEED);
                 });
             }
         });

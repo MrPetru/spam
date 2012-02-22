@@ -403,7 +403,7 @@ class TableAssets(twl.LiveTable):
     show_headers = False
     thumbnail = twl.LiveThumbnail(parent_css_class = 'thumbnail')
     name = twl.Box(
-        css_class='status %(status)s',
+        css_class='',
         parent_css_class = 'asset_name',
         children=[
             twl.Text(id='name', sort_default=True),
@@ -415,7 +415,7 @@ class TableAssets(twl.LiveTable):
             )
     ])
     current_fmtver = twl.Text(
-        css_class='status %(status)s',
+        css_class='',
         help_text='version',
         parent_css_class = 'asset_version')
 #    status = StatusIcon(
@@ -423,7 +423,7 @@ class TableAssets(twl.LiveTable):
 #        icon_class='asset',
 #        help_text='status: ')
     note = twl.Box(
-        css_class='status %(status)s',
+        css_class='',
         parent_css_class = 'asset_note',
         children=[
             twl.Text(id='current_header',
@@ -433,7 +433,7 @@ class TableAssets(twl.LiveTable):
                 help_text='latest comment'),
     ])
     actions = twl.BoxAction(
-        css_class='status %(status)s',
+        css_class='',
         parent_css_class = 'asset_actions',
         children=[
             twl.ActionButton(id='history',
