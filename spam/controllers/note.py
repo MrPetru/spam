@@ -50,6 +50,9 @@ class Controller(RestController):
         * ``unpin`` (:meth:`unpin`)
     """
     
+    from spam.lib.helpers import widget_actions
+    wa = widget_actions()
+    
     @project_set_active
     @require(is_project_user())
     @expose('spam.templates.notes.get_all')
@@ -117,12 +120,12 @@ class Controller(RestController):
         updates = [dict(item=note, type='added', topic=TOPIC_NOTES,
                                                         filter=ob.annotable.id)]
         if isinstance(ob, AssetVersion):
-            updates.append(dict(item=ob.asset, topic=TOPIC_ASSETS))
+            updates = [dict(item=ob.asset, topic=TOPIC_ASSETS, type='updated', extra_data = dict(actions_display_status = self.wa.main(ob.asset, user.id)))]
         else:
             updates.append(dict(item=ob, topic=TOPICS[ob.__class__]))
         notify.send(updates)
 
-        return dict(msg=msg, status='ok', updates=[])
+        return dict(msg=msg, status='ok', updates=updates)
     
     @project_set_active
     @require(is_project_admin())
