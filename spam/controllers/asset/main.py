@@ -317,7 +317,7 @@ class Controller(RestController):
             status = 'ok'
             asset_directory_path = os.path.join(G.REPOSITORY, proj, asset.path)
             asset_directory_path = os.path.split(asset_directory_path)[0]
-            shutil.os.chmod(asset_directory_path, 0775)
+            shutil.os.chmod(asset_directory_path, 0755)
 
             # log into Journal
             journal.add(user, '%s - %s' % (msg, asset))
