@@ -42,6 +42,7 @@ from spam.lib.predicates import is_asset_supervisor, is_asset_artist
 from spam.lib.predicates import is_asset_owner
 
 from spam.lib.helpers import widget_actions
+from tg import app_globals as G
 
 import logging
 log = logging.getLogger(__name__)
@@ -278,6 +279,11 @@ class Controller(RestController):
             msg = '%s %s' % (_('Checkedout Asset:'), asset.path)
             updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset2, user.id)))]
             status = 'ok'
+            asset_directory_path = os.path.join(G.REPOSITORY, proj, asset.path)
+            asset_directory_path = os.path.split(asset_directory_path)[0]
+            if not os.path.exists(asset_directory_path):
+                os.makedirs(asset_directory_path)
+            shutil.os.chmod(asset_directory_path, 0777)
 
             # log into Journal
             journal.add(user, '%s - %s' % (msg, asset))
@@ -309,6 +315,9 @@ class Controller(RestController):
             msg = '%s %s' % (_('Released Asset:'), asset.path)
             updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
+            asset_directory_path = os.path.join(G.REPOSITORY, proj, asset.path)
+            asset_directory_path = os.path.split(asset_directory_path)[0]
+            shutil.os.chmod(asset_directory_path, 0775)
 
             # log into Journal
             journal.add(user, '%s - %s' % (msg, asset))
