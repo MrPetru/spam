@@ -479,9 +479,10 @@ th {
  * Header
  ****************************************/
 #header {
-    height: 70px;
-    padding: 5px 20px;
-    background-color: #73d216; /* Chameleon 2 */
+    height: 128px;
+    padding: 4px 20px 4px 4px;
+    /* background-color: #73d216; /* Chameleon 2 */
+    background-color: #4BBE00;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
     color: #f6f6f4; /* Aluminium 0 */
@@ -490,8 +491,8 @@ th {
 #header .logo {
     display: block;
     float: left;
-    height: 70px;
-    width: 100px;
+    height: 128px;
+    width: 363px;
     margin-right: 10px;
     /*border: 1px solid black;*/
     background-image: url(../images/logo.png);

@@ -80,9 +80,9 @@
 
 <%def name="title()">
     % if page:
-        SPAM - ${page}
+        Mapo - ${page}
     % else:
-        SPAM
+        Mapo
     % endif
 </%def>
 
@@ -102,7 +102,7 @@
   	    	% if hasattr(c, 'project') and c.project:
   	    	    ${c.project.name}
     	    % else:
-    	        SPAM
+    	        No project selected
 	        % endif
 	    </div>
         % if page:
