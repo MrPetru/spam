@@ -30,6 +30,7 @@ from spam.lib.exceptions import SPAMDBError, SPAMDBNotFound
 from spam.model import DBSession, Project, Scene, Shot, Libgroup, Asset
 from spam.model import Category, User, Group, Taggable, Tag, Annotable, Note
 from spam.model import AssetVersion, AssetContainer
+from spam.model import Task
 
 import logging
 log = logging.getLogger(__name__)
@@ -146,6 +147,26 @@ def asset_get(proj, asset_id):
         raise SPAMDBNotFound('Asset "%s" could not be found.' % asset_id)
     except MultipleResultsFound:
         raise SPAMDBError('Error when searching asset "%s".' % asset_id)
+        
+def task_get_all():
+    """Return all tasks."""
+    
+    query = session_get().query(Task)
+    try:
+        #return query.all()
+        return query
+    except NoResultFound:
+        raise SPAMDBNotFound('No task was defined')
+        
+def task_get(task_id):
+    """Return one task."""
+    
+    query = session_get().query(Task)
+    try:
+        return query.filter_by(id=task_id).one()
+    except NoResultFound:
+        return None
+        raise SPAMDBNotFound('No previous task was found')
 
 def assetversion_get(proj, assetver_id):
     """Return an asset version."""

@@ -39,7 +39,8 @@ class Globals(object):
         self.PREVIEWS = config.get('previews_dir', '.previews')
         self.SCENES = config.get('default_scenes_dir', 'scenes')
         self.LIBRARY = config.get('default_library_dir', 'library')
-        self.DEFAULT_PROJ_DIRS = [self.SCENES, self.LIBRARY, self.PREVIEWS]
+        self.ATTACHMENTS = config.get('attachments_dir', '.attachments')
+        self.DEFAULT_PROJ_DIRS = [self.SCENES, self.LIBRARY, self.PREVIEWS, self.ATTACHMENTS]
         self.ADDITIONAL_PROJ_DIRS = config.get(
                                             'additional_proj_dirs', '').split()
         self.DEFAULT_PROJ_DIRS.extend(self.ADDITIONAL_PROJ_DIRS)

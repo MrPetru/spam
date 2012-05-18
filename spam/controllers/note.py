@@ -110,8 +110,13 @@ class Controller(RestController):
         user = tmpl_context.user
         annotable = annotable_get(annotable_id)
         ob = annotable.annotated
-
-        note = Note(user, text)
+        
+        action = '[%s]' % (_('comented'))
+        if isinstance(ob, AssetVersion):
+            task = ob.asset.current_task
+            note = Note(user, action, text, task)
+        else:
+            note = Note(user, action, text)
         annotable.notes.append(note)
         session.refresh(annotable)
 

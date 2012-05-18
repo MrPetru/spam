@@ -36,7 +36,7 @@ def bootstrap(command, conf, vars):
     from sqlalchemy.exc import IntegrityError
     try:
         admin = model.User(u'admin', display_name=u'SPAM Administrator')
-        admin.password = u'none'
+        admin.password = u'admin'
 
         session.add(admin)
 
@@ -46,6 +46,36 @@ def bootstrap(command, conf, vars):
         administrators.users.append(admin)
 
         session.add(administrators)
+        
+        # add other default artist user 
+        artist = model.User(u'artist', display_name=u'SPAM Default Artist')
+        artist.password = u'artist'
+        session.add(artist)
+        
+        # add default artists group
+        artists = model.Group(u'artists', display_name=u'SPAM Default Artists')
+        artists.users.append(artist)
+        session.add(artists)
+        
+        # add default supervisor
+        supervisor = model.User(u'supervisor', display_name=u'SPAM Default Supervisor')
+        supervisor.password = u'supervisor'
+        session.add(supervisor)
+        
+        # add default artists group
+        supervisors = model.Group(u'supervisors', display_name=u'SPAM Default Supervisors')
+        supervisors.users.append(supervisor)
+        session.add(supervisors)
+        
+#        # create default project
+#        project = model.Project(u'default', name=u'SPAM Default Project',
+#                        description=u'default project for development proupose')
+#        session.add(project)
+#        project.admins.append(admin)
+#        from spam.lib import repo
+#        # create directories and init hg repo
+#        repo.project_create_dirs(u'default')
+#        repo.repo_init(u'default')
         
         session.flush()
         transaction.commit()

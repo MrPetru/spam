@@ -181,81 +181,83 @@ class Annotable(DeclarativeBase):
         return '<Annotable: %s (%s)>' % (self.id, self.association_type)
 
 
-class Note(DeclarativeBase):
-    __tablename__ = 'notes'
+#class Note(DeclarativeBase):
+#    __tablename__ = 'notes'
 
-    # Columns
-    id = Column(String(40), primary_key=True)
-    annotable_id = Column(String(40), ForeignKey('annotables.id'))
-    user_id = Column(Unicode(40), ForeignKey('users.user_id'))
-    text = Column(UnicodeText)
-    created = Column(DateTime, default=datetime.now)
-    sticky = Column(Boolean, default=False)
+#    # Columns
+#    id = Column(String(40), primary_key=True)
+#    annotable_id = Column(String(40), ForeignKey('annotables.id'))
+#    user_id = Column(Unicode(40), ForeignKey('users.user_id'))
+#    text = Column(UnicodeText)
+#    created = Column(DateTime, default=datetime.now)
+#    sticky = Column(Boolean, default=False)
 
-    # Relations
-    user = relation('User', backref=backref('notes',
-                                    order_by=(desc('sticky'), desc('created'))))
+#    # Relations
+#    user = relation('User', backref=backref('notes',
+#                                    order_by=(desc('sticky'), desc('created'))))
 
-    annotable = relation(Annotable, backref=backref('notes',
-                                    order_by=(desc('sticky'), desc('created'))))
+#    annotable = relation(Annotable, backref=backref('notes',
+#                                    order_by=(desc('sticky'), desc('created'))))
+#                                    
+#    #task_id = Column(Unicode, ForeignKey('Task.id'))
 
-    # Properties
-    @property
-    def annotated(self):
-        return self.annotable.annotated
+#    # Properties
+#    @property
+#    def annotated(self):
+#        return self.annotable.annotated
 
-    @property
-    def strftime(self):
-        return self.created.strftime('%d/%m/%Y %H:%M')
+#    @property
+#    def strftime(self):
+#        return self.created.strftime('%d/%m/%Y %H:%M')
 
-    @property
-    def header(self):
-        return '%s at %s' %(self.user.user_name, self.strftime)
+#    @property
+#    def header(self):
+#        return '%s at %s' %(self.user.user_name, self.strftime)
 
-    @property
-    def summary(self):
-        characters = 75
-        summary = self.text[0:characters]
-        if len(self.text) > characters:
-            summary = '%s[...]' % summary
-        return summary
+#    @property
+#    def summary(self):
+#        characters = 75
+#        summary = self.text[0:characters]
+#        if len(self.text) > characters:
+#            summary = '%s[...]' % summary
+#        return summary
 
-    @property
-    def lines(self):
-        return [dict(line=l) for l in self.text.split('\n')]
+#    @property
+#    def lines(self):
+#        return [dict(line=l) for l in self.text.split('\n')]
 
-    @property
-    def project(self):
-        return self.annotable.annotated.project
+#    @property
+#    def project(self):
+#        return self.annotable.annotated.project
 
-    @property
-    def user_name(self):
-        return self.user.user_name
+#    @property
+#    def user_name(self):
+#        return self.user.user_name
 
-    # Special methods
-    def __init__(self, user, text):
-        self.created = datetime.now()
-        self.user = user
-        self.text = text
-        hashable = '%s-%s-%s' % (self.user_id, self.created, self.text)
-        self.id = sha1(hashable.encode('utf-8')).hexdigest()
+#    # Special methods
+#    def __init__(self, user, text):
+#        self.created = datetime.now()
+#        self.user = user
+#        self.text = text
+#        hashable = '%s-%s-%s' % (self.user_id, self.created, self.text)
+#        self.id = sha1(hashable.encode('utf-8')).hexdigest()
 
-    def __repr__(self):
-        return '<Note: by %s at %s "%s">' % (self.user.user_name,
-                                                self.strftime,
-                                                self.summary)
+#    def __repr__(self):
+#        return '<Note: by %s at %s "%s">' % (self.user.user_name,
+#                                                self.strftime,
+#                                                self.summary)
 
-    def __json__(self):
-        return dict(id=self.id,
-                    project=self.project,
-                    user=self.user,
-                    user_name=self.user.user_name,
-                    created=self.created,
-                    text=self.text,
-                    sticky=self.sticky,
-                    strftime=self.strftime,
-                    header=self.header,
-                    summary=self.summary,
-                    lines=self.lines,
-                   )
+#    def __json__(self):
+#        return dict(id=self.id,
+#                    project=self.project,
+#                    user=self.user,
+#                    user_name=self.user.user_name,
+#                    created=self.created,
+#                    text=self.text,
+#                    sticky=self.sticky,
+#                    strftime=self.strftime,
+#                    header=self.header,
+#                    summary=self.summary,
+#                    lines=self.lines,
+#                   )
 

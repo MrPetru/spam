@@ -393,7 +393,25 @@ class TableLibgroups(twl.LiveTable):
         super(TableLibgroups, self).prepare()
         self.update_condition = 'msg.ob.parent_id==%s' % (
                         self.parent_id and '"%s"' % self.parent_id or 'null')
+    
 
+class TableAssetShort(twc.RepeatingWidget):
+
+    template = 'mako:spam.templates.widgets.asset_table_short'
+    
+    #child = twc.CompoundWidget
+    child = twl.RowLayout(template = 'mako:spam.templates.widgets.asset_row')
+    
+    thumbnail = twl.LiveThumbnail(parent_css_class = 'thumbnail')
+    
+    name = twl.Box(
+        id=None,
+        css_class='',
+        parent_css_class = 'asset_name',
+        children=[
+            twl.Text(id='name', sort_default=True),
+            twl.Text(id='owner_id', sort_default=True),
+        ])
 
 class TableAssets(twl.LiveTable):
     """Asset livetable."""
@@ -573,6 +591,26 @@ class TableAssets(twl.LiveTable):
                     twl.Icon(id='delete',
                         icon_class='icon_delete',
                         help_text='delete'),
+            ]),
+            twl.Button(id='newtask',
+                index = '10',
+                condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+                action=url('/task/%(proj_id)s/%(id)s/new'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='newtask',
+                        icon_class='icon_task',
+                        help_text='new task'),
+            ]),
+            twl.Button(id='newattach',
+                index = '10',
+                condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+                action=url('/attach/%(proj_id)s/%(id)s/attach'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='newattach',
+                        icon_class='icon_delete',
+                        help_text='new attach'),
             ]),
     ])
     
@@ -1197,9 +1235,203 @@ class FormAssetStatus(RestForm):
     """Asset status form."""
     proj = twf.HiddenField()
     asset_id = twf.HiddenField()
+    sender = twf.HiddenField()
     project_name_ = twf.LabelField()
     container_ = twf.LabelField()
     category_id_ = twf.LabelField()
     asset_name_ = twf.LabelField(label='Name')
+    receiver = twf.SingleSelectField(label='send to', options=[],
+            validator=twc.All(StringLength(max=30), required=True), default='')
     comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
+# =====
+
+class AssetActions(twl.LiveCompoundWidget):
+    
+    actions = twl.Box(
+        children = [
+        twl.Button(id='history',
+            index = '0',
+            action=url('/asset/%(proj_id)s/%(id)s'),
+            dialog=True,
+            children=[
+                twl.Icon(id='history',
+                    icon_class='icon_history',
+                    help_text='asset history'),
+        ]),
+        twl.Button(id='checkout',
+            index = '3',
+            condition=('!data.checkedout && !data.approved '
+                '&& ($.inArray(data.user_id, data.supervisor_ids)>=0 '
+                '|| $.inArray(data.user_id, data.artist_ids)>=0)'),
+            action=url('/asset/%(proj_id)s/%(id)s/checkout'),
+            children=[
+                twl.Icon(id='checkout',
+                    icon_class='icon_checkout',
+                    help_text='checkout'),
+        ]),
+        twl.Button(id='release',
+            index = '4',
+            condition=('data.checkedout && !data.submitted && '
+                '&& !data.approved && (data.user_id==data.owner_id '
+                '|| $.inArray(data.user_id, data.supervisor_ids)>=0)'),
+            action=url('/asset/%(proj_id)s/%(id)s/release'),
+            children=[
+                twl.Icon(id='release',
+                    icon_class='icon_release',
+                    help_text='release'),
+        ]),
+        twl.Button(id='publish',
+                index = '5',
+                condition=('data.checkedout '
+                    '&& data.user_id==data.owner_id'),
+                action=url('/asset/%(proj_id)s/%(id)s/publish'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='publish',
+                        icon_class='icon_publish',
+                        help_text='publish a new version'),
+        ]),
+        twl.Link(id='download_link',
+            index = '2',
+            condition='data.current_ver && data.current_ver>0',
+            dest=url('/asset/%(proj_id)s/%(current_id)s/download'),
+            children=[
+                twl.Icon(id='download',
+                    icon_class='icon_download',
+                    help_text='download',
+                )
+        ]),
+        twl.Button(id='open_link',
+            index = '12',
+            condition=('data.approved '
+                '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
+            action=('http://localhost:8083/open?%(proj_id)s/%(path)s'),
+            dialog=True,
+            children=[
+                twl.Icon(id='open',
+                    icon_class='icon_open',
+                    help_text='open'),
+        ]),
+        twl.Button(id='newtask',
+                index = '10',
+                condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+                action=url('/task/%(proj_id)s/%(id)s/new'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='newtask',
+                        icon_class='icon_task',
+                        help_text='new task'),
+        ]),
+        ]
+        )
+        
+class TaskActions(twl.LiveCompoundWidget):
+
+    actions = twl.Box(
+
+        children=[
+            twl.Button(id='addnote',
+                index = '1',
+                action=url('/note/%(proj_id)s/%(current_id)s/new'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='addnote',
+                        icon_class='icon_edit',
+                        help_text='add note'),
+            ]),
+            twl.Button(id='submit', icon_class='submit',
+                index = '6',
+                condition=('data.checkedout && data.current_ver>0 '
+                    '&& !data.submitted && !data.approved '
+                    '&& data.user_id==data.owner_id'),
+                action=url('/asset/%(proj_id)s/%(id)s/submit'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='submit',
+                        icon_class='icon_submit',
+                        help_text='submit for approval'),
+            ]),
+            twl.Button(id='recall',
+                index = '7',
+                condition=('data.submitted && !data.approved '
+                    '&& data.user_id==data.owner_id'),
+                action=url('/asset/%(proj_id)s/%(id)s/recall'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='recall',
+                        icon_class='icon_recall',
+                        help_text='recall submission'),
+            ]),
+            twl.Button(id='sendback',
+                index = '9',
+                condition=('data.submitted && !data.approved '
+                    '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
+                action=url('/asset/%(proj_id)s/%(id)s/sendback'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='sendback',
+                        icon_class='icon_sendback',
+                        help_text='send back for revisions'),
+            ]),
+            twl.Button(id='approve',
+                index = '8',
+                condition=('data.submitted && !data.approved '
+                    '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
+                action=url('/asset/%(proj_id)s/%(id)s/approve'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='approve',
+                        icon_class='icon_approve',
+                        help_text='approve'),
+            ]),
+            twl.Button(id='newattach',
+                index = '10',
+                condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+                action=url('/attach/%(proj_id)s/%(id)s/attach'),
+                dialog=True,
+                children=[
+                    twl.Icon(id='newattach',
+                        icon_class='icon_delete',
+                        help_text='new attach'),
+            ]),
+    ])
+
+class TaskNotes(twc.RepeatingWidget):
+    template = 'mako:spam.templates.task.repeating'
+    child = twc.Widget(
+        template = 'mako:spam.templates.task.note',
+        )
+
+# Task
+class FormTaskNew(RestForm):
+    """New task form."""
+    proj = twf.HiddenField()
+    asset_id = twf.HiddenField()
+    sender = twf.HiddenField()
+    project_name_ = twf.LabelField()
+    
+    receiver = twf.SingleSelectField(label='send to', options=[],
+            validator=twc.All(StringLength(max=30), required=True), default='')
+    name = twf.TextField(validator=twc.All(required=True))
+    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    
+class FormAttachUpload(RestForm):
+    """Upload an attach form."""
+    
+    custom_method = 'ATTACH'
+    proj = twf.HiddenField()
+    asset_id = twf.HiddenField()
+    uploaded = twf.HiddenField(validator=twc.ListLengthValidator(
+                    min=1, max=MAX_UPLOAD_FILES,
+                    msgs={'tooshort': ('list_tooshort',
+                                       'Please choose the file(s) to upload'),
+                          'toolong': ('list_toolong',
+                                      'Too many files selected'),
+                         },
+                    required=True))
+    name = twf.TextField(validator=twc.All(required=True))
+    uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
+    spacer = twf.Spacer()
+    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    

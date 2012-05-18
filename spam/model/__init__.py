@@ -45,9 +45,10 @@ from versioning import db_upgrade, db_downgrade
 
 # Models import
 from auth import User, Group, Permission
-from misc import Taggable, Tag, Annotable, Note, Journal, Migrate
+from misc import Taggable, Tag, Annotable, Journal, Migrate
 from project import Project, Scene, Shot, Libgroup, AssetContainer
 from project import Category, Supervisor, Artist, Asset, AssetVersion
+from project import Task, Note, Attach
 
 # Caching & helpers
 from helpers import query_projects, query_projects_archived, project_get
@@ -55,6 +56,7 @@ from helpers import project_get_eager, session_get, scene_get, shot_get
 from helpers import container_get, asset_get, category_get, libgroup_get
 from helpers import group_get, taggable_get, tag_get, user_get
 from helpers import annotable_get, note_get, assetversion_get
+from helpers import task_get_all, task_get
 
 # Init model
 def init_model(engine):

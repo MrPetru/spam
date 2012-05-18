@@ -55,8 +55,10 @@ upload.handle_files = function(queue, files) {
         var splitted_name = file.name.split(".");
         var ext = "." + splitted_name[splitted_name.length-1];
         if (ext != upload.config.ext) {
-            alert('"' + file.name + '" is not a "' + upload.config.ext + '" file');
-            continue;
+            if (upload.config.ext != "") {
+                alert('"' + file.name + '" is not a "' + upload.config.ext + '" file');
+                continue;
+                }
         }
 
         if (!upload.queue.find(file.name)) {

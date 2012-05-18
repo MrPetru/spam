@@ -43,6 +43,7 @@ from spam.lib.predicates import is_asset_owner
 
 from spam.lib.helpers import widget_actions
 from tg import app_globals as G
+from spam.model import User, Task, user_get
 
 import logging
 log = logging.getLogger(__name__)
@@ -120,7 +121,7 @@ class Controller(RestController):
         # thumb, ver, note
         history = []
         for ver in asset.versions:
-            if ver.notes:
+            if 0:#ver.notes:
                 for note in ver.notes:
                     history.append(dict(id=None, proj_id=None, thumbnail=None,
                                     ver=None, fmtver=None, header=note.header,
@@ -177,10 +178,10 @@ class Controller(RestController):
         category = category_get(category_id)
 
         # add asset to db
-        asset = Asset(container, category, name, user)
+        asset = Asset(container, category, name, user, comment)
         session.add(asset)
         session.flush()
-        text = '[%s v000]\n%s' % (_('created'), comment or '')
+        text = '[%s v000]' % (_('created'))
         asset.current.notes.append(Note(user, text))
 
         msg = '%s %s' % (_('Created Asset:'), asset.name)
@@ -275,6 +276,12 @@ class Controller(RestController):
         
         if not asset.checkedout:
             asset.checkout(user)
+            
+            action = u'[%s v%03d]' % (_('checkedout'), asset.current.ver)
+            task = asset.current_task
+            asset.current.notes.append(Note(user, action, task=task))
+            session.refresh(asset.current.annotable)
+            
             asset2 = asset_get(proj, asset_id)
             msg = '%s %s' % (_('Checkedout Asset:'), asset.path)
             updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset2, user.id)))]
@@ -307,11 +314,18 @@ class Controller(RestController):
         
         The asset will be unblocked and available for other users to checkout.
         """
+        session = session_get()
         asset = asset_get(proj, asset_id)
         user = tmpl_context.user
 
         if asset.checkedout:
             asset.release()
+            
+            action = u'[%s v%03d]' % (_('released'), asset.current.ver)
+            task = asset.current_task
+            asset.current.notes.append(Note(user, action, task=task))
+            session.refresh(asset.current.annotable)
+            
             msg = '%s %s' % (_('Released Asset:'), asset.path)
             updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
@@ -401,8 +415,11 @@ class Controller(RestController):
 
         # create a new version
         newver = AssetVersion(asset, asset.current.ver+1, user, repo_id)
-        text = u'[%s v%03d]\n%s' % (_('published'), newver.ver, comment)
-        newver.notes.append(Note(user, text))
+        #text = u'[%s v%03d]\n%s' % (_('published'), newver.ver, comment)
+        task = newver.asset.current_task
+        text = u'%s' % comment
+        action = u'[%s v%03d]' % (_('published'), newver.ver)
+        newver.notes.append(Note(user, action, text, task))
         session.flush()
         session.refresh(asset)
 
@@ -428,15 +445,23 @@ class Controller(RestController):
     def get_submit(self, proj, asset_id, **kwargs):
         """Display a SUBMIT form."""
         asset = asset_get(proj, asset_id)
-
+        
+        sender = tmpl_context.user.id
+        
         f_status.custom_method = 'SUBMIT'
         f_status.value = dict(proj=asset.project.id,
                               asset_id=asset.id,
+                              sender=sender,
                               project_name_=asset.project.name,
                               container_=asset.parent.owner.path,
                               category_id_=asset.category.id,
                               asset_name_=asset.name,
                              )
+        query = session_get().query(User)
+        users = query.order_by('user_name')
+        user_choices = ['']
+        user_choices.extend([u.user_name for u in users])
+        f_status.child.children.receiver.options = user_choices
 
         tmpl_context.form = f_status
         return dict(title='%s: %s' % (_('Submit for approval'), asset.path))
@@ -446,17 +471,27 @@ class Controller(RestController):
     @require(is_asset_owner())
     @expose('json')
     @validate(f_status, error_handler=get_submit)
-    def post_submit(self, proj, asset_id, comment=None):
+    def post_submit(self, proj, asset_id, sender, receiver, comment=None):
         """Submit an asset to supervisors for approval."""
         session = session_get()
         user = tmpl_context.user
         asset = asset_get(proj, asset_id)
+        
+        sender = user_get(sender)
+        receiver = user_get(receiver)
 
         if not asset.submitted and not asset.approved:
             asset.submit(user)
-            text = u'[%s v%03d]\n%s' % (_('submitted'), asset.current.ver,
-                                                                comment or '')
-            asset.current.notes.append(Note(user, text))
+#            text = u'[%s v%03d]\n%s' % (_('submitted'), asset.current.ver,
+#                                                                comment or '')
+            text = u'%s' % (comment or '')
+            action = u'[%s v%03d]' % (_('submitted'), asset.current.ver)
+            old_task = asset.current_task
+            task_name = u'Submited For Revision'
+            new_task = Task(task_name, comment, asset, sender, receiver)
+            new_task.previous_task = old_task
+            
+            asset.current.notes.append(Note(user, action, text, new_task))
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Submitted Asset:'), asset.path)
@@ -482,16 +517,24 @@ class Controller(RestController):
     def get_recall(self, proj, asset_id, **kwargs):
         """Display a RECALL form."""
         asset = asset_get(proj, asset_id)
-
+        
+        sender = tmpl_context.user.id
+        
         f_status.custom_method = 'RECALL'
         f_status.value = dict(proj=asset.project.id,
                               asset_id=asset.id,
+                              sender=sender,
                               project_name_=asset.project.name,
                               container_=asset.parent.owner.path,
                               category_id_=asset.category.id,
                               asset_name_=asset.name,
                              )
-
+        query = session_get().query(User)
+        users = query.order_by('user_name')
+        user_choices = ['']
+        user_choices.extend([u.user_name for u in users])
+        f_status.child.children.receiver.options = user_choices
+        
         tmpl_context.form = f_status
         return dict(title='%s: %s' % (_('Recall submission for'), asset.path))
 
@@ -500,17 +543,28 @@ class Controller(RestController):
     @require(is_asset_owner())
     @expose('json')
     @validate(f_status, error_handler=get_submit)
-    def post_recall(self, proj, asset_id, comment=None):
+    def post_recall(self, proj, asset_id, sender, receiver, comment=None):
         """Recall an asset submitted for approval."""
         session = session_get()
         user = tmpl_context.user
         asset = asset_get(proj, asset_id)
+        
+        sender = user_get(sender)
+        receiver = user_get(receiver)
 
         if asset.submitted and not asset.approved:
             asset.recall(user)
-            text = u'[%s v%03d]\n%s' % (_('recalled'), asset.current.ver,
-                                                                comment or '')
-            asset.current.notes.append(Note(user, text))
+#            text = u'[%s v%03d]\n%s' % (_('recalled'), asset.current.ver,
+#                                                                comment or '')
+            text = u'%s' % (comment or '')
+            action = u'[%s v%03d]' % (_('recalled'), asset.current.ver)
+            
+            old_task = asset.current_task
+            task_name = u'Recall From Revision'
+            new_task = Task(task_name, comment, asset, sender, receiver)
+            new_task.previous_task = old_task
+            
+            asset.current.notes.append(Note(user, action, text, new_task))
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Recall submission for Asset:'), asset.path)
@@ -537,16 +591,25 @@ class Controller(RestController):
     def get_sendback(self, proj, asset_id, **kwargs):
         """Display a SENDBACK form."""
         asset = asset_get(proj, asset_id)
+        
+        sender = tmpl_context.user.id
 
         f_status.custom_method = 'SENDBACK'
         f_status.value = dict(proj=asset.project.id,
                               asset_id=asset.id,
+                              sender=sender,
                               project_name_=asset.project.name,
                               container_=asset.parent.owner.path,
                               category_id_=asset.category.id,
                               asset_name_=asset.name,
                              )
-
+        
+        query = session_get().query(User)
+        users = query.order_by('user_name')
+        user_choices = ['']
+        user_choices.extend([u.user_name for u in users])
+        f_status.child.children.receiver.options = user_choices
+        
         tmpl_context.form = f_status
         return dict(title='%s: %s' % (_('Send back for revisions'), asset.path))
 
@@ -555,17 +618,28 @@ class Controller(RestController):
     @require(is_asset_supervisor())
     @expose('json')
     @validate(f_status, error_handler=get_submit)
-    def post_sendback(self, proj, asset_id, comment=None):
+    def post_sendback(self, proj, asset_id, sender, receiver, comment=None):
         """Send back an asset for revision."""
         session = session_get()
         user = tmpl_context.user
         asset = asset_get(proj, asset_id)
+        
+        sender = user_get(sender)
+        receiver = user_get(receiver)
 
         if asset.submitted and not asset.approved:
             asset.sendback(user)
-            text = u'[%s v%03d]\n%s' % (_('sent back for revisions'),
-                                            asset.current.ver, comment or '')
-            asset.current.notes.append(Note(user, text))
+#            text = u'[%s v%03d]\n%s' % (_('sent back for revisions'),
+#                                            asset.current.ver, comment or '')
+            text = u'%s' % (comment or '')
+            action = u'[%s v%03d]' % (_('sent back for revisions'), asset.current.ver)
+            
+            old_task = asset.current_task
+            task_name = u'Sent Back For Revision'
+            new_task = Task(task_name, comment, asset, sender, receiver)
+            new_task.previous_task = old_task
+            
+            asset.current.notes.append(Note(user, action, text, new_task))
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Asset sent back for revisions:'), asset.path)
@@ -592,15 +666,21 @@ class Controller(RestController):
     def get_approve(self, proj, asset_id, **kwargs):
         """Display a APPROVE form."""
         asset = asset_get(proj, asset_id)
+        
+        sender = tmpl_context.user.user_name
 
         f_status.custom_method = 'APPROVE'
         f_status.value = dict(proj=asset.project.id,
                               asset_id=asset.id,
+                              sender=sender,
                               project_name_=asset.project.name,
                               container_=asset.parent.owner.path,
                               category_id_=asset.category.id,
                               asset_name_=asset.name,
                              )
+        
+        user_choices = [tmpl_context.user.user_name]
+        f_status.child.children.receiver.options = user_choices
                      
         tmpl_context.form = f_status
         return dict(title='%s: %s' % (_('Approve'), asset.path))
@@ -610,7 +690,7 @@ class Controller(RestController):
     @require(is_asset_supervisor())
     @expose('json')
     @validate(f_status, error_handler=get_submit)
-    def post_approve(self, proj, asset_id, comment=None):
+    def post_approve(self, proj, asset_id, sender, comment=None, **kwargs):
         """Approve an asset submitted for approval."""
         session = session_get()
         user = tmpl_context.user
@@ -618,9 +698,16 @@ class Controller(RestController):
 
         if asset.submitted and not asset.approved:
             asset.approve(user)
-            text = u'[%s v%03d]\n%s' % (_('approved'), asset.current.ver,
-                                                                comment or '')
-            asset.current.notes.append(Note(user, text))
+#            text = u'[%s v%03d]\n%s' % (_('approved'), asset.current.ver,
+#                                                                comment or '')
+            old_task = asset.current_task
+            task_name = u'Aprouved'
+            new_task = Task(task_name, comment, asset, user, user)
+            new_task.previous_task = old_task
+            
+            text = u'%s' % (comment or '')
+            action = u'[%s v%03d]' % (_('approved'), asset.current.ver)
+            asset.current.notes.append(Note(user, action, text, new_task))
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Approved Asset:'), asset.path)

@@ -115,6 +115,7 @@ body {
 .icon_history {background: url(../images/icons/16x16/history.png) left center no-repeat;}
 .icon_download {background: url(../images/icons/16x16/download.png) left center no-repeat;}
 .icon_open {background: url(../images/icons/16x16/open.png) left center no-repeat;}
+.icon_task {background: url(../images/icons/16x16/task.png) left center no-repeat;}
 .icon_pin {background: url(../images/icons/16x16/pin.png) left center no-repeat;}
 .icon_unpin {background: url(../images/icons/16x16/unpin.png) left center no-repeat;}
 
@@ -665,6 +666,7 @@ th {
     -webkit-border-radius: 10px;
     background-color: #eeeeec; /* Aluminium 1 */
     color: #2e3436; /* Aluminium 6 */
+    overflow: hidden;
 }
 
 .content h1, .content h2, .content h3 {
@@ -802,4 +804,176 @@ ul.tabs a.current {
 .asset_note {
     vertical-align: middle;
     padding-left: 8px;
+}
+
+.short_assets {
+    width: 30%;
+    float: left;
+}
+
+/*.asset_description_detailed {
+    background-color: white;
+    border-radius: 8px 8px 8px 8px;
+    float: right;
+    height: 100px;
+    padding: 15px;
+    width: 65%;
+    border: 1px solid #666666;
+}*/
+
+.short_assets table {
+    border: 1px solid #bbbbbb;   
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+
+/*for user task tab*/
+
+.assetinfo {
+	background-color: #DDDDDD;
+	font-size: 12px;
+	padding: 5px;
+}
+
+.assetshort {
+	width: 25%;
+	height: 200px;
+	float: left;
+	border: 1px solid #bbbbbb;   
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+}
+
+.assetname {
+	padding: 5px 0 5px 0;
+	font-weight: bold;
+}
+
+.assetdescription {
+	background-color: white;
+	border-radius: 8px 8px 8px 8px;
+	float: right;
+	padding: 15px;
+	/*width: 800px;*/
+	border: 1px solid #666666;
+	min-width: 760px;
+	min-height: 300px; 
+	}
+	
+.maxithumbnail {
+	float: left;
+	width: 320px;
+	height: 180px;
+	padding: 10px 0 10px 0;
+	background-color: #EEEEEE;
+}
+
+.description {
+	float: left;
+	height: 180px;
+	padding: 10px;
+	width: 420px;
+}
+
+.description span {
+	font-weight: bold;
+	
+}
+
+.tasks {
+	clear: both;
+}
+
+.tasklist {
+	/*height: 255px;*/
+	border: 1px solid #666666;
+	background-color: #EEEEEE;
+}
+
+.leftside {
+	float: left;
+}
+
+.assetactions {
+	float: right;
+	width: 16px;
+	height: 160px;
+	margin-top: 30px;
+	margin-left: 10px;
+}
+
+.maintask {
+	padding: 7px 7px 7px 7px;
+}
+
+.taskhead {
+	float: left;
+	width: 742px;
+	#padding: 7px 7px 7px 7px;
+	vertical-align: middle;
+	border-bottom-width: 2px;
+	border-bottom-style: solid;
+	border-bottom-color: #BBBBBB;
+}
+
+.taskbody {
+	clear: left;
+	width: 742px;
+	border-bottom-width: 2px;
+	border-bottom-style: solid;
+	border-bottom-color: #777777;
+	min-height: 75px;
+	padding: 10px 0;
+	background-color: #FFFFFF;
+}
+
+.taskactions {
+	/*border: 1px solid #000000;*/
+	width: 85px;
+	height: 35px;
+	margin: 3px;
+	float: right;
+}
+
+.sender {
+	float: left;
+	font-size: 18px;
+}
+
+.receiver {
+	float: left;
+	clear: left;
+	font-size: 12px;
+}
+
+.lasttask {
+	padding: 7px 7px 7px 7px;
+	float: left;
+}
+
+.oldtasks {
+    clear: both;
+}
+
+.expand {
+    border: 1px solid #000000;
+	margin: 3px;
+	float: right;
+	padding: 2px;
+}
+
+.actionbox {
+    border: 1px solid #000000;
+}
+
+.actionbody {
+	background-color: #FFFFFF;
+	margin-left: 35px;
+	padding: 3px;
+}
+
+.actionheader {
+	font-size: 10px;
+	background-color: #EEEEEE;
+	padding: 3px;
 }

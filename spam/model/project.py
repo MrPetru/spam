@@ -626,6 +626,7 @@ class Asset(DeclarativeBase):
     approved = Column(Boolean, default=False)
     approver_id = Column(Integer, ForeignKey('users.user_id'))
     approved_date =  Column(DateTime)
+    description = Column(Unicode(255), default=u'')
 
     # Relations
     category = relation('Category', backref=backref('assets'))
@@ -646,6 +647,8 @@ class Asset(DeclarativeBase):
                                         
     rejected_by = relation('User', primaryjoin=rejected_id==User.user_id,
                                         backref=backref('rejected_assets'))
+    
+    current_task = relation('Task', uselist=False, backref=("parent_asset"))
 
     # Properties
     @property
@@ -688,15 +691,16 @@ class Asset(DeclarativeBase):
     
     @property    
     def current_header(self):
-        return (self.current.notes and self.current.notes[0].header or '')
+        #return (self.current.notes and self.current.notes[0].header or '')
+        return self.current_task.name
         
     @property
     def current_summary(self):
-        for n in self.current.notes:
-            if n.summary[0] != '[':
-                return (self.current.notes and n.summary or '')
-            elif len(n.summary) > (n.summary.find(']')+2):
-                return (self.current.notes and n.summary or '')
+#        for n in self.current.notes:
+#            if n.summary[0] != '[':
+#                return (self.current.notes and n.summary or '')
+#            elif len(n.summary) > (n.summary.find(']')+2):
+#                return (self.current.notes and n.summary or '')
         return (self.current.notes and self.current.notes[0].summary or '')
     
     @property
@@ -780,13 +784,14 @@ class Asset(DeclarativeBase):
         self.submitted_date = None
     
     # Special methods
-    def __init__(self, parent, category, name, user):
+    def __init__(self, parent, category, name, user, description):
         self.parent = parent
         self.category = category
         self.name = name
         hashable = '%s-%s-%s' % (parent.id, category.id, name)
         self.id = sha1(hashable.encode('utf-8')).hexdigest()
         self.taggable = Taggable(self.id, u'asset')
+        self.description = description
         
         #create version zero
         AssetVersion(self, 0, user, '')
@@ -825,6 +830,7 @@ class Asset(DeclarativeBase):
                     has_preview=self.has_preview,
                     supervisor_ids=[u.user_id for u in self.supervisors],
                     artist_ids=[u.user_id for u in self.artists],
+                    description=self.description,
                     #'repopath': self.repopath,
                     #'basedir': self.basedir,
                     #'repobasedir': self.repobasedir,
@@ -923,4 +929,201 @@ class AssetVersion(DeclarativeBase):
                     #'preview_large_repopath': self.preview_large_repopath,
                     #'strftime': self.strftime,
                    )
+                   
+class Task(DeclarativeBase):
+    """Tasks for assets"""
+    __tablename__ = "tasks"
 
+    # Columns
+    id = Column(Unicode(40), primary_key=True)
+    name = Column(Unicode(50))
+    description = Column(Unicode(255))
+
+    
+#    # used in one to one relation with asset
+#    # back reference name is parent_asset
+#        # this may be eliminated by replacing in asset
+#        # current_task = relation('Task', uselist=False, backref="parent_asset")
+#        # with
+#        # current_task = relation('Task', backref=backref("parent_asset", uselist=False))
+    parent_id = Column(Integer, ForeignKey('assets.id'))
+    
+    # used to record for old tasks on wich asset was
+    asset_id = Column(Unicode(40))
+    
+    # user tahat work on this task now
+    in_work_by = Column(Integer, ForeignKey('users.user_id'))
+    
+    # is this task in working process
+    in_work = Column(Boolean, default=False)
+    
+    # 
+    sender_id = Column(Unicode, ForeignKey('users.user_id')) # sender = creator of this asset
+    sender = relation('User', primaryjoin=sender_id==User.user_id,
+                                        backref=backref('sended_tasks'))
+                                        
+    receiver_id = Column(Unicode, ForeignKey('users.user_id')) # one to many relation
+    receiver = relation('User', primaryjoin=receiver_id==User.user_id,
+                                        backref=backref('received_tasks'))
+   
+    send_date =  Column(DateTime) # send_date = creation_date
+    closed_date = Column(DateTime)
+    
+    # previos task. used to get all chained task
+    # here is used a self referencing relation
+    previous_task_id = Column(Unicode, ForeignKey('tasks.id'))
+    previous_task = relation('Task', remote_side=[id])
+    
+    # one to many relation with actions
+    #actions = relation("Action", backref=backref("task"))
+    
+    notes = relation("Note", backref=backref("task"))
+    
+    @property
+    def noteslist(self):
+        new_list = []
+        for n in self.notes:
+            new_list.append(n.__json__())
+        new_list.reverse()
+        return new_list
+    
+    # Special methods
+    def __init__(self, name, description, asset, sender, receiver):
+        self.name = name
+        self.description = description
+        self.parent_asset = asset
+        self.asset_id = asset.id
+        self.sender = sender
+        self.receiver = receiver
+        self.send_date = datetime.now()
+        
+        hashable = '%s-%s-%s' % (name, asset.id, datetime.now())
+        self.id = sha1(hashable.encode('utf-8')).hexdigest()
+        
+    def __json__(self):
+        return dict(
+                    id=self.id,
+                    name=self.name.upper(),
+                    description=self.description,
+                    notes=self.notes,
+                    sender_name=self.sender.display_name,
+                    receiver_name=self.receiver.display_name,
+                    send_date=self.send_date.strftime('%d %b %Y at %H:%M'),
+                   )
+
+
+class Note(DeclarativeBase):
+    __tablename__ = 'notes'
+
+    # Columns
+    id = Column(String(40), primary_key=True)
+    annotable_id = Column(String(40), ForeignKey('annotables.id'))
+    user_id = Column(Unicode(40), ForeignKey('users.user_id'))
+    text = Column(UnicodeText)
+    action = Column(UnicodeText)
+    created = Column(DateTime, default=datetime.now)
+    sticky = Column(Boolean, default=False)
+
+    # Relations
+    user = relation('User', backref=backref('notes',
+                                    order_by=(desc('sticky'), desc('created'))))
+
+    annotable = relation(Annotable, backref=backref('notes',
+                                    order_by=(desc('sticky'), desc('created'))))
+                                    
+    task_id = Column(Unicode, ForeignKey('tasks.id'))
+    
+    attachment = relation("Attach", uselist=False, backref="note")
+
+    # Properties
+    @property
+    def annotated(self):
+        return self.annotable.annotated
+
+    @property
+    def strftime(self):
+        return self.created.strftime('%d/%m/%Y %H:%M')
+
+    @property
+    def header(self):
+        return '%s at %s' %(self.user.user_name, self.strftime)
+
+    @property
+    def summary(self):
+        characters = 75
+        summary = self.text[0:characters]
+        if len(self.text) > characters:
+            summary = '%s[...]' % summary
+        return summary
+
+    @property
+    def lines(self):
+        return [dict(line=l) for l in self.text.split('\n')]
+
+    @property
+    def project(self):
+        return self.annotable.annotated.project
+
+    @property
+    def user_name(self):
+        return self.user.user_name
+
+    # Special methods
+    def __init__(self, user, action, text=u'', task=None):
+        self.created = datetime.now()
+        self.user = user
+        self.action = action
+        self.text = text
+        self.task = task
+        hashable = '%s-%s-%s' % (self.user_id, self.created, self.text)
+        self.id = sha1(hashable.encode('utf-8')).hexdigest()
+
+    def __repr__(self):
+        return '<Note: by %s at %s "%s">' % (self.user.user_name,
+                                                self.strftime,
+                                                self.summary)
+
+    def __json__(self):
+        return dict(id=self.id,
+                    project=self.project,
+                    user=self.user,
+                    user_name=self.user.user_name,
+                    created=self.created.strftime('%d/%m/%Y %H:%M'),
+                    text=self.text,
+                    action=self.action,
+                    task=self.task,
+                    task_id=self.task_id,
+                    sticky=self.sticky,
+                    strftime=self.strftime,
+                    header=self.header,
+                    summary=self.summary,
+                    lines=self.lines,
+                   )
+                   
+class Attach(DeclarativeBase):
+    __tablename__ = 'attachments'
+
+    # Columns
+    id = Column(Integer, primary_key=True)
+    
+    file_name = Column(String(100))
+    file_path = Column(Unicode(255))
+    preview_path = Column(Unicode(255))
+    
+    # relations
+    note_id = Column(String, ForeignKey('notes.id'))
+    
+    def __init__(self, file_name, file_path):
+        self.file_name = file_name
+        self.file_path = file_path
+        
+        
+    def __json__(self):
+        return dict(id=self.id,
+                file_name=self.file_name,
+                file_path=self.file_path,
+                note=self.note,
+                note_id=self.note_id,
+                )
+        
+    

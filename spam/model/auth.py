@@ -79,6 +79,9 @@ class Group(DeclarativeBase):
     display_name = Column(Unicode(255))
     created = Column(DateTime, default=datetime.now)
     
+#    refer_to_project = # id of working project
+#    permision_type = # type as user, supervisor, admin and mabe guest
+    
     # Relations
     users = relation('User', secondary=users_groups_table,
                                         backref=backref('groups', lazy=False))

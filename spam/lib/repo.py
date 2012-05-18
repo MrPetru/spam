@@ -221,6 +221,17 @@ def scene_create_dirs(proj, scene):
         if not error.errno==17:
             raise SPAMRepoError("Couldn't create directories for scene %s" %
                                                                         path)
+    # create directory for scene attachements
+    path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, scene.path)
+    previews_path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, G.PREVIEWS, scene.path)
+    try:
+        os.makedirs(path)
+        os.makedirs(previews_path)
+    except OSError, error:
+        # error 17 is "file exists", in that case we just skip the exception
+        if not error.errno==17:
+            raise SPAMRepoError("Couldn't create directories for scene %s" %
+                                                                        path)
 
 def shot_create_dirs(proj, shot):
     """Create directories in the repository for ``shot``."""
@@ -234,11 +245,33 @@ def shot_create_dirs(proj, shot):
         if not error.errno==17:
             raise SPAMRepoError("Couldn't create directories for shot %s" %
                                                                         path)
+    # create directory for shot attachements
+    path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, shot.path)
+    previews_path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, G.PREVIEWS, shot.path)
+    try:
+        os.makedirs(path)
+        os.makedirs(previews_path)
+    except OSError, error:
+        # error 17 is "file exists", in that case we just skip the exception
+        if not error.errno==17:
+            raise SPAMRepoError("Couldn't create directories for shot %s" %
+                                                                        path)
 
 def libgroup_create_dirs(proj, libgroup):
     """Create directories in the repository for ``libgroup``."""
     path = os.path.join(G.REPOSITORY, proj, libgroup.path)
     previews_path = os.path.join(G.REPOSITORY, proj, G.PREVIEWS, libgroup.path)
+    try:
+        os.makedirs(path)
+        os.makedirs(previews_path)
+    except OSError, error:
+        # error 17 is "file exists", in that case we just skip the exception
+        if not error.errno==17:
+            raise SPAMRepoError("Couldn't create directories for libgroup %s" %
+                                                                        path)
+    
+    path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, libgroup.path)
+    previews_path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, G.PREVIEWS, libgroup.path)
     try:
         os.makedirs(path)
         os.makedirs(previews_path)

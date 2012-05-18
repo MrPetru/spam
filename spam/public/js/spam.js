@@ -208,6 +208,23 @@ spam_init = function (cookiebase) {
 	        spam.dialog_load(this);
 	        return false;
         });
+        
+        /* instrument action to get description */
+	    $(".actiondescription").live("click", function(e) {
+            $.ajax({
+                type: "GET",
+                url: $(this).children('input').attr("value"),
+                success: function(msg){
+                    /*var result = JSON.parse(msg);*/
+                    /*var asset = msg.asset;
+                    var name = asset.name;
+                    $(".asset_description_detailed").html('<p>'+msg.asset.name+'</p>');*/
+                    $(".assetdescription").html(msg);
+                }
+            });
+	        return false;
+        });
+        
      });
 }
 
