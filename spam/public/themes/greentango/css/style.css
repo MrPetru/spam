@@ -106,18 +106,19 @@ body {
 .icon_schema_outdated {background: url(../images/icons/16x16/urgent.png) left center no-repeat;}
 .icon_checkout {background: url(../images/icons/16x16/checkout.png) left center no-repeat;}
 .icon_release {background: url(../images/icons/16x16/release.png) left center no-repeat;}
-.icon_publish {background: url(../images/icons/16x16/publish.png) left center no-repeat;}
+.icon_publish {background: url(../images/icons/16x16/publish_v02.png) left center no-repeat;}
 .icon_submit {background: url(../images/icons/16x16/redo.png) left center no-repeat;}
 .icon_sendback {background: url(../images/icons/16x16/sendback.png) left center no-repeat;}
 .icon_recall {background: url(../images/icons/16x16/undo.png) left center no-repeat;}
 .icon_approve {background: url(../images/icons/16x16/approve.png) left center no-repeat;}
 .icon_revoke {background: url(../images/icons/16x16/revoke.png) left center no-repeat;}
-.icon_history {background: url(../images/icons/16x16/history.png) left center no-repeat;}
+.icon_history {background: url(../images/icons/16x16/history_v02.png) left center no-repeat;}
 .icon_download {background: url(../images/icons/16x16/download.png) left center no-repeat;}
-.icon_open {background: url(../images/icons/16x16/open.png) left center no-repeat;}
+.icon_open {background: url(../images/icons/16x16/history.png) left center no-repeat;}
 .icon_task {background: url(../images/icons/16x16/task.png) left center no-repeat;}
 .icon_pin {background: url(../images/icons/16x16/pin.png) left center no-repeat;}
 .icon_unpin {background: url(../images/icons/16x16/unpin.png) left center no-repeat;}
+.icon_attach {background: url(../images/icons/16x16/publish.png) left center no-repeat;}
 
 /* loading feedback */
 .icon.icon_loading_white, .icon.icon_loading_black {
@@ -338,6 +339,7 @@ div.note_header {
 .owner {
     font-size: 0.8em;
     font-style: italic;
+    float: left;
 }
 
 
@@ -833,6 +835,7 @@ ul.tabs a.current {
 	background-color: #DDDDDD;
 	font-size: 12px;
 	padding: 5px;
+	overflow: hidden;
 }
 
 .assetshort {
@@ -857,7 +860,8 @@ ul.tabs a.current {
 	/*width: 800px;*/
 	border: 1px solid #666666;
 	min-width: 760px;
-	min-height: 300px; 
+	min-height: 300px;
+	display: none;
 	}
 	
 .maxithumbnail {
@@ -882,6 +886,7 @@ ul.tabs a.current {
 
 .tasks {
 	clear: both;
+	width: 742px;
 }
 
 .tasklist {
@@ -908,7 +913,7 @@ ul.tabs a.current {
 
 .taskhead {
 	float: left;
-	width: 742px;
+	/*width: 742px;*/
 	#padding: 7px 7px 7px 7px;
 	vertical-align: middle;
 	border-bottom-width: 2px;
@@ -929,7 +934,7 @@ ul.tabs a.current {
 
 .taskactions {
 	/*border: 1px solid #000000;*/
-	width: 85px;
+	/*width: 85px;*/
 	height: 35px;
 	margin: 3px;
 	float: right;
@@ -977,3 +982,18 @@ ul.tabs a.current {
 	background-color: #EEEEEE;
 	padding: 3px;
 }
+
+.actiondescription {
+
+}
+
+.version {
+    float: left;
+    font-size: 0.8em;
+    font-style: italic;
+}
+.lastchange {
+    float: left;
+    font-size: 0.8em;
+    font-style: italic;
+} 

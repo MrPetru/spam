@@ -831,6 +831,7 @@ class Asset(DeclarativeBase):
                     supervisor_ids=[u.user_id for u in self.supervisors],
                     artist_ids=[u.user_id for u in self.artists],
                     description=self.description,
+                    current_task=self.current_task,
                     #'repopath': self.repopath,
                     #'basedir': self.basedir,
                     #'repobasedir': self.repobasedir,
@@ -977,7 +978,7 @@ class Task(DeclarativeBase):
     # one to many relation with actions
     #actions = relation("Action", backref=backref("task"))
     
-    notes = relation("Note", backref=backref("task"))
+    notes = relation("Note", backref=backref("task"), order_by=desc('created'))
     
     @property
     def noteslist(self):
@@ -1067,6 +1068,13 @@ class Note(DeclarativeBase):
     @property
     def user_name(self):
         return self.user.user_name
+        
+    @property
+    def file_name(self):
+        if self.attachment:
+            return self.attachment.file_name
+        else:
+            return ''
 
     # Special methods
     def __init__(self, user, action, text=u'', task=None):
@@ -1091,13 +1099,13 @@ class Note(DeclarativeBase):
                     created=self.created.strftime('%d/%m/%Y %H:%M'),
                     text=self.text,
                     action=self.action,
-                    task=self.task,
                     task_id=self.task_id,
                     sticky=self.sticky,
                     strftime=self.strftime,
                     header=self.header,
                     summary=self.summary,
                     lines=self.lines,
+                    file_name=self.file_name,
                    )
                    
 class Attach(DeclarativeBase):

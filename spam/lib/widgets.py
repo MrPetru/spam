@@ -395,24 +395,26 @@ class TableLibgroups(twl.LiveTable):
                         self.parent_id and '"%s"' % self.parent_id or 'null')
     
 
-class TableAssetShort(twc.RepeatingWidget):
+class TableAssetShort(twl.LiveTable):
 
-    template = 'mako:spam.templates.widgets.asset_table_short'
+    child = twl.RowLayout(widgets_class = 'actiondescription',
+            template='mako:spam.lib.livewidgets.templates.asset_row',
+            maker_template='mako:spam.lib.livewidgets.templates.asset_row_maker')
     
-    #child = twc.CompoundWidget
-    child = twl.RowLayout(template = 'mako:spam.templates.widgets.asset_row')
-    
+    update_topic = notifications.TOPIC_ASSETS
+    show_headers = False
+
     thumbnail = twl.LiveThumbnail(parent_css_class = 'thumbnail')
     
     name = twl.Box(
-        id=None,
         css_class='',
         parent_css_class = 'asset_name',
         children=[
-            twl.Text(id='name', sort_default=True),
-            twl.Text(id='owner_id', sort_default=True),
+            twl.Text(id = 'name', sort_default=True, text="%(name)s"),
+            twl.Text(id = 'owner_id',sort_default=True,
+                        text="owned by: %(owner_user_name)s", css_class='owner'),
         ])
-
+    
 class TableAssets(twl.LiveTable):
     """Asset livetable."""
     category = twc.Param('Asset category', default='')
@@ -428,7 +430,7 @@ class TableAssets(twl.LiveTable):
             twl.Text(id='owner_id',
                 css_class='owner',
                 condition='data.checkedout',
-                text='%s: %s' % ('checkedout by', '%(owner_user_name)s'),
+                text='%s: %s' % ('owned by', '%(owner_user_name)s'),
                 help_text='%(owner_id)s (%(owner_display_name)s)',
             )
     ])
@@ -609,7 +611,7 @@ class TableAssets(twl.LiveTable):
                 dialog=True,
                 children=[
                     twl.Icon(id='newattach',
-                        icon_class='icon_delete',
+                        icon_class='icon_attach',
                         help_text='new attach'),
             ]),
     ])
@@ -1434,4 +1436,318 @@ class FormAttachUpload(RestForm):
     uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
     spacer = twf.Spacer()
     comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+
+
+class TaskAssetDescription(twl.LiveContainer): # repeating widget
     
+    # questo widget riceve come value una lista con un solo asset
+    
+    update_topic = notifications.TOPIC_ASSETS
+    template = 'mako:spam.templates.task.asset_description'
+    
+    child = twl.ItemLayout(
+        template = 'mako:spam.templates.task.box_layout',
+        maker_template = 'mako:spam.templates.task.box_layout_maker',
+        append_selector = '.assetdescription', # definire il selector del suo padre
+        )
+    leftside = twl.LiveCompoundWidget(
+        template = 'mako:spam.templates.task.compound',
+        maker_template = 'mako:spam.templates.task.compound_maker',
+        css_class = 'leftside',
+        parent_css_class = '',
+        name = twl.Box(
+            css_class='assetname',
+            parent_css_class = '',
+            children=[
+                twl.Text(id='name', sort_default=True),
+            ]),
+        
+        info = twl.Box(
+            css_class='assetinfo',
+            parent_css_class = '',
+            children=[
+                twl.Text(id='version', css_class='version', condition='data.checkedout',
+                    text='%s: %s &nbsp;&nbsp;| &nbsp;&nbsp;' % ('version', '%(current_fmtver)s'),
+                    help_text='last version in database',
+                ),
+                twl.Text(id='owner_id',
+                    css_class='owner',
+                    condition='data.checkedout',
+                    text='%s: %s &nbsp;&nbsp;| &nbsp;&nbsp;' % ('owned by', '%(owner_user_name)s'),
+                    help_text='%(owner_id)s (%(owner_display_name)s)',
+                ),
+                twl.Text(id='lastchange', css_class='lastchange', condition='data.checkedout',
+                    text='%s: %s' % ('last change by', '%(current_header)s'),
+                    help_text='last change of this asset',
+                )
+            ]),
+        thumbnail = twl.LiveThumbnail(parent_css_class = '', css_class='maxithumbnail'),
+        description = twl.Box(
+            css_class='description',
+            parent_css_class = '',
+            children=[
+                twl.Text(id='description',
+                    css_class='description',
+                    condition='data.checkedout',
+                    text='<span>Asset Description</span> <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%s</p>' % ('%(description)s'),
+                    help_text='asset permanent description',
+                ),
+            ]),
+    )
+    rightside = twl.LiveCompoundWidget(
+        template = 'mako:spam.templates.task.compound',
+        maker_template = 'mako:spam.templates.task.compound_maker',
+        css_class = 'assetactions', # rightside
+        parent_css_class = '',
+        actions = twl.Box(
+            children = [
+                twl.Button(id='history',
+                    index = '0',
+                    action=url('/asset/%(proj_id)s/%(id)s'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='history',
+                            icon_class='icon_history',
+                            help_text='asset history'),
+                ]),
+                twl.Button(id='checkout',
+                    index = '3',
+                    condition=('!data.checkedout && !data.approved '
+                        '&& ($.inArray(data.user_id, data.supervisor_ids)>=0 '
+                        '|| $.inArray(data.user_id, data.artist_ids)>=0)'),
+                    action=url('/asset/%(proj_id)s/%(id)s/checkout'),
+                    children=[
+                        twl.Icon(id='checkout',
+                            icon_class='icon_checkout',
+                            help_text='checkout'),
+                ]),
+                twl.Button(id='release',
+                    index = '4',
+                    condition=('data.checkedout && !data.submitted && '
+                        '&& !data.approved && (data.user_id==data.owner_id '
+                        '|| $.inArray(data.user_id, data.supervisor_ids)>=0)'),
+                    action=url('/asset/%(proj_id)s/%(id)s/release'),
+                    children=[
+                        twl.Icon(id='release',
+                            icon_class='icon_release',
+                            help_text='release'),
+                ]),
+                twl.Button(id='publish',
+                        index = '5',
+                        condition=('data.checkedout '
+                            '&& data.user_id==data.owner_id'),
+                        action=url('/asset/%(proj_id)s/%(id)s/publish'),
+                        dialog=True,
+                        children=[
+                            twl.Icon(id='publish',
+                                icon_class='icon_publish',
+                                help_text='publish a new version'),
+                ]),
+                twl.Link(id='download_link',
+                    index = '2',
+                    condition='data.current_ver && data.current_ver>0',
+                    dest=url('/asset/%(proj_id)s/%(current_id)s/download'),
+                    children=[
+                        twl.Icon(id='download',
+                            icon_class='icon_download',
+                            help_text='download',
+                        )
+                ]),
+                twl.Button(id='open_link',
+                    index = '12',
+                    condition=('data.approved '
+                        '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
+                    action=('http://localhost:8083/open?%(proj_id)s/%(path)s'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='open',
+                            icon_class='icon_open',
+                            help_text='open'),
+                ]),
+                twl.Button(id='newtask',
+                        index = '10',
+                        condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+                        action=url('/task/%(proj_id)s/%(id)s/new'),
+                        dialog=True,
+                        children=[
+                            twl.Icon(id='newtask',
+                                icon_class='icon_task',
+                                help_text='new task'),
+                ]),
+                ])
+            )
+            
+    current_task = twl.LiveCompoundWidget(
+        id='current_task',
+        template = 'mako:spam.templates.task.compound',
+        maker_template = 'mako:spam.templates.task.compound_maker',
+        css_class = 'tasks',
+        parent_css_class = '',
+        header = twl.Box(
+            css_class='taskhead',
+            parent_css_class = '',
+            children=[
+                twl.Text(id='current_task_name', sort_default=True,
+                    text='%s' % ('%(current_task_name)s'),
+                    css_class = 'sender',
+                ),
+                twl.Text(id='current_task_sender_name',
+                    sort_default=True,
+                    text='from: <strong>%s</strong> to: <strong>%s</strong> date: %s' % ('%(current_task_sender_name)s',
+                                                '%(current_task_receiver_name)s',
+                                                '%(current_task_send_date)s'),
+                    css_class = 'receiver',
+                ),
+            ]),
+        
+        ##########
+        
+        taskactions = twl.LiveCompoundWidget(
+            template = 'mako:spam.templates.task.compound',
+            maker_template = 'mako:spam.templates.task.compound_maker',
+            css_class = 'taskactions', # rightside
+            parent_css_class = '',
+            actions = twl.Box(
+
+            children=[
+                twl.Button(id='addnote',
+                    index = '1',
+                    action=url('/note/%(proj_id)s/%(current_id)s/new'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='addnote',
+                            icon_class='icon_edit',
+                            help_text='add note'),
+                ]),
+                twl.Button(id='submit', icon_class='submit',
+                    index = '6',
+                    condition=('data.checkedout && data.current_ver>0 '
+                        '&& !data.submitted && !data.approved '
+                        '&& data.user_id==data.owner_id'),
+                    action=url('/asset/%(proj_id)s/%(id)s/submit'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='submit',
+                            icon_class='icon_submit',
+                            help_text='submit for approval'),
+                ]),
+                twl.Button(id='recall',
+                    index = '7',
+                    condition=('data.submitted && !data.approved '
+                        '&& data.user_id==data.owner_id'),
+                    action=url('/asset/%(proj_id)s/%(id)s/recall'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='recall',
+                            icon_class='icon_recall',
+                            help_text='recall submission'),
+                ]),
+                twl.Button(id='sendback',
+                    index = '9',
+                    condition=('data.submitted && !data.approved '
+                        '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
+                    action=url('/asset/%(proj_id)s/%(id)s/sendback'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='sendback',
+                            icon_class='icon_sendback',
+                            help_text='send back for revisions'),
+                ]),
+                twl.Button(id='approve',
+                    index = '8',
+                    condition=('data.submitted && !data.approved '
+                        '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
+                    action=url('/asset/%(proj_id)s/%(id)s/approve'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='approve',
+                            icon_class='icon_approve',
+                            help_text='approve'),
+                ]),
+                twl.Button(id='newattach',
+                    index = '10',
+                    condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+                    action=url('/attach/%(proj_id)s/%(id)s/attach'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='newattach',
+                            icon_class='icon_delete',
+                            help_text='new attach'),
+                ]),
+            ])
+            ),
+        
+        ##########
+        
+        # devo aggiungere? il LiveWidget
+        current_task_notes = twl.LiveRepeating(
+            template = 'mako:spam.templates.task.repeating',
+            maker_template = 'mako:spam.templates.task.repeating_maker',
+            css_class = 'taskbody',
+            parent_css_class = '',
+            update_condition = 'false',
+            child = twl.ItemLayout(
+                children = [
+                    twl.Text(id='text', sort_default=True,
+                            text='%s' % ('%(text)s'),
+                            css_class = 'actionbody',
+                    ),
+                    twl.Text(id='action', sort_default=True,
+                            text='%s' % ('%(action)s'),
+                            css_class = 'actionheader',
+                    ),
+                    twl.Text(id='file_name', sort_default=True,
+                            text='%s' % ('%(file_name)s'),
+                            css_class = 'actionheader',
+                    ),
+                    ]
+            )
+        )
+    )
+#         task_list = twl.LiveCompoundWidget(
+#            template = 'mako:spam.templates.task.compound',
+#            css_class = 'tasks',
+#            parent_css_class = '',
+#             current_task = twl.LiveCompoundWidget(
+#                id='current_task',
+#                template = 'mako:spam.templates.task.compound',
+#                css_class = 'maintask',
+#                parent_css_class = '',
+#                tasks_label = twf.Label(text='Tasks List:'),
+#                header = twl.Box(
+#                    css_class='taskhead',
+#                    parent_css_class = '',
+#                    children=[
+#                        twl.Text(id='current_task_name', sort_default=True,
+#                            text='%s' % ('%(current_task_name)s'),
+#                            css_class = 'sender',
+#                        ),
+#                        twl.Text(id='current_task_sender_name',
+#                            sort_default=True,
+#                            text='from: <strong>%s</strong> to: <strong>%s</strong> date: %s' % ('%(current_task_sender_name)s',
+#                                                        '%(current_task_receiver_name)s',
+#                                                        '%(current_task_send_date)s'),
+#                            css_class = 'receiver',
+#                        ),
+#                    ]),
+#             )
+#         )
+#        tasks = RepeatingWidget(
+#            #child
+#            name = ''
+#            actions = ''
+#            info = ''
+#            notes = RepeatingWidget(
+#                text = ''
+#                inof = ''
+#                attach = ''
+#                )
+#            )
+
+#    rightside = twl.LiveCompoundWidget(
+#        template = 'mako:spam.templates.task.compound',
+#        css_class = 'rightside',
+#        parent_css_class = '',
+#        thumbnail = twl.LiveThumbnail(parent_css_class = 'thumbnail')
+#        )
+

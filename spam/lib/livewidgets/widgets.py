@@ -58,7 +58,6 @@ class LiveWidget(twc.Widget):
         'field', default='mako:spam.lib.livewidgets.templates.default_maker')
     label = twc.Param('Widget label', default='')
     display_w = twc.Param('display or not widget', default=1)
-    display_w2 = twc.Param('display or not widget', default=1)
     type_w = twc.Param('display or not widget', default=1)
     help_text = twc.Param('Tooltip text', default='')
     update_condition = twc.Param('Javascript condition used to filter updates',
@@ -70,15 +69,6 @@ class LiveWidget(twc.Widget):
         'templates', default = {})
 
     maker = twc.util.class_or_instance(_maker)
-    
-##    def prepare(self):
-##        super(LiveWidget, self).prepare()
-##        if hasattr(self, 'parent') and hasattr(self.parent, 'display_w'):
-##            if hasattr(self, 'type_w'):
-##                self.display_w = self.parent.display_w
-##                #self.type_w = self.parent.type_w
-##                self.display_w2 = (self.display_w or self.type_w)
-##        
 
 class LiveCompoundWidget(LiveWidget, twc.CompoundWidget):
     """Base class for compound LiveWidgets
@@ -107,15 +97,14 @@ class LiveCompoundWidget(LiveWidget, twc.CompoundWidget):
             if isinstance(self.data[self.key], dict):
                 for k, v in self.data[self.key].iteritems():
                     newdata['%s_%s' % (self.key, k)] = v
-            elif hasattr(self.data[self.key], '__dict__'):
-                for k, v in self.data[self.key].__dict__.iteritems():
+            elif hasattr(self.data[self.key], '__json__'):
+                for k, v in self.data[self.key].__json__().iteritems():
                     newdata['%s_%s' % (self.key, k)] = v
         self.data.update(newdata)
         if hasattr(self, 'parent') and hasattr(self.parent, 'display_w'):
             if hasattr(self, 'type_w'):
                 self.display_w = self.parent.display_w
                 #self.type_w = self.parent.type_w
-                self.display_w2 = (self.display_w or self.type_w)
 
         # prepare data for children
         for c in self.children:
@@ -299,7 +288,6 @@ class ItemLayout(twc.CompoundWidget, LiveWidget):
         # prepare data for children
         for c in self.children:
             c.data = self.data
-
         # we call super().prepare() after updating children data so if one of
         # our children is a LiveCompoundWidget, it can propagate it to its
         # own children
@@ -356,9 +344,14 @@ class LiveRepeating(twc.RepeatingWidget, LiveWidget):
         # extend data with parent's extra_data
         if self.parent and hasattr(self.parent, 'extra_data'):
             self.data.update(self.parent.extra_data)
+            
+        if self.id in self.data.keys():
+            self.value = self.data[self.id]
+        else:
+            self.child.data = self.data
 
         # prepare data for children
-        self.child.data = self.data
+        #self.child.data = self.data
         super(LiveRepeating, self).prepare()
     
     maker = twc.util.class_or_instance(_maker)

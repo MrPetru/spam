@@ -59,11 +59,16 @@ a_actions = AssetActions()
 t_actions = TaskActions()
 t_notes = TaskNotes()
 
+from spam.lib.widgets import TaskAssetDescription
+asset_description = TaskAssetDescription()
+
 from spam.lib.widgets import FormTaskNew
 f_new = FormTaskNew(action=url('/task'))
 
 from spam.model import User, user_get
 from spam.lib.helpers import widget_actions
+
+from hashlib import sha1
 
 class Controller(RestController):
     """
@@ -97,8 +102,10 @@ class Controller(RestController):
         #previous_task = task_get(asset.current_task.previous_task_id)
         if previous_task:
             previous_task = previous_task.__json__()
-
-        return dict(asset = asset.__json__(), task = task_data,
+            
+        tmpl_context.asset_description = asset_description
+        
+        return dict(asset = asset.__json__(), task = task_data, asset_raw = [asset],
                     previous_task = (previous_task or None), notes=notes)
     
     @project_set_active
@@ -133,26 +140,16 @@ class Controller(RestController):
             else:
                 asset_group[tmp_path].append(a)
                 
-        
+        asset_group_list = []
+        for k in asset_group.keys():
+            d = dict(id=sha1(k.encode('utf-8')).hexdigest(), path=k, assets=asset_group[k])
+            asset_group_list.append(d)
         
         tmpl_context.t_assets = t_assets
         
         return dict(page='user_tasks', sidebar=('projects', project.id),
-            assets=asset_group)
+            assets_groups=asset_group_list)
 
-    
-#    def new(self, name, description, asset, sender, receiver):
-#        """create a new task and set him as current task for asset"""
-#        
-#        # create a connection seesion
-#        session = session_get()
-#        
-#        # create new task
-#        new_task = Task(name, description, asset, sender, receiver)
-#        
-#        # insert data in database
-#        session.add(new_task)
-#        session.flush()
 
     @project_set_active
     @require(is_project_user())

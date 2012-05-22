@@ -1,4 +1,4 @@
-<tr class="item-${w.item_id} actiondescription status ${w.item_status}" id="${w.item_id}">
+<tr class="item-${w.item_id} ${w.widgets_class} status ${w.item_status}">
     <input type='hidden' value='${"/spam/task/%(proj_id)s/%(id)s" % w.data}'/>
     % for c in w.children:
         <td class="${c.parent_css_class}">

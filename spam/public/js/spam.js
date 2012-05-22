@@ -182,6 +182,22 @@ spam_init = function (cookiebase) {
             $("#dialog").dialog("destroy");
         }
     }
+    /* instrument action to get description */
+    spam.task_tab_activate = function(form) {
+        $(".actiondescription").live("click", function(e) {
+            $(".actiondescription").css("box-shadow", "none");
+            $.ajax({
+                type: "GET",
+                url: $(this).children('input').attr("value"),
+                success: function(msg){
+                    $(".assetdescription").fadeOut('fast').html(msg).fadeIn('fast');
+                }
+            });
+            $(this).css("box-shadow", "16px 4px 20px #55AC52");
+
+            return false;
+        });
+    }
 
 
     /****************************************
@@ -209,21 +225,7 @@ spam_init = function (cookiebase) {
 	        return false;
         });
         
-        /* instrument action to get description */
-	    $(".actiondescription").live("click", function(e) {
-            $.ajax({
-                type: "GET",
-                url: $(this).children('input').attr("value"),
-                success: function(msg){
-                    /*var result = JSON.parse(msg);*/
-                    /*var asset = msg.asset;
-                    var name = asset.name;
-                    $(".asset_description_detailed").html('<p>'+msg.asset.name+'</p>');*/
-                    $(".assetdescription").html(msg);
-                }
-            });
-	        return false;
-        });
+        spam.task_tab_activate();
         
      });
 }
