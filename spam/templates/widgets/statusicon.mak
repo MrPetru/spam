@@ -24,6 +24,6 @@
 ##    return field;
 ##}
 
-<div class = "statusicon ${w.value}" title = "${w.value}">
+<div class = "statusicon ${w.value}" title = "${w.help_text} : ${w.value}">
 </div>
 

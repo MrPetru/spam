@@ -38,10 +38,16 @@ class StatusIcon(twl.LiveWidget):
     params = ['icon_class']
     template = 'mako:spam.templates.widgets.statusicon'
     maker_template = 'mako:spam.templates.widgets.statusicon_maker'
+    help_text = twc.Param('help text', default='')
     
     css_class = 'lw_status'
     show_header = False
     sortable = False
+    
+    def prepare(self):
+        if self.parent and self.parent.value and hasattr(self.parent.value, 'name'):
+            self.help_text = (self.parent.value.name or '')
+            super(StatusIcon, self).prepare()
 
 
 ##class StatusIconBox(twl.LiveRepeating):
@@ -252,22 +258,26 @@ class TableScenes(twl.LiveTable):
     """Scene livetable."""
     update_topic = notifications.TOPIC_SCENES
     show_headers = False
-    thumbnail = twl.LiveThumbnail()
+    thumbnail = twl.LiveThumbnail(parent_css_class = 'thumbnail')
     namelink = twl.Link(
         dest=url('/scene/%(proj_id)s/%(name)s/'),
         sort_default=True,
+        parent_css_class = 'scene_name',
         children=[
             twl.Text(id='name', help_text='name')
     ])
-    description = twl.Text()
+    description = twl.Text(parent_css_class = 'scene_text')
     shots = twl.StatusIconBox(
+        parent_css_class = 'scene_shots',
         children=[
-            twl.Link(dest=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s/'), children = [StatusIcon(id='status', help_text='')]),
+            twl.Link(dest=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s/'),
+            children = [StatusIcon(id='status', help_text='')]),
             
     ])
     actions = twl.Box(
         condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
         type_w = 0,
+        parent_css_class = 'asset_actions',
         children=[
             twl.Button(id='edit',
                 action=url('/scene/%(proj_id)s/%(name)s/edit'),
@@ -293,17 +303,19 @@ class TableShots(twl.LiveTable):
     """Shot livetable."""
     update_topic = notifications.TOPIC_SHOTS
     show_headers = False
-    thumbnail = twl.LiveThumbnail()
+    thumbnail = twl.LiveThumbnail(parent_css_class = 'thumbnail')
     namelink = twl.Link(
         dest=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s/'),
         sort_default=True,
+        parent_css_class = 'shot_name',
         children=[
             twl.Text(id='name', help_text='name')
     ])
-    description = twl.Text()
-    frames = twl.Text()
+    description = twl.Text(parent_css_class = 'shot_text')
+    frames = twl.Text(parent_css_class = 'shot_text')
     categories =  twl.StatusIconBox(
         css_class='statusiconbox',
+        parent_css_class = 'shot_categories',
         condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
         child=twl.Link(
                 dest='%s#%s' % (
@@ -311,12 +323,13 @@ class TableShots(twl.LiveTable):
                       url('/asset/%(proj_id)s/%(container_type)s/%(id)s')),
                 children=[
                     StatusIcon(id='status',
-                        help_text='%(item_name)s: %(item_status)s'),
+                        help_text='%(item_name)s: %(status)s'),
             ])
     )
     actions = twl.Box(
         condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
         type_w = 0,
+        parent_css_class = 'asset_actions',
         children=[
             twl.Button(id='edit',
                 action=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s/edit'),
@@ -342,23 +355,26 @@ class TableLibgroups(twl.LiveTable):
     parent_id = twc.Param('Libgroup parent id', default=None)
     update_topic = notifications.TOPIC_LIBGROUPS
     show_headers = False
-    thumbnail = twl.LiveThumbnail()
+    thumbnail = twl.LiveThumbnail(parent_css_class = 'thumbnail')
     namelink = twl.Link(
         dest=url('/libgroup/%(proj_id)s/%(id)s/'),
         sort_default=True,
+        parent_css_class = 'libgroup_name',
         children=[
             twl.Text(id='name',
                 help_text='name')
     ])
-    description = twl.Text()
+    description = twl.Text(parent_css_class = 'libgroup_text')
     subgroups = twl.StatusIconBox(
         ##dest=url('/libgroup/%(proj_id)s/%(id)s'),
+        parent_css_class = 'libgroup_subgroups',
         children=[
             twl.Link(dest=url('/libgroup/%(proj_id)s/%(id)s'),
                 children = [StatusIcon(id='status', help_text='')]),
     ])
     categories = twl.StatusIconBox(
         css_class='statusiconbox',
+        parent_css_class = 'libgroup_categories',
         child=twl.Link(
                 dest='%s#%s' % (
                       url('/libgroup/%(proj_id)s/%(id)s'),
@@ -370,6 +386,7 @@ class TableLibgroups(twl.LiveTable):
     )
     actions = twl.Box(
         condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+        parent_css_class = 'asset_actions',
         children=[
             twl.Button(id='edit',
                 action=url('/libgroup/%(proj_id)s/%(id)s/edit'),

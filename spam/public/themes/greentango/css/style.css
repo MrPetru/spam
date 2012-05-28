@@ -201,6 +201,24 @@ table {
     -webkit-border-radius: 8px;
 }
 
+.update_on_shots table {
+    border: 1px solid #bbbbbb;   
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+
+.update_on_scenes table {
+    border: 1px solid #bbbbbb;   
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+
+.update_on_libgroups table {
+    border: 1px solid #bbbbbb;   
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+
 table thead th {
     font-weight: bold;
 }
@@ -340,6 +358,12 @@ div.note_header {
     font-size: 0.8em;
     font-style: italic;
     float: left;
+}
+
+.ownerbold {
+    font-size: 1em;
+    font-style: italic;
+    font-weight: bold;
 }
 
 
@@ -784,6 +808,66 @@ ul.tabs a.current {
 
 .asset_name {
     width: 350px;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+
+.shot_name {
+    width: 180px;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+.shot_categories {
+    width: 180px;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+
+.shot_text {
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+
+.scene_text {
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+.scene_shots {
+    width: 180px;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+.scene_name {
+    width: 180px;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+.libgroup_name {
+    width: 180px;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+.libgroup_text {
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+.libgroup_categories {
+    width: 180px;
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 8px;
+}
+.libgroup_subgroups {
+    width: 180px;
     vertical-align: middle;
     text-align: left;
     padding-left: 8px;
