@@ -23,19 +23,26 @@
 import sys, os, time, thread
 import gobject
 import pygst
-pygst.require("0.10")
+#pygst.require("0.10")
 import gst
 from tg import app_globals as G
+import gtk
 
 import logging
 log = logging.getLogger(__name__)
 
-THUMB_WIDTH = 120
-THUMB_HEIGHT = 68
+#THUMB_WIDTH = 120
+#THUMB_HEIGHT = 68
+THUMB_WIDTH = 320
+THUMB_HEIGHT = 180
 
-PIPELINE_THUMB_FROM_IMAGE = 'filesrc location=%(src)s ! gdkpixbufdec ! ' \
-    'gdkpixbufscale ! video/x-raw-rgb, width=%(width)d, height=%(height)d ! ' \
-    'pngenc compression-level=9 ! filesink location=%(dest)s'
+#PIPELINE_THUMB_FROM_IMAGE = 'filesrc location=%(src)s ! gdkpixbufdec ! ' \
+#    'gdkpixbufscale ! video/x-raw-rgb, width=%(width)d, height=%(height)d ! ' \
+#    'pngenc compression-level=9 ! filesink location=%(dest)s'
+    
+PIPELINE_THUMB_FROM_IMAGE = 'filesrc location=%(src)s ! decodebin ! '\
+        'videoscale ! video/x-raw-rgb, width=%(width)d, height=%(height)d ! '\
+        'pngenc compression-level=9 ! filesink location=%(dest)s'
 
 loop = gobject.MainLoop()
 
@@ -76,7 +83,7 @@ def pipeline_run(pipeline, **kwargs):
 def make_preview(asset):
     pass
 
-def make_thumb(asset):
+def old_make_thumb(asset):
     image_types = ['.png', '.jpg', '.tif']
     
     repo_path = os.path.join(G.REPOSITORY, asset.proj_id)
@@ -104,6 +111,79 @@ def make_thumb(asset):
             except OSError:
                 os.link(dest_name, unversioned_dest)
 
+
+def make_thumb(asset):
+    image_types = ['.png', '.jpg', '.tif']
+    
+    repo_path = os.path.join(G.REPOSITORY, asset.proj_id)
+    previews_path = os.path.join(G.REPOSITORY, asset.proj_id, G.PREVIEWS)
+    dirname, basename = os.path.split(asset.path)
+    name, ext = os.path.splitext(basename)
+    
+    if not asset.is_sequence:
+        if ext in image_types:
+            src = os.path.join(repo_path, asset.path)
+            dest_name = '%s_%s-thumb.png' % (name, asset.current.fmtver)
+            dest = os.path.join(previews_path, dirname, dest_name)
+            if not os.path.exists(os.path.dirname(dest)):
+                os.makedirs(os.path.dirname(dest))
+            
+            pixbuf = gtk.gdk.pixbuf_new_from_file(src)
+            
+            w = pixbuf.get_width()
+            h = pixbuf.get_height()
+            tw = th = 0
+            if (w > h):
+                tw = 320
+                th = int(h/(float(w)/tw))
+            else:
+                th = 180
+                tw = int(w/(float(h)/th))
+            
+            pixbuf2 = pixbuf.scale_simple(tw,th,gtk.gdk.INTERP_HYPER)
+            pixbuf2.save(dest, 'png')
+#            pipeline_run(PIPELINE_THUMB_FROM_IMAGE, width=THUMB_WIDTH,
+#                         height=THUMB_HEIGHT, src=src, dest=dest)
+
+            unversioned_dest_name = '%s-thumb.png' % name
+            unversioned_dest = os.path.join(previews_path, dirname,
+                                                        unversioned_dest_name)
+            if os.path.exists(unversioned_dest):
+                os.remove(unversioned_dest)
+            try:
+                os.symlink(dest_name, unversioned_dest)
+            except OSError:
+                os.link(dest_name, unversioned_dest)
+                
+def make_attach_thumb(image, final_thumb_path):
+    image_types = ['.png', '.jpg', '.tif']
+    
+    #repo_path = os.path.join(G.REPOSITORY, asset.proj_id)
+    previews_path = os.path.dirname(final_thumb_path)
+    dirname, basename = os.path.split(final_thumb_path)
+    name, ext = os.path.splitext(basename)
+    
+    if ext in image_types:
+        src = image
+        dest_name = basename
+        dest = os.path.join(previews_path, dest_name)
+        if not os.path.exists(os.path.dirname(dest)):
+            os.makedirs(os.path.dirname(dest))
+        
+        pixbuf = gtk.gdk.pixbuf_new_from_file(src)
+        
+        w = pixbuf.get_width()
+        h = pixbuf.get_height()
+        tw = th = 0
+        if (w > h):
+            tw = 60
+            th = int(h/(float(w)/tw))
+        else:
+            th = 34
+            tw = int(w/(float(h)/th))
+        
+        pixbuf2 = pixbuf.scale_simple(tw,th,gtk.gdk.INTERP_HYPER)
+        pixbuf2.save(dest, 'png')
 
 ###############################
 PIPELINE = 'multifilesrc location=test/frame.%04d.jpg caps="image/jpeg,framerate=25/1,pixel-aspect-ratio=1/1" ! jpegdec ! ffmpegcolorspace ! video/x-raw-yuv ! ffenc_flv ! ffmux_flv ! filesink location=output.flv'

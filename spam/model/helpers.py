@@ -30,7 +30,7 @@ from spam.lib.exceptions import SPAMDBError, SPAMDBNotFound
 from spam.model import DBSession, Project, Scene, Shot, Libgroup, Asset
 from spam.model import Category, User, Group, Taggable, Tag, Annotable, Note
 from spam.model import AssetVersion, AssetContainer
-from spam.model import Task
+from spam.model import Task, Attach
 
 import logging
 log = logging.getLogger(__name__)
@@ -288,3 +288,14 @@ def project_get_eager(proj):
     
     return project
 
+def attach_get(proj, attach_id):
+    """Return an attach"""
+    query = session_get().query(Attach)
+    try:
+        return query.filter_by(id=attach_id.decode('utf-8')).one()
+    except NoResultFound:
+        raise SPAMDBNotFound('Attach "%s" could not be found.' %
+                                                                    attach_id)
+    except MultipleResultsFound:
+        raise SPAMDBError('Error when searching attach "%s".' %
+                                                                    assetver_id)

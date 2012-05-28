@@ -209,7 +209,7 @@ class widget_actions():
             admin_display_status, self.list_union(
                 supervisor_display_status,self.list_union(artist_display_status, owner_display_status)))
         
-    def main(self, asset, cur_user):
+    def old_main(self, asset, cur_user):
         self.set_user_type_flags(asset, cur_user)
         self.set_display_flags_by_user()
         self.set_asset_status_flags(asset)
@@ -218,3 +218,75 @@ class widget_actions():
         #print (asset.owner_id)
         #print (self.display_flags)
         return (self.display_flags)
+        
+    def main(self, asset, cur_user):
+        display_flags = [
+            1, # 0,  history - vedi tutta la histori
+            0, # 1,  addnote - agiunge una nota
+            1, # 2,  download - download last version 
+            1, # 3,  checkout - prendi in carrico
+            0, # 4,  release - lasciare l'incarico
+            0, # 5,  publish - publicare una nuova versione
+            0, # 6,  submit - manda per essere revisionato
+            0, # 7,  recall - richiama dalla revisione
+            0, # 8,  approve - approvare il asset
+            0, # 9,  sendback - rimandare in dietro per fare le modifiche
+            0, # 10, delete - cancelare l'asset
+            0, # 11, revoke - anulare l'approvazione
+            1, # 12, open - apri il asset tramite il servizio locale di spam
+            0, # 13, new_task - crea un nuovo task
+            ]
+        asset_json = asset.__json__()
+        if asset.current_task:
+            if asset.current_task.receiver:
+                receiver = asset.current_task.receiver.id
+            else:
+                receiver = u'TO ALL GROUP'
+        else:
+            receiver = u''
+            
+        display_flags[0] = 1
+        display_flags[1] = int(not receiver == u'')
+        display_flags[2] = 1
+        display_flags[3] = int(not asset_json['checkedout'] and (not asset_json['approved']) and 
+                            ((cur_user in asset_json['supervisor_ids']) or 
+                            (cur_user in asset_json['artist_ids']) or (cur_user == receiver)))
+                            
+        display_flags[4] = int(asset_json['checkedout'] and ((cur_user in 
+                            asset_json['artist_ids']) or (cur_user in 
+                            asset_json['supervisor_ids']) or (cur_user == asset_json['owner_id'])))
+        
+        display_flags[5] = int(cur_user == asset_json['owner_id'])                    
+        
+        display_flags[6] = int(cur_user == asset_json['owner_id'] and
+                                not asset_json['approved'] and
+                                not asset_json['submitted'] and
+                                receiver != u'')
+        display_flags[7] = int(cur_user == asset_json['owner_id'] and
+                                not asset_json['approved'] and
+                                asset_json['submitted'])
+                                
+        display_flags[8] = int(not asset_json['approved'] and
+                                asset_json['submitted'] and
+                                cur_user in asset_json['supervisor_ids'])
+                                
+        display_flags[9] = int(asset_json['submitted'] and
+                                cur_user in asset_json['supervisor_ids'] and
+                                not asset_json['approved'])
+                                
+        display_flags[10] = int(cur_user in asset_json['supervisor_ids'])
+        
+        display_flags[11] = 0
+        
+        display_flags[12] = int(cur_user == asset_json['owner_id'] and
+                                asset_json['checkedout'] and
+                                not asset_json['submitted'] and
+                                not asset_json['approved'])
+                                
+        display_flags[13] = int((cur_user in asset_json['supervisor_ids'] and
+                                asset_json['approved'] and 
+                                cur_user not in asset_json['artist_ids']) or
+                                (cur_user in asset_json['supervisor_ids'] and receiver == u''))
+        
+        return (display_flags)
+        

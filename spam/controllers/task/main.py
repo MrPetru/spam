@@ -54,13 +54,11 @@ log = logging.getLogger(__name__)
 from spam.lib.widgets import TableAssetShort
 t_assets = TableAssetShort()
 
-from spam.lib.widgets import AssetActions, TaskActions, TaskNotes
-a_actions = AssetActions()
-t_actions = TaskActions()
-t_notes = TaskNotes()
-
 from spam.lib.widgets import TaskAssetDescription
 asset_description = TaskAssetDescription()
+
+from spam.lib.widgets import OldTasks
+o_tasks = OldTasks()
 
 from spam.lib.widgets import FormTaskNew
 f_new = FormTaskNew(action=url('/task'))
@@ -80,33 +78,21 @@ class Controller(RestController):
     @project_set_active
     @require(is_project_user())
     @expose('spam.templates.task.get_one')
-    def get_one(self, project, asset_id):
+    def get_one(self, proj, asset_id):
+        
+        project = tmpl_context.project
         asset = asset_get(project, asset_id)
-        a_actions.data = asset.__json__()
-        a_actions.extra_data = dict(project=project)
-        
-        t_actions.data = asset.__json__()
-        t_actions.extra_data = dict(project=project)
-        
-        tmpl_context.a_actions = a_actions
-        tmpl_context.t_actions = t_actions
+        old_tasks = []
         if asset.current_task:
-            notes = asset.current_task.noteslist
-            previous_task = task_get(asset.current_task.previous_task_id)
-            task_data = asset.current_task.__json__()
-        else:
-            notes = []
-            previous_task = None
-            task_data = {}
-        
-        #previous_task = task_get(asset.current_task.previous_task_id)
-        if previous_task:
-            previous_task = previous_task.__json__()
+            ct = asset.current_task
+            while ct.previous_task:
+                old_tasks.append(ct.previous_task)
+                ct = ct.previous_task
             
         tmpl_context.asset_description = asset_description
-        
-        return dict(asset = asset.__json__(), task = task_data, asset_raw = [asset],
-                    previous_task = (previous_task or None), notes=notes)
+        tmpl_context.o_tasks = o_tasks
+
+        return dict(asset = [asset], old_tasks = old_tasks)
     
     @project_set_active
     @require(is_project_user())
@@ -118,18 +104,28 @@ class Controller(RestController):
         user = tmpl_context.user
         
         # get all tasks for current user
-        tasks = task_get_all().filter_by(receiver=user).all()
+        tasks = task_get_all().filter(Task.parent_asset!=None).all()
         
         # get all current associated asset for current user
         assets = []
         for t in tasks:
-            if t.parent_asset != None:
-                assets.append(t.parent_asset)
+            if t.receiver:
+                if (t.receiver==user):
+                    assets.append(t.parent_asset)
+            else:
+                if ((user.id in t.parent_asset.__json__()['artist_ids']) and (not t.parent_asset.__json__()['submitted'])) or ((user.id in t.parent_asset.__json__()['supervisor_ids']) and (t.parent_asset.__json__()['submitted'])):
+                    assets.append(t.parent_asset)
+                    
+#            if (((user.id in t.parent_asset.__json__()['artist_ids']) or (t.receiver==user)) and (not t.parent_asset.__json__()['submitted'])) or ((user.id in t.parent_asset.__json__()['supervisor_ids']) and (t.parent_asset.__json__()['submitted'])):
+#                assets.append(t.parent_asset)
+            
+#            if t.parent_asset != None:
+#                assets.append(t.parent_asset)
                 
-        asset_list = session.query(Asset).filter_by(owner=user).all()
-        for a in asset_list:
-            if a not in assets:
-                assets.append(a)
+#        asset_list = session.query(Asset).filter_by(owner=user).all()
+#        for a in asset_list:
+#            if a not in assets:
+#                assets.append(a)
                 
         # group asset based on path
         asset_group = {}
@@ -189,7 +185,13 @@ class Controller(RestController):
         
         asset = asset_get(proj, asset_id)
         sender = user_get(sender)
-        receiver = user_get(receiver)
+        if receiver:
+            receiver = user_get(receiver)
+        else:
+            receiver = None
+        
+        if asset.approved:
+            asset.revoke(user)
         
         old_task = asset.current_task
         new_task = Task(name, description, asset, sender, receiver)
@@ -203,9 +205,15 @@ class Controller(RestController):
         session.flush()
         msg = '%s %s' % (_('Updated Asset:'), asset.name)
 
+        updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
+        status = 'ok'
+
+        # log into Journal
+        journal.add(user, '%s - %s' % (msg, asset))
+
         # notify clients
-        updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
-                extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
         notify.send(updates)
 
-        return dict(msg=msg, status='ok', updates=updates)
+        #return dict(msg=msg, status='ok', updates=updates)
+        return dict(msg=msg, status=status, updates=updates)
+        

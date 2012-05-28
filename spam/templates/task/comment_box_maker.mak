@@ -8,7 +8,7 @@ function(data) {
              "maker": ${field.maker().replace('\n', '') | n},
         });
     % endfor
-    content += '<div class="item-' + data["id"] + ' statuss ' +data["status"] +'">';
+    content += '<div class="item-' + data["id"] + ' taskcomment">';
         $.each(field_makers, function() {
             if (this.condition(data)) {
                 var css_calss = this.css_class;

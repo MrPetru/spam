@@ -22,6 +22,7 @@
 
 import tw2.core as twc
 import tw2.forms as twf
+from tg import config, url
 
 from spam.lib.helpers import widget_actions
 
@@ -144,7 +145,7 @@ class BoxAction(LiveCompoundWidget):
     parent_css_class = ''
     def prepare(self):
         wa = widget_actions()
-        self.display_data=wa.main(self.value, self.parent.parent.user.id)
+        self.display_data=wa.main(self.value, self.data['user_id'])
         super(BoxAction, self).prepare()
         
 
@@ -222,7 +223,7 @@ class Text(LiveWidget):
 
     def prepare(self):
         super(Text, self).prepare()
-
+        
         # use widget value if "text" was not given
         self.text = self.text or str(self.value) or ''
 
@@ -238,15 +239,19 @@ class Image(LiveWidget):
     widget_class = 'lw_image'
 
     def prepare(self):
-        super(Image, self).prepare()
-        if self.id == 'thumbnail':
-            if self.value == '' or self.value == None:
-                self.parent.css_class = 'thumbnail_image_not_found'
-                self.src = ''
+        if (self.id == 'thumbnail') or (self.id == 'maxithumbnail'):
+            if self.data.has_key('thumbnail') and self.data['thumbnail'] == '':
+            #if self.value == '' or self.value == None:
+                #self.parent.css_class = 'thumbnail_image_not_found'
+                self.src = url("/themes/default/images/preview_not_found.png")
                 self.help_text = ''
+            else:
+                self.src = self.src or self.value or ''
         else:
             # use widget value if "src" was not given
             self.src = self.src or self.value or ''
+        #print self.data
+        super(Image, self).prepare()
 
 
 class Icon(LiveWidget):
@@ -347,9 +352,9 @@ class LiveRepeating(twc.RepeatingWidget, LiveWidget):
             
         if self.id in self.data.keys():
             self.value = self.data[self.id]
+            self.child.data = self.data
         else:
             self.child.data = self.data
-
         # prepare data for children
         #self.child.data = self.data
         super(LiveRepeating, self).prepare()
@@ -423,6 +428,32 @@ class LiveThumbnail(LiveCompoundWidget):
             id='thumbnail',
             help_text='thumbnail',
             css_class='thumbnail',
+            condition='data.has_preview',
+            src='/repo/%(thumbnail)s',
+            )
+    ]
+
+class LiveThumbnailM(LiveCompoundWidget):
+    """A simple container widget
+
+    Box is a compound widget, and can contain other widgets like ``Text``,
+    ``Image`` or ``Icon``
+    """
+    template = 'mako:spam.lib.livewidgets.templates.livethumbnail'
+    maker_template = 'mako:spam.lib.livewidgets.templates.livethumbnail_maker'
+    
+    src = twc.Param('A formatting string the will be expanded with the '
+        'widget\'s ItemLayout value as a dictionary, ``None`` defaults to the '
+        'widget\'s value', default='')
+
+    widget_class = 'lw_thumbnail'
+    css_class = 'maxithumbnail'
+    parent_css_class = ''
+    children = [
+        Image(
+            id='maxithumbnail',
+            help_text='thumbnail',
+            css_class='maxithumbnail',
             condition='data.has_preview',
             src='/repo/%(thumbnail)s',
             )

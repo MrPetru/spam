@@ -29,7 +29,7 @@ from spam.model import session_get, Asset, AssetVersion, Category, Note
 from spam.model import project_get, container_get, asset_get, category_get
 from spam.model import assetversion_get
 from spam.lib.widgets import FormAssetNew, FormAssetEdit, FormAssetConfirm
-from spam.lib.widgets import FormAssetPublish, FormAssetStatus
+from spam.lib.widgets import FormAssetPublish, FormAssetStatus, FormAssetStatusAttach
 from spam.lib.widgets import TableAssets, TableAssetHistory
 #from spam.lib.widgets import BoxStatus
 from spam.lib import repo, preview
@@ -44,6 +44,8 @@ from spam.lib.predicates import is_asset_owner
 from spam.lib.helpers import widget_actions
 from tg import app_globals as G
 from spam.model import User, Task, user_get
+from spam.lib import attachments
+from spam.model import Attach
 
 import logging
 log = logging.getLogger(__name__)
@@ -54,6 +56,7 @@ f_edit = FormAssetEdit(action=url('/asset'))
 f_confirm = FormAssetConfirm(action=url('/asset'))
 f_publish = FormAssetPublish(action=url('/asset'))
 f_status = FormAssetStatus(action=url('/asset'))
+f_status_attach = FormAssetStatusAttach(action=url('/asset'))
 
 # livewidgets
 t_assets = TableAssets()
@@ -192,7 +195,8 @@ class Controller(RestController):
         journal.add(user, '%s - %s' % (msg, asset))
 
         # notify clients
-        updates = [dict(item=asset, type='added', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
+        updates = [dict(item=asset, type='added', topic=TOPIC_ASSETS,
+                    extra_data = dict(user_id=user.id, actions_display_status = self.wa.main(asset, user.id)))]
         notify.send(updates)
 
         return dict(msg=msg, status='ok', updates=updates)
@@ -284,7 +288,9 @@ class Controller(RestController):
             
             asset2 = asset_get(proj, asset_id)
             msg = '%s %s' % (_('Checkedout Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset2, user.id)))]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
+                    extra_data = dict(user_id=user.id,
+                        actions_display_status = self.wa.main(asset2, user.id)))]
             status = 'ok'
             asset_directory_path = os.path.join(G.REPOSITORY, proj, asset.path)
             asset_directory_path = os.path.split(asset_directory_path)[0]
@@ -327,7 +333,9 @@ class Controller(RestController):
             session.refresh(asset.current.annotable)
             
             msg = '%s %s' % (_('Released Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
+                        extra_data = dict(user_id=user.id,
+                            actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
             asset_directory_path = os.path.join(G.REPOSITORY, proj, asset.path)
             asset_directory_path = os.path.split(asset_directory_path)[0]
@@ -428,7 +436,9 @@ class Controller(RestController):
         preview.make_preview(asset)
 
         msg = '%s %s v%03d' % (_('Published'), asset.path, newver.ver)
-        updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
+        updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
+                    extra_data = dict(user_id=user.id,
+                        actions_display_status = self.wa.main(asset, user.id)))]
 
         # log into Journal
         journal.add(user, '%s - %s' % (msg, asset))
@@ -448,8 +458,8 @@ class Controller(RestController):
         
         sender = tmpl_context.user.id
         
-        f_status.custom_method = 'SUBMIT'
-        f_status.value = dict(proj=asset.project.id,
+        f_status_attach.custom_method = 'SUBMIT'
+        f_status_attach.value = dict(proj=asset.project.id,
                               asset_id=asset.id,
                               sender=sender,
                               project_name_=asset.project.name,
@@ -461,17 +471,17 @@ class Controller(RestController):
         users = query.order_by('user_name')
         user_choices = ['']
         user_choices.extend([u.user_name for u in users])
-        f_status.child.children.receiver.options = user_choices
+        f_status_attach.child.children.receiver.options = user_choices
 
-        tmpl_context.form = f_status
+        tmpl_context.form = f_status_attach
         return dict(title='%s: %s' % (_('Submit for approval'), asset.path))
 
     @project_set_active
     @asset_set_active
     @require(is_asset_owner())
     @expose('json')
-    @validate(f_status, error_handler=get_submit)
-    def post_submit(self, proj, asset_id, sender, receiver, comment=None):
+    @validate(f_status_attach, error_handler=get_submit)
+    def post_submit(self, proj, asset_id, sender, uploaded, receiver, comment=None, uploader=None):
         """Submit an asset to supervisors for approval."""
         session = session_get()
         user = tmpl_context.user
@@ -484,6 +494,18 @@ class Controller(RestController):
             asset.submit(user)
 #            text = u'[%s v%03d]\n%s' % (_('submitted'), asset.current.ver,
 #                                                                comment or '')
+            if isinstance(uploaded, list):
+                # the form might send empty strings, so we strip them
+                uploaded = [uf for uf in uploaded if uf]
+            else:
+                uploaded = [uploaded]
+            
+            if uploaded[0] != u'':
+                result = attachments.put(asset, uploaded[0])
+                new_attachment = Attach(result['file_name'], result['file_path'])
+            else:
+                new_attachment = None
+            
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('submitted'), asset.current.ver)
             old_task = asset.current_task
@@ -491,11 +513,16 @@ class Controller(RestController):
             new_task = Task(task_name, comment, asset, sender, receiver)
             new_task.previous_task = old_task
             
-            asset.current.notes.append(Note(user, action, text, new_task))
+            new_note = Note(user, action, text=comment, task=new_task)
+            new_note.attachment = new_attachment
+            
+            asset.current.notes.append(new_note)
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Submitted Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
+                        extra_data = dict(user_id=user.id,
+                            actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -560,7 +587,7 @@ class Controller(RestController):
             action = u'[%s v%03d]' % (_('recalled'), asset.current.ver)
             
             old_task = asset.current_task
-            task_name = u'Recall From Revision'
+            task_name = u'Recalled: %s' % old_task.previous_task.name
             new_task = Task(task_name, comment, asset, sender, receiver)
             new_task.previous_task = old_task
             
@@ -568,7 +595,9 @@ class Controller(RestController):
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Recall submission for Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
+                        extra_data = dict(user_id=user.id,
+                            actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -594,8 +623,8 @@ class Controller(RestController):
         
         sender = tmpl_context.user.id
 
-        f_status.custom_method = 'SENDBACK'
-        f_status.value = dict(proj=asset.project.id,
+        f_status_attach.custom_method = 'SENDBACK'
+        f_status_attach.value = dict(proj=asset.project.id,
                               asset_id=asset.id,
                               sender=sender,
                               project_name_=asset.project.name,
@@ -608,17 +637,18 @@ class Controller(RestController):
         users = query.order_by('user_name')
         user_choices = ['']
         user_choices.extend([u.user_name for u in users])
-        f_status.child.children.receiver.options = user_choices
+        f_status_attach.child.children.receiver.options = user_choices
         
-        tmpl_context.form = f_status
+        tmpl_context.form = f_status_attach
         return dict(title='%s: %s' % (_('Send back for revisions'), asset.path))
 
     @project_set_active
     @asset_set_active
     @require(is_asset_supervisor())
     @expose('json')
-    @validate(f_status, error_handler=get_submit)
-    def post_sendback(self, proj, asset_id, sender, receiver, comment=None):
+    @validate(f_status_attach, error_handler=get_submit)
+    def post_sendback(self, proj, asset_id, sender, uploaded, receiver, comment=None,
+                                                                uploader=None):
         """Send back an asset for revision."""
         session = session_get()
         user = tmpl_context.user
@@ -631,6 +661,18 @@ class Controller(RestController):
             asset.sendback(user)
 #            text = u'[%s v%03d]\n%s' % (_('sent back for revisions'),
 #                                            asset.current.ver, comment or '')
+            if isinstance(uploaded, list):
+                # the form might send empty strings, so we strip them
+                uploaded = [uf for uf in uploaded if uf]
+            else:
+                uploaded = [uploaded]
+            
+            if uploaded[0] != u'':
+                result = attachments.put(asset, uploaded[0])
+                new_attachment = Attach(result['file_name'], result['file_path'])
+            else:
+                new_attachment = None
+                
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('sent back for revisions'), asset.current.ver)
             
@@ -639,11 +681,16 @@ class Controller(RestController):
             new_task = Task(task_name, comment, asset, sender, receiver)
             new_task.previous_task = old_task
             
-            asset.current.notes.append(Note(user, action, text, new_task))
+            new_note = Note(user, action, text=comment, task=new_task)
+            new_note.attachment = new_attachment
+            
+            asset.current.notes.append(new_note)
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Asset sent back for revisions:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
+                        extra_data = dict(user_id=user.id,
+                            actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -711,7 +758,9 @@ class Controller(RestController):
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Approved Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
+                        extra_data = dict(user_id=user.id,
+                            actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal
@@ -765,7 +814,9 @@ class Controller(RestController):
             session.refresh(asset.current.annotable)
 
             msg = '%s %s' % (_('Revoked approval for Asset:'), asset.path)
-            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
+            updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
+                        extra_data = dict(user_id=user.id,
+                            actions_display_status = self.wa.main(asset, user.id)))]
             status = 'ok'
 
             # log into Journal

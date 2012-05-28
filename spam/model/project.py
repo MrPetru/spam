@@ -692,16 +692,26 @@ class Asset(DeclarativeBase):
     @property    
     def current_header(self):
         #return (self.current.notes and self.current.notes[0].header or '')
-        return self.current_task.name
+        if self.current_task:
+            return self.current_task.name
+        else:
+            return u'No tasks...'
         
     @property
     def current_summary(self):
-#        for n in self.current.notes:
+        first_not_void = 'No comments!'
+        
+        for n in self.current.notes:
+            if n.summary != u'':
+                first_not_void = (self.current.notes and n.summary or '')
+                return first_not_void
+        return first_not_void
+        
 #            if n.summary[0] != '[':
 #                return (self.current.notes and n.summary or '')
 #            elif len(n.summary) > (n.summary.find(']')+2):
 #                return (self.current.notes and n.summary or '')
-        return (self.current.notes and self.current.notes[0].summary or '')
+#        return (self.current.notes and self.current.notes[0].summary or '')
     
     @property
     def is_sequence(self):
@@ -821,10 +831,12 @@ class Asset(DeclarativeBase):
                     current_id=self.current.id,
                     current_ver=self.current.ver,
                     current_fmtver=self.current.fmtver,
-                    current_header=(self.current.notes and
-                                        self.current.notes[0].header or ''),
-                    current_summary=(self.current.notes and
-                                        self.current.notes[0].summary or ''),
+#                    current_header=(self.current.notes and
+#                                        self.current.notes[0].header or ''),
+#                    current_summary=(self.current.notes and
+#                                        self.current.notes[0].summary or ''),
+                    current_header=self.current_header,
+                    current_summary=self.current_summary,
                     is_sequence=self.is_sequence,
                     thumbnail=self.thumbnail,
                     has_preview=self.has_preview,
@@ -980,6 +992,9 @@ class Task(DeclarativeBase):
     
     notes = relation("Note", backref=backref("task"), order_by=desc('created'))
     
+    #last_attach = relation("Attach", backref=backref("task", uselist=False))
+    last_attach = relation("Attach", uselist=False, backref="task")
+    
     @property
     def noteslist(self):
         new_list = []
@@ -987,7 +1002,13 @@ class Task(DeclarativeBase):
             new_list.append(n.__json__())
         new_list.reverse()
         return new_list
-    
+        
+    @property
+    def receiver_name(self):
+        if self.receiver:
+            return self.receiver.display_name
+        else:
+            return (u'TO ALL GROUP')
     # Special methods
     def __init__(self, name, description, asset, sender, receiver):
         self.name = name
@@ -1008,7 +1029,7 @@ class Task(DeclarativeBase):
                     description=self.description,
                     notes=self.notes,
                     sender_name=self.sender.display_name,
-                    receiver_name=self.receiver.display_name,
+                    receiver_name=self.receiver_name,
                     send_date=self.send_date.strftime('%d %b %Y at %H:%M'),
                    )
 
@@ -1075,6 +1096,18 @@ class Note(DeclarativeBase):
             return self.attachment.file_name
         else:
             return ''
+    @property
+    def file_path(self):
+        if self.attachment:
+            return self.attachment.file_path
+        else:
+            return ''
+    @property
+    def preview_path(self):
+        if self.attachment:
+            return self.attachment.preview_path
+        else:
+            return ''
 
     # Special methods
     def __init__(self, user, action, text=u'', task=None):
@@ -1098,7 +1131,7 @@ class Note(DeclarativeBase):
                     user_name=self.user.user_name,
                     created=self.created.strftime('%d/%m/%Y %H:%M'),
                     text=self.text,
-                    action=self.action,
+                    action="%s at %s" % (self.action, self.created.strftime('%d/%m/%Y %H:%M')),
                     task_id=self.task_id,
                     sticky=self.sticky,
                     strftime=self.strftime,
@@ -1106,30 +1139,43 @@ class Note(DeclarativeBase):
                     summary=self.summary,
                     lines=self.lines,
                     file_name=self.file_name,
+                    file_path=self.file_path,
+                    preview_path=self.preview_path,
+                    proj_id=self.project.id,
                    )
                    
 class Attach(DeclarativeBase):
     __tablename__ = 'attachments'
 
     # Columns
-    id = Column(Integer, primary_key=True)
+    #id = Column(Integer, primary_key=True)
+    id = Column(String(40), primary_key=True)
     
-    file_name = Column(String(100))
+    #file_name = Column(String(100))
     file_path = Column(Unicode(255))
     preview_path = Column(Unicode(255))
     
+    order = Column(Integer)
+    
+    @property
+    def file_name(self):
+        return self.id
+    
     # relations
     note_id = Column(String, ForeignKey('notes.id'))
+    task_id = Column(String, ForeignKey('tasks.id'))
     
-    def __init__(self, file_name, file_path):
-        self.file_name = file_name
+    def __init__(self, file_name, file_path, preview_path=''):
+        self.id = file_name
         self.file_path = file_path
+        self.preview_path = preview_path
         
         
     def __json__(self):
         return dict(id=self.id,
-                file_name=self.file_name,
+                file_name=self.id,
                 file_path=self.file_path,
+                preview_path=self.preview_path,
                 note=self.note,
                 note_id=self.note_id,
                 )

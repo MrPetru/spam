@@ -68,6 +68,20 @@ spam_init = function (cookiebase) {
         });
 
     }
+    
+    spam.toggles_activate_oldtasks = function () {
+        /* set toggle function for old tasks */
+        $("#oldtasks .oldtasks").click(function(event){
+            toggle = $(this).parents("div:first");
+            if (toggle.hasClass('expanded')) {
+                $('> .taskbody', toggle).hide('fast');
+            } else {
+                $('> .taskbody', toggle).show('fast');
+            }
+            toggle.toggleClass('expanded');
+            return false;
+        });
+    }
 
 
     /****************************************
@@ -190,7 +204,7 @@ spam_init = function (cookiebase) {
                 type: "GET",
                 url: $(this).children('input').attr("value"),
                 success: function(msg){
-                    $(".assetdescription").fadeOut('fast').html(msg).fadeIn('fast');
+                    $(".assetdescription").hide().html(msg).fadeIn('fast');
                 }
             });
             $(this).css("box-shadow", "16px 4px 20px #55AC52");

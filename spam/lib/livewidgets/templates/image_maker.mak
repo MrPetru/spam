@@ -6,9 +6,18 @@ function(data) {
     % else:
         src = data['${w.id}'] ? data['${w.id}'] : '';
     % endif
+    
+    if ($.sprintf('%(thumbnail)s', data) == ''){
+        src = '/themes/default/images/preview_not_found.png';
+    }
+    
     title = $.sprintf('${w.help_text | n}', data);
     var css_class = $.sprintf('${w.css_class | n}', data);
-    var field = '<img src="' + src + '" class="${w.widget_class} ' + css_class + '"  title="' + title + '"></img>';
+    if ((src != "/repo/") && (src != "")) {
+        var field = '<img src="' + src + '" class="${w.widget_class} ' + css_class + '"  title="' + title + '"></img>';
+    } else {
+        var field = '';
+    }
     return field;
 }
 

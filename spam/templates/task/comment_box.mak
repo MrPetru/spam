@@ -1,5 +1,5 @@
 
-<div class="item-${w.item_id} statuss ${w.item_status}">
+<div class="item-${w.item_id} taskcomment">
     % for c in w.children:
             ${c.display() | n}
     % endfor

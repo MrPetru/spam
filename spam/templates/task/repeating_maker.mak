@@ -1,13 +1,10 @@
 function(data) {
-    % if w.value:
-        var field = '<div class="da_cambiare">';
-        if (data['shots'] != []){
-            maker_t = ${w.child.maker() | n};
-            field += maker_t(data);
-            field += '</div>';
-            return field;
-        };
-    % else:
-        return '<div class="da_cambiare"></div>'
-    % endif
+    var field = '<div class="${w.css_class}">';
+    $.each(data["${w.key}"], function(i, item) {
+        ##alert(i + "____" + item);
+        maker_t = ${w.child.maker() | n};
+        field += maker_t(item);
+    });
+    field += '</div>';
+    return field;
 }

@@ -53,17 +53,24 @@ log = logging.getLogger(__name__)
 f_attach = FormAttachUpload(action=url('/attach'))
 
 from spam.lib import attachments
+from datetime import datetime
+from hashlib import sha1
+
+from spam.lib.helpers import widget_actions
+from spam.model import attach_get
 
 class Controller(RestController):
     """
         manipulate with attachemts
     """
     
-    _custom_actions = ['attach']
+    wa = widget_actions()
+    
+    _custom_actions = ['attach', 'download']
     
     @project_set_active
     @asset_set_active
-    @require(is_asset_owner())
+    #@require(is_asset_owner())
     @expose('spam.templates.forms.form')
     def get_attach(self, proj, asset_id, **kwargs):
         """Display a attach form."""
@@ -86,10 +93,10 @@ class Controller(RestController):
         
     @project_set_active
     @asset_set_active
-    @require(is_asset_owner())
+    #@require(is_asset_owner())
     @expose('json')
     @validate(f_attach, error_handler=get_attach)
-    def post_attach(self, proj, asset_id, name, uploaded, comment=None,
+    def post_attach(self, proj, asset_id, uploaded, comment=None,
                                                                 uploader=None):
         """Put a new attachment"""
         
@@ -97,70 +104,80 @@ class Controller(RestController):
         asset = asset_get(proj, asset_id)
         user = tmpl_context.user
 
-        if not asset.checkedout or user != asset.owner:
-            msg = '%s %s' % (_('Cannot publish Asset:'), asset.path)
-            return dict(msg=msg, status='error', updates=[])
+#        if not asset.checkedout or user != asset.owner:
+#            msg = '%s %s' % (_('Cannot publish Asset:'), asset.path)
+#            return dict(msg=msg, status='error', updates=[])
 
         if isinstance(uploaded, list):
             # the form might send empty strings, so we strip them
             uploaded = [uf for uf in uploaded if uf]
         else:
             uploaded = [uploaded]
-        
-        result = attachments.put(asset, uploaded[0], name)
-        print (result)
-        
-        new_attachment = Attach(result['file_name'], result['file_path'])
+            
+        if uploaded[0] != u'':
+            result = attachments.put(asset, uploaded[0])
+            new_attachment = Attach(result['file_name'], result['file_path'], result['preview_path'])
+        else:
+            new_attachment = None
         
         # create Note for this attachment
-        action = u'[%s v%03d]' % (_('attachment to'), asset.current.ver)
+        action = u'[%s v%03d]' % (_('comented'), asset.current.ver)
         task = asset.current_task
+        if new_attachment:
+            if task.last_attach:
+                new_attachment.order = task.last_attach.order + 1
+            else:
+                new_attachment.order = 1
+        task.last_attach = new_attachment
         new_note = Note(user, action, text=comment, task=task)
         new_note.attachment = new_attachment
         asset.current.notes.append(new_note)
         session.refresh(asset.current.annotable)
 
-#        # check that uploaded file extension matches asset name
-#        name, ext = os.path.splitext(asset.name)
-#        for uf in uploaded:
-#            uf_name, uf_ext = os.path.splitext(uf)
-#            if not uf_ext == ext:
-#                msg = '%s %s' % (_('Uploaded file must be of type:'), ext)
-#                return dict(msg=msg, status='error', updates=[])
+        msg = '%s %s v%03d' % (_('Comented'), asset.path, asset.current.ver)
+        updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
 
-#        # commit file to repo
-#        if comment is None or comment=='None':
-#            comment = ''
-#        header = u'[%s %s v%03d]' % (_('published'), asset.path,
-#                                                            asset.current.ver+1)
-#        text = comment and u'%s\n%s' % (header, comment) or header
-#        repo_id = repo.commit(proj, asset, uploaded, text, user.user_name)
-#        if not repo_id:
-#            msg = '%s %s' % (_('The latest version is already:'), uploaded)
-#            return dict(msg=msg, status='info', updates=[])
+        # log into Journal
+        journal.add(user, '%s - %s' % (msg, asset))
 
-#        # create a new version
-#        newver = AssetVersion(asset, asset.current.ver+1, user, repo_id)
-#        #text = u'[%s v%03d]\n%s' % (_('published'), newver.ver, comment)
-#        task = newver.asset.current_task
-#        text = u'%s' % comment
-#        action = u'[%s v%03d]' % (_('published'), newver.ver)
-#        newver.notes.append(Note(user, action, text, task))
-#        session.flush()
-#        session.refresh(asset)
+        # notify clients
+        notify.send(updates)
 
-#        # create thumbnail and preview
-#        preview.make_thumb(asset)
-#        preview.make_preview(asset)
+        return dict(msg=msg, status='ok', updates=updates)
+        
+    @project_set_active
+    @require(is_project_user())
+    @expose()
+    def download(self, proj, attach_id):
+        """Return a version of an asset from the repository as a file 
+        attachment in the response body."""
+        
+        attach = attach_get(proj, attach_id)
+        
+        name, ext = os.path.splitext(attach.file_name)
+        
+        #file_name = "%s_%s_attach_%03d%s" % (attach.note.annotable.annotated.asset.name, attach.note.task.name, 1, ext)
+        file_name = "%s_attach_%03d%s" % (attach.note.task.name, attach.order, ext)
+        file_name = file_name.replace(" ", "_")
 
-#        msg = '%s %s v%03d' % (_('Published'), asset.path, newver.ver)
-#        updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
-
-#        # log into Journal
-#        journal.add(user, '%s - %s' % (msg, asset))
-
-#        # notify clients
-#        notify.send(updates)
-
-#        return dict(msg=msg, status='ok', updates=updates)
-        return dict(msg='attached', status='ok', updates=[])
+        f = attachments.get(proj, attach)
+        
+#        if assetver.asset.is_sequence:
+#            name = os.path.split(assetver.path)[0]
+#            path = '%s.zip' % name
+#        else:
+#            path = assetver.path
+            
+        path = attach.file_path
+        
+        # set the correct content-type so the browser will know what to do
+        content_type, encoding = mimetypes.guess_type(path)
+        response.headers['Content-Type'] = content_type
+        response.headers['Content-Disposition'] = (
+                                        ('attachment; filename=%s' %
+                                            file_name).encode())
+        
+        # copy file content in the response body
+        shutil.copyfileobj(f, response.body_file)
+        f.close()
+        return

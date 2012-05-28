@@ -853,7 +853,7 @@ ul.tabs a.current {
 }
 
 .assetdescription {
-	background-color: white;
+	background-color: #F5F5F5;
 	border-radius: 8px 8px 8px 8px;
 	float: right;
 	padding: 15px;
@@ -866,10 +866,13 @@ ul.tabs a.current {
 	
 .maxithumbnail {
 	float: left;
-	width: 320px;
-	height: 180px;
+	max-width: 320px;
+	max-height: 180px;
 	padding: 10px 0 10px 0;
-	background-color: #EEEEEE;
+	/*background-color: #EEEEEE;*/
+}
+.maxithumbnail img {
+	padding: 5px;
 }
 
 .description {
@@ -887,6 +890,14 @@ ul.tabs a.current {
 .tasks {
 	clear: both;
 	width: 742px;
+	
+	background-color: white;
+    /*border: 1px solid #DDDDDD;*/
+    border-radius: 8px 8px 8px 8px;
+    /*overflow: hidden;*/
+    float: left;
+    padding: 5px;
+    margin: 5px 0;
 }
 
 .tasklist {
@@ -921,16 +932,30 @@ ul.tabs a.current {
 	border-bottom-color: #BBBBBB;
 }
 
+.currenttaskbody {
+	clear: left;
+	width: 742px;
+	/*border-bottom-width: 2px;
+	border-bottom-style: solid;
+	border-bottom-color: #777777;*/
+	min-height: 75px;
+	/*padding: 10px 0;*/
+	background-color: #FFFFFF;
+	overflow: hidden;
+}
 .taskbody {
 	clear: left;
 	width: 742px;
-	border-bottom-width: 2px;
+	/*border-bottom-width: 2px;
 	border-bottom-style: solid;
-	border-bottom-color: #777777;
+	border-bottom-color: #777777;*/
 	min-height: 75px;
-	padding: 10px 0;
+	/*padding: 10px 0;*/
 	background-color: #FFFFFF;
+	overflow: hidden;
+	display: none;
 }
+
 
 .taskactions {
 	/*border: 1px solid #000000;*/
@@ -938,6 +963,10 @@ ul.tabs a.current {
 	height: 35px;
 	margin: 3px;
 	float: right;
+	background-color: #EEEEEE;
+    border-radius: 4px 4px 4px 4px;
+    width: 65px;
+    vertical-align: middle;
 }
 
 .sender {
@@ -958,6 +987,16 @@ ul.tabs a.current {
 
 .oldtasks {
     clear: both;
+    width: 742px;
+}
+.oldtaskname {
+	float: left;
+	font-size: 12px;
+	background-color: #CCCCCC;
+    border-radius: 4px 4px 4px 4px;
+    margin: 1px;
+    width: 722px;
+    padding: 1px 10px 1px 10px;
 }
 
 .expand {
@@ -972,15 +1011,15 @@ ul.tabs a.current {
 }
 
 .actionbody {
-	background-color: #FFFFFF;
+	/*background-color: #FFFFFF;*/
 	margin-left: 35px;
-	padding: 3px;
+	/*padding: 3px;*/
 }
 
 .actionheader {
 	font-size: 10px;
-	background-color: #EEEEEE;
-	padding: 3px;
+	/*background-color: #EEEEEE;
+	padding: 3px;*/
 }
 
 .actiondescription {
@@ -996,4 +1035,17 @@ ul.tabs a.current {
     float: left;
     font-size: 0.8em;
     font-style: italic;
-} 
+}
+
+.attache_preview {
+    width: 60px;
+    height: 34px;
+}
+
+.taskcomment {
+    border: 1px solid #DDDDDD;
+    -moz-border-radius: 8px;
+    margin: 5px;
+    padding: 5px;
+    background-color: #F5F5F5; /*#dfe7ff;*/
+}
