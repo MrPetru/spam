@@ -16,7 +16,8 @@
 # along with SPAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Original Copyright (c) 2010, Lorenzo Pierfederici <lpierfederici@gmail.com>
-# Contributor(s): 
+# Contributor(s):
+# Mr. Petru <petrea.email@gmail.com>
 #
 """Task controller"""
 
@@ -109,23 +110,13 @@ class Controller(RestController):
         # get all current associated asset for current user
         assets = []
         for t in tasks:
-            if t.receiver:
-                if (t.receiver==user):
+            if t.parent_asset.project == project:
+                if (t.receiver == user or t.sender == user or t.parent_asset.owner == user):
                     assets.append(t.parent_asset)
-            else:
-                if ((user.id in t.parent_asset.__json__()['artist_ids']) and (not t.parent_asset.__json__()['submitted'])) or ((user.id in t.parent_asset.__json__()['supervisor_ids']) and (t.parent_asset.__json__()['submitted'])):
-                    assets.append(t.parent_asset)
-                    
-#            if (((user.id in t.parent_asset.__json__()['artist_ids']) or (t.receiver==user)) and (not t.parent_asset.__json__()['submitted'])) or ((user.id in t.parent_asset.__json__()['supervisor_ids']) and (t.parent_asset.__json__()['submitted'])):
-#                assets.append(t.parent_asset)
-            
-#            if t.parent_asset != None:
-#                assets.append(t.parent_asset)
-                
-#        asset_list = session.query(Asset).filter_by(owner=user).all()
-#        for a in asset_list:
-#            if a not in assets:
-#                assets.append(a)
+                else:
+                    if not t.receiver:
+                        if (user in t.parent_asset.artists) or (user in t.parent_asset.supervisors):
+                            assets.append(t.parent_asset)
                 
         # group asset based on path
         asset_group = {}
@@ -214,6 +205,5 @@ class Controller(RestController):
         # notify clients
         notify.send(updates)
 
-        #return dict(msg=msg, status='ok', updates=updates)
         return dict(msg=msg, status=status, updates=updates)
         

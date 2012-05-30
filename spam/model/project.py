@@ -1008,7 +1008,7 @@ class Task(DeclarativeBase):
         if self.receiver:
             return self.receiver.display_name
         else:
-            return (u'TO ALL GROUP')
+            return (u'ALL GROUP')
     # Special methods
     def __init__(self, name, description, asset, sender, receiver):
         self.name = name
