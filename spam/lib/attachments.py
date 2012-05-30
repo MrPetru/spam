@@ -57,14 +57,14 @@ def put(asset, filename):
     video = ['.mp4', '.avi', '.mov']
     docs = ['.txt', '.doc', '.odt']
     
-    if ext in images:
+    if (ext in images) or (ext.lower() in images):
         preview.make_attach_thumb(final_file_path, os.path.join(previews_path,target_name) + '.png')
         #final_previews_path = '/themes/default/images/attach_image.png'
         final_previews_path = os.path.join('/repo',asset.proj_id, G.ATTACHMENTS, G.PREVIEWS,
                                 dirname, target_name + '.png')
-    elif ext in video:
+    elif (ext in video) or (ext.lower() in video):
         final_previews_path = u'/themes/default/images/attach_video.png'
-    elif ext in docs:
+    elif (ext in docs) or (ext.lower() in docs):
         final_previews_path = u'/themes/default/images/attach_document.png'
     else:
         final_previews_path = u'/themes/default/images/attach_other.png'

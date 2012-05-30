@@ -85,7 +85,7 @@ class Controller(RestController):
     def get_one(self, proj):
         """Return a `tabbed` page for project tabs."""
         project = tmpl_context.project
-        tabs = [('User Tasks', url('/task/get_all/%s' % project.id)),
+        tabs = [('My Tasks', url('/task/get_all/%s' % project.id)),
                 ('Project Summary', 'tab/summary'),
                 ('Scenes', url('/scene/%s' % project.id)),
                 ('Library', url('/libgroup/%s' % project.id)),

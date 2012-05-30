@@ -106,7 +106,7 @@ body {
 .icon_schema_outdated {background: url(../images/icons/16x16/urgent.png) left center no-repeat;}
 .icon_checkout {background: url(../images/icons/16x16/checkout.png) left center no-repeat;}
 .icon_release {background: url(../images/icons/16x16/release.png) left center no-repeat;}
-.icon_publish {background: url(../images/icons/16x16/publish_v02.png) left center no-repeat;}
+.icon_publish {background: url(../images/icons/16x16/publish.png) left center no-repeat;}
 .icon_submit {background: url(../images/icons/16x16/redo.png) left center no-repeat;}
 .icon_sendback {background: url(../images/icons/16x16/sendback.png) left center no-repeat;}
 .icon_recall {background: url(../images/icons/16x16/undo.png) left center no-repeat;}
@@ -114,7 +114,7 @@ body {
 .icon_revoke {background: url(../images/icons/16x16/revoke.png) left center no-repeat;}
 .icon_history {background: url(../images/icons/16x16/history_v02.png) left center no-repeat;}
 .icon_download {background: url(../images/icons/16x16/download.png) left center no-repeat;}
-.icon_open {background: url(../images/icons/16x16/history.png) left center no-repeat;}
+.icon_open {background: url(../images/icons/16x16/open.png) left center no-repeat;}
 .icon_task {background: url(../images/icons/16x16/task.png) left center no-repeat;}
 .icon_pin {background: url(../images/icons/16x16/pin.png) left center no-repeat;}
 .icon_unpin {background: url(../images/icons/16x16/unpin.png) left center no-repeat;}
@@ -681,6 +681,7 @@ th {
 
 #tabbed_content_wrapper {
     margin-top: -2px;
+    min-width: 1235px;
 }
 
 .content {
@@ -950,13 +951,17 @@ ul.tabs a.current {
 	
 .maxithumbnail {
 	float: left;
-	max-width: 320px;
-	max-height: 180px;
+	/*width: 320px;
+	height: 180px;*/
 	padding: 10px 0 10px 0;
 	/*background-color: #EEEEEE;*/
 }
 .maxithumbnail img {
 	padding: 5px;
+	max-width: 320px;
+	max-height: 180px;
+    width: auto; /* you can use % */
+    height: auto;
 }
 
 .description {
@@ -1098,12 +1103,14 @@ ul.tabs a.current {
 	/*background-color: #FFFFFF;*/
 	margin-left: 35px;
 	/*padding: 3px;*/
+	clear: both;
 }
 
 .actionheader {
 	font-size: 10px;
 	/*background-color: #EEEEEE;
 	padding: 3px;*/
+	float: right;
 }
 
 .actiondescription {
@@ -1132,4 +1139,5 @@ ul.tabs a.current {
     margin: 5px;
     padding: 5px;
     background-color: #F5F5F5; /*#dfe7ff;*/
+    overflow: hidden;
 }

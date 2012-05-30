@@ -172,7 +172,7 @@ class Controller(RestController):
     @expose('spam.templates.forms.result')
     @validate(f_new, error_handler=new)
     def post(self, proj, container_type, container_id, category_id, name,
-                                                                comment=None):
+                                                                description=None):
         """Create a new asset"""
         session = session_get()
         project = tmpl_context.project
@@ -181,7 +181,7 @@ class Controller(RestController):
         category = category_get(category_id)
 
         # add asset to db
-        asset = Asset(container, category, name, user, comment)
+        asset = Asset(container, category, name, user, description)
         session.add(asset)
         session.flush()
         text = '[%s v000]' % (_('created'))
@@ -467,9 +467,10 @@ class Controller(RestController):
                               category_id_=asset.category.id,
                               asset_name_=asset.name,
                              )
-        query = session_get().query(User)
-        users = query.order_by('user_name')
-        user_choices = ['']
+        #query = session_get().query(User)
+        #users = query.order_by('user_name')
+        users = asset.supervisors
+        user_choices = []
         user_choices.extend([u.user_name for u in users])
         f_status_attach.child.children.receiver.options = user_choices
 
@@ -488,7 +489,11 @@ class Controller(RestController):
         asset = asset_get(proj, asset_id)
         
         sender = user_get(sender)
-        receiver = user_get(receiver)
+        
+        if receiver:
+            receiver = user_get(receiver)
+        else:
+            receiver = None
 
         if not asset.submitted and not asset.approved:
             asset.submit(user)
@@ -502,7 +507,8 @@ class Controller(RestController):
             
             if uploaded[0] != u'':
                 result = attachments.put(asset, uploaded[0])
-                new_attachment = Attach(result['file_name'], result['file_path'])
+                new_attachment = Attach(result['file_name'], result['file_path'], result['preview_path'])
+                new_attachment.order = 1
             else:
                 new_attachment = None
             
@@ -556,11 +562,11 @@ class Controller(RestController):
                               category_id_=asset.category.id,
                               asset_name_=asset.name,
                              )
-        query = session_get().query(User)
-        users = query.order_by('user_name')
-        user_choices = ['']
-        user_choices.extend([u.user_name for u in users])
-        f_status.child.children.receiver.options = user_choices
+#        query = session_get().query(User)
+#        users = query.order_by('user_name')
+#        user_choices = ['']
+#        user_choices.extend([u.user_name for u in users])
+#        f_status.child.children.receiver.options = user_choices
         
         tmpl_context.form = f_status
         return dict(title='%s: %s' % (_('Recall submission for'), asset.path))
@@ -570,14 +576,14 @@ class Controller(RestController):
     @require(is_asset_owner())
     @expose('json')
     @validate(f_status, error_handler=get_submit)
-    def post_recall(self, proj, asset_id, sender, receiver, comment=None):
+    def post_recall(self, proj, asset_id, sender, comment=None):
         """Recall an asset submitted for approval."""
         session = session_get()
         user = tmpl_context.user
         asset = asset_get(proj, asset_id)
         
         sender = user_get(sender)
-        receiver = user_get(receiver)
+        receiver = user
 
         if asset.submitted and not asset.approved:
             asset.recall(user)
@@ -588,7 +594,7 @@ class Controller(RestController):
             
             old_task = asset.current_task
             task_name = u'Recalled: %s' % old_task.previous_task.name
-            new_task = Task(task_name, comment, asset, sender, receiver)
+            new_task = Task(task_name, comment, asset, old_task.receiver, receiver)
             new_task.previous_task = old_task
             
             asset.current.notes.append(Note(user, action, text, new_task))
@@ -633,9 +639,10 @@ class Controller(RestController):
                               asset_name_=asset.name,
                              )
         
-        query = session_get().query(User)
-        users = query.order_by('user_name')
-        user_choices = ['']
+#        query = session_get().query(User)
+#        users = query.order_by('user_name')
+        users = asset.artists
+        user_choices = []
         user_choices.extend([u.user_name for u in users])
         f_status_attach.child.children.receiver.options = user_choices
         
@@ -655,7 +662,11 @@ class Controller(RestController):
         asset = asset_get(proj, asset_id)
         
         sender = user_get(sender)
-        receiver = user_get(receiver)
+        
+        if receiver:
+            receiver = user_get(receiver)
+        else:
+            receiver = None
 
         if asset.submitted and not asset.approved:
             asset.sendback(user)
@@ -669,7 +680,8 @@ class Controller(RestController):
             
             if uploaded[0] != u'':
                 result = attachments.put(asset, uploaded[0])
-                new_attachment = Attach(result['file_name'], result['file_path'])
+                new_attachment = Attach(result['file_name'], result['file_path'], result['preview_path'])
+                new_attachment.order = 1
             else:
                 new_attachment = None
                 
@@ -726,8 +738,8 @@ class Controller(RestController):
                               asset_name_=asset.name,
                              )
         
-        user_choices = [tmpl_context.user.user_name]
-        f_status.child.children.receiver.options = user_choices
+#        user_choices = [tmpl_context.user.user_name]
+#        f_status.child.children.receiver.options = user_choices
                      
         tmpl_context.form = f_status
         return dict(title='%s: %s' % (_('Approve'), asset.path))
@@ -749,7 +761,7 @@ class Controller(RestController):
 #                                                                comment or '')
             old_task = asset.current_task
             task_name = u'Aprouved'
-            new_task = Task(task_name, comment, asset, user, user)
+            new_task = Task(task_name, comment, asset, user, old_task.sender)
             new_task.previous_task = old_task
             
             text = u'%s' % (comment or '')

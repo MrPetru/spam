@@ -100,6 +100,7 @@ class Controller(RestController):
                                         (libgroup.project.id, libgroup.id))),
                 ('Assets', url('/asset/%s/libgroup/%s' %
                                         (libgroup.project.id, libgroup.id))),
+                ('My Tasks', url('/task/get_all/%s' % libgroup.project.id)),
                ]
         return dict(page='%s' % libgroup.path, libgroup=libgroup, tabs=tabs, 
                                     sidebar=('projects', libgroup.project.id))

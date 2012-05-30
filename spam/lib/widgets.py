@@ -463,11 +463,14 @@ class TableAssets(twl.LiveTable):
         css_class='',
         parent_css_class = 'asset_note',
         children=[
-            twl.Text(id='current_header',
-                css_class='note_header',
-                help_text='latest comment'),
+            twl.Text(id='current_task_name',
+                css_class='assetname',
+                help_text='current task name'),
             twl.Text(id='current_summary',
                 help_text='latest comment'),
+#            twl.Text(id='current_header',
+#                css_class='note_header',
+#                help_text='latest comment'),
     ])
     actions = twl.BoxAction(
         css_class='',
@@ -544,7 +547,7 @@ class TableAssets(twl.LiveTable):
                 children=[
                     twl.Icon(id='submit',
                         icon_class='icon_submit',
-                        help_text='submit for approval'),
+                        help_text='submit for revision'),
             ]),
             twl.ActionButton(id='recall',
                 index = '7',
@@ -1192,7 +1195,7 @@ class FormAssetNew(RestForm):
                                 twc.RegexValidator(regex=G.pattern_seq)),
                         CategoryNamingConvention(category_field='category_id'),
                         required=True))
-    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class FormAssetEdit(RestForm):
@@ -1259,8 +1262,8 @@ class FormAssetStatus(RestForm):
     container_ = twf.LabelField()
     category_id_ = twf.LabelField()
     asset_name_ = twf.LabelField(label='Name')
-    receiver = twf.SingleSelectField(label='send to', options=[],
-            validator=twc.All(StringLength(max=30), required=True), default='')
+#    receiver = twf.SingleSelectField(label='send to', options=[],
+#            validator=twc.All(StringLength(max=30), required=True), default='')
     comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     
 class FormAssetStatusAttach(RestForm):
@@ -1282,7 +1285,7 @@ class FormAssetStatusAttach(RestForm):
     uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
     spacer = twf.Spacer()
     receiver = twf.SingleSelectField(label='send to', options=[],
-            validator=twc.All(StringLength(max=30), required=True), default='')
+            validator=twc.All(StringLength(max=30)), default='')
     comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 # =====
@@ -1293,10 +1296,20 @@ class FormTaskNew(RestForm):
     asset_id = twf.HiddenField()
     sender = twf.HiddenField()
     project_name_ = twf.LabelField()
-    
+    spacer = twf.Spacer()
+    name = twf.TextField(validator=twc.All(required=True))
     receiver = twf.SingleSelectField(label='send to', options=[],
             validator=twc.All(StringLength(max=30), required=False), default='')
-    name = twf.TextField(validator=twc.All(required=True))
+            
+    uploaded = twf.HiddenField(validator=twc.ListLengthValidator(
+                    min=0, max=MAX_UPLOAD_FILES,
+                    msgs={'tooshort': ('list_tooshort',
+                                       'Please choose the file(s) to upload'),
+                          'toolong': ('list_toolong',
+                                      'Too many files selected'),
+                         }))
+    uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
+    
     description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     
 class FormAttachUpload(RestForm):
@@ -1509,7 +1522,7 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
                     children=[
                         twl.Icon(id='submit',
                             icon_class='icon_submit',
-                            help_text='submit for approval'),
+                            help_text='submit for revision'),
                 ]),
                 twl.ActionButton(id='recall',
                     index = '7',
@@ -1568,17 +1581,18 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
             child = twl.ItemLayout(
                 template = 'mako:spam.templates.task.comment_box',
                 maker_template = 'mako:spam.templates.task.comment_box_maker',
+                azione = twl.Text(id='action', sort_default=True,
+                        text='%s on %s, %s' % ('%(user_name)s', '%(created)s', '%(action)s'),
+                        css_class = 'actionheader',
+                ),
                 text_commento = twl.Text(id='text', sort_default=True,
                         text='%s' % ('%(text)s'),
                         css_class = 'actionbody',
                 ),
-                azione = twl.Text(id='action', sort_default=True,
-                        text='%s' % ('%(action)s'),
-                        css_class = 'actionheader',
-                ),
 #                file_path = twl.Image(css_class = "attache_preview", src="/repo/%(file_path)s"),
                 file_path = twl.Link(id=None,
                     dest=url('/attach/%(proj_id)s/%(file_name)s/download'),
+                    widget_class = 'actionheader',
                     children=[
                         twl.Image(id='file_path', css_class = "attache_preview", src="%(preview_path)s"),
                     ]),
@@ -1621,17 +1635,18 @@ class OldTasks (twl.LiveContainer):
             child = twl.ItemLayout(
                 template = 'mako:spam.templates.task.comment_box',
                 maker_template = 'mako:spam.templates.task.comment_box_maker',
+                azione = twl.Text(id='action', sort_default=True,
+                        text='%s on %s, %s' % ('%(user_name)s', '%(created)s', '%(action)s'),
+                        css_class = 'actionheader',
+                ),
                 text_commento = twl.Text(id='text', sort_default=True,
                         text='%s' % ('%(text)s'),
                         css_class = 'actionbody',
                 ),
-                azione = twl.Text(id='action', sort_default=True,
-                        text='%s' % ('%(action)s'),
-                        css_class = 'actionheader',
-                ),
 #                file_path = twl.Image(css_class = "attache_preview", src="/repo/%(file_path)s"),
                 file_path = twl.Link(id=None,
                     dest=url('/attach/%(proj_id)s/%(file_name)s/download'),
+                    widget_class = 'actionheader',
                     children=[
                         twl.Image(id='preview_path', css_class = "attache_preview", src="%(preview_path)s"),
                     ]),

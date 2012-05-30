@@ -95,6 +95,7 @@ class Controller(RestController):
         
         tabs = [('Summary', 'tab/summary'),
                 ('Shots', url('/shot/%s/%s/' % (scene.project.id, scene.name))),
+                ('My Tasks', url('/task/get_all/%s' % scene.project.id)),
                ]
         return dict(page='%s' % scene.path, scene=scene, tabs=tabs, 
                                         sidebar=('projects', scene.project.id))

@@ -103,6 +103,7 @@ class Controller(RestController):
         tabs = [('Summary', 'tab/summary'),
                 ('Assets', url('/asset/%s/shot/%s' %
                                                 (shot.project.id, shot.id))),
+                ('My Tasks', url('/task/get_all/%s' % shot.project.id)),
                ]
         return dict(page='%s' % shot.path, shot=shot, tabs=tabs, 
                                         sidebar=('projects', shot.project.id))

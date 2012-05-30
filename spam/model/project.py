@@ -652,6 +652,10 @@ class Asset(DeclarativeBase):
 
     # Properties
     @property
+    def current_task_name(self):
+        return self.current_task.name.upper()
+        
+    @property
     def proj_id(self):
         return self.parent.owner.project.id
     
@@ -689,13 +693,17 @@ class Asset(DeclarativeBase):
     def current_fmtver(self):
         return self.current.fmtver
     
+#    @property    
+#    def current_header(self):
+#        #return (self.current.notes and self.current.notes[0].header or '')
+#        if self.current_task:
+#            return self.current_task.name
+#        else:
+#            return u'No tasks...'
+#        
     @property    
     def current_header(self):
-        #return (self.current.notes and self.current.notes[0].header or '')
-        if self.current_task:
-            return self.current_task.name
-        else:
-            return u'No tasks...'
+        return (self.current.notes and self.current.notes[0].header or '')
         
     @property
     def current_summary(self):
@@ -1002,6 +1010,14 @@ class Task(DeclarativeBase):
             new_list.append(n.__json__())
         new_list.reverse()
         return new_list
+    
+    @property
+    def non_void_notes(self):
+        new_list = []
+        for n in self.notes:
+            if n.attachment or n.text:
+                new_list.append(n)
+        return new_list
         
     @property
     def receiver_name(self):
@@ -1027,7 +1043,8 @@ class Task(DeclarativeBase):
                     id=self.id,
                     name=self.name.upper(),
                     description=self.description,
-                    notes=self.notes,
+                    #notes=self.notes,
+                    notes=self.non_void_notes,
                     sender_name=self.sender.display_name,
                     receiver_name=self.receiver_name,
                     send_date=self.send_date.strftime('%d %b %Y at %H:%M'),
@@ -1064,7 +1081,7 @@ class Note(DeclarativeBase):
 
     @property
     def strftime(self):
-        return self.created.strftime('%d/%m/%Y %H:%M')
+        return self.created.strftime('%d %b %Y at %H:%M')
 
     @property
     def header(self):
@@ -1129,9 +1146,10 @@ class Note(DeclarativeBase):
                     project=self.project,
                     user=self.user,
                     user_name=self.user.user_name,
-                    created=self.created.strftime('%d/%m/%Y %H:%M'),
+                    created=self.created.strftime('%d %b %Y at %H:%M'),
                     text=self.text,
-                    action="%s at %s" % (self.action, self.created.strftime('%d/%m/%Y %H:%M')),
+#                    action="%s at %s" % (self.action, self.created.strftime('%d %b %Y at %H:%M')),
+                    action=self.action,
                     task_id=self.task_id,
                     sticky=self.sticky,
                     strftime=self.strftime,

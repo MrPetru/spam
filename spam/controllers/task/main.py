@@ -69,6 +69,9 @@ from spam.lib.helpers import widget_actions
 
 from hashlib import sha1
 
+from spam.lib import attachments
+from spam.model import Attach
+
 class Controller(RestController):
     """
         manipulate with tasks
@@ -144,6 +147,7 @@ class Controller(RestController):
     def new(self, proj, asset_id, **kwargs):
         """Display a NEW form."""
         project = tmpl_context.project
+        asset = asset_get(proj, asset_id)
         
         sender = tmpl_context.user.id
         
@@ -153,9 +157,10 @@ class Controller(RestController):
                            project_name_=project.name,
                           )
 
-        query = session_get().query(User)
-        users = query.order_by('user_name')
-        user_choices = ['']
+#        query = session_get().query(User)
+#        users = query.order_by('user_name')
+        users = asset.artists
+        user_choices = []
         user_choices.extend([u.user_name for u in users])
         f_new.child.children.receiver.options = user_choices
 
@@ -168,7 +173,7 @@ class Controller(RestController):
     @expose('json')
     @expose('spam.templates.forms.result')
     @validate(f_new, error_handler=new)
-    def post(self, proj, asset_id, sender, receiver, name, description=u''):
+    def post(self, proj, asset_id, sender, name, receiver, uploaded, uploader=None, description=u''):
         """Create a new task"""
         
         user = tmpl_context.user
@@ -183,13 +188,36 @@ class Controller(RestController):
         
         if asset.approved:
             asset.revoke(user)
+            
+        #########
+            
+        if isinstance(uploaded, list):
+            # the form might send empty strings, so we strip them
+            uploaded = [uf for uf in uploaded if uf]
+        else:
+            uploaded = [uploaded]
+        
+        if uploaded[0] != u'':
+            result = attachments.put(asset, uploaded[0])
+            new_attachment = Attach(result['file_name'], result['file_path'], result['preview_path'])
+            new_attachment.order = 1
+        else:
+            new_attachment = None
         
         old_task = asset.current_task
+        task_name = u'Submited For Revision'
         new_task = Task(name, description, asset, sender, receiver)
         new_task.previous_task = old_task
         
         action = '[%s]' % (_('task was created created'))
-        asset.current.notes.append(Note(user, action, description, new_task))
+        
+        new_note = Note(user, action, description, new_task)
+        new_note.attachment = new_attachment
+        
+        asset.current.notes.append(new_note)
+        session.refresh(asset.current.annotable)
+        
+        #########
         
         # insert data in database
         session.add(new_task)

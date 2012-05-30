@@ -256,12 +256,14 @@ class widget_actions():
                             asset_json['artist_ids']) or (cur_user in 
                             asset_json['supervisor_ids']) or (cur_user == asset_json['owner_id'])))
         
-        display_flags[5] = int(cur_user == asset_json['owner_id'])                    
+        display_flags[5] = int(cur_user == asset_json['owner_id'] and 
+                                (not asset_json['approved']) and
+                                (not asset_json['submitted']))
         
         display_flags[6] = int(cur_user == asset_json['owner_id'] and
                                 not asset_json['approved'] and
                                 not asset_json['submitted'] and
-                                receiver != u'')
+                                receiver != u'' and (asset_json['current_ver'] > 0))
         display_flags[7] = int(cur_user == asset_json['owner_id'] and
                                 not asset_json['approved'] and
                                 asset_json['submitted'])
