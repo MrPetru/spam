@@ -681,7 +681,7 @@ th {
 
 #tabbed_content_wrapper {
     margin-top: -2px;
-    min-width: 1235px;
+    min-width: 1320px;
 }
 
 .content {
@@ -808,10 +808,11 @@ ul.tabs a.current {
 
 
 .asset_name {
-    width: 350px;
+    max-width: 280px;
     vertical-align: middle;
     text-align: left;
     padding-left: 8px;
+    word-wrap: break-word;
 }
 
 .shot_name {
@@ -950,9 +951,9 @@ ul.tabs a.current {
 	}
 	
 .maxithumbnail {
-	float: left;
-	/*width: 320px;
-	height: 180px;*/
+	float: right;
+	width: 320px;
+	/*height: 180px;*/
 	padding: 10px 0 10px 0;
 	/*background-color: #EEEEEE;*/
 }
