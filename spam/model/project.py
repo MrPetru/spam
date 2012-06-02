@@ -998,7 +998,7 @@ class Task(DeclarativeBase):
     # one to many relation with actions
     #actions = relation("Action", backref=backref("task"))
     
-    notes = relation("Note", backref=backref("task"), order_by=desc('created'))
+    notes = relation("Note", backref=backref("task"), order_by="Note.created")
     
     #last_attach = relation("Attach", backref=backref("task", uselist=False))
     last_attach = relation("Attach", uselist=False, backref="task")
