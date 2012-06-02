@@ -852,6 +852,7 @@ class Asset(DeclarativeBase):
                     artist_ids=[u.user_id for u in self.artists],
                     description=self.description,
                     current_task=self.current_task,
+                    current_task_name=self.current_task_name,
                     #'repopath': self.repopath,
                     #'basedir': self.basedir,
                     #'repobasedir': self.repobasedir,

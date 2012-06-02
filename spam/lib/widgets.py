@@ -464,6 +464,7 @@ class TableAssets(twl.LiveTable):
         parent_css_class = 'asset_note',
         children=[
             twl.Text(id='current_task_name',
+                text = '%(current_task_name)s',
                 css_class='assetname',
                 help_text='current task name'),
             twl.Text(id='current_summary',
@@ -816,7 +817,7 @@ class BoxScenesStatus(twl.LiveBox):
     """Scene status livebox."""
     params = ['proj_id']
     container_class = 'statusbox'
-    update_topic = notifications.TOPIC_SCENES
+    #update_topic = notifications.TOPIC_SCENES
     show_update = False
     
     link = twl.Link(dest=url('/scene/%(proj_id)s/%(name)s'),
@@ -833,7 +834,7 @@ class BoxShotsStatus(twl.LiveBox):
     """Shot status livebox."""
     params = ['scene_id']
     container_class = 'statusbox'
-    update_topic = notifications.TOPIC_SHOTS
+    #update_topic = notifications.TOPIC_SHOTS
     show_update = False
     
     link = twl.Link(dest=url('/shot/%(proj_id)s/%(parent_name)s/%(name)s'),
@@ -850,7 +851,7 @@ class BoxLibgroupsStatus(twl.LiveBox):
     """Libgroup status livebox."""
     params = ['libgroup_id']
     container_class = 'statusbox'
-    update_topic = notifications.TOPIC_LIBGROUPS
+    #update_topic = notifications.TOPIC_LIBGROUPS
     show_update = False
     
     link = twl.Link(dest=url('/libgroup/%(proj_id)s/%(id)s'),
