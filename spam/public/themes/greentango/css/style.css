@@ -1107,6 +1107,12 @@ ul.tabs a.current {
 	clear: both;
 }
 
+.actionbody ul {
+    list-style: circle outside none;
+    padding-left: 40px;
+    margin: auto;
+}
+
 .actionheader {
 	font-size: 10px;
 	/*background-color: #EEEEEE;
