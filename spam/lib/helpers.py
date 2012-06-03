@@ -286,8 +286,7 @@ class widget_actions():
                                 not asset_json['approved'])
                                 
         display_flags[13] = int((cur_user in asset_json['supervisor_ids'] and
-                                asset_json['approved'] and 
-                                cur_user not in asset_json['artist_ids']) or
+                                asset_json['approved']) or
                                 (cur_user in asset_json['supervisor_ids'] and receiver == u''))
         
         return (display_flags)
