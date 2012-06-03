@@ -1311,7 +1311,7 @@ class FormTaskNew(RestForm):
                          }))
     uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
     
-    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     
 class FormAttachUpload(RestForm):
     """Upload an attach form."""
