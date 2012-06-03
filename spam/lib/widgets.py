@@ -1196,7 +1196,7 @@ class FormAssetNew(RestForm):
                                 twc.RegexValidator(regex=G.pattern_seq)),
                         CategoryNamingConvention(category_field='category_id'),
                         required=True))
-    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class FormAssetEdit(RestForm):
@@ -1251,7 +1251,7 @@ class FormAssetPublish(RestForm):
                     required=True))
     uploader = Upload(label='File(s) to Upload')
     spacer = twf.Spacer()
-    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    comment = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class FormAssetStatus(RestForm):
@@ -1265,7 +1265,7 @@ class FormAssetStatus(RestForm):
     asset_name_ = twf.LabelField(label='Name')
 #    receiver = twf.SingleSelectField(label='send to', options=[],
 #            validator=twc.All(StringLength(max=30), required=True), default='')
-    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    comment = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     
 class FormAssetStatusAttach(RestForm):
     """Asset status form."""
@@ -1287,7 +1287,7 @@ class FormAssetStatusAttach(RestForm):
     spacer = twf.Spacer()
     receiver = twf.SingleSelectField(label='send to', options=[],
             validator=twc.All(StringLength(max=30)), default='')
-    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    comment = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 # =====
 # Task
@@ -1329,7 +1329,7 @@ class FormAttachUpload(RestForm):
     #name = twf.TextField(validator=twc.All(required=True))
     uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
     spacer = twf.Spacer()
-    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    comment = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class TaskAssetDescription(twl.LiveContainer): # repeating widget

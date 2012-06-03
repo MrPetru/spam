@@ -159,7 +159,7 @@ spam_init = function (cookiebase) {
 	spam.dialog_load = function(elem) {
         $("#dialog").dialog("destroy").dialog({
 	        modal: true,
-            width: 500,
+            width: 600,
 	        height: 350,
 	        closeText: '',
         });

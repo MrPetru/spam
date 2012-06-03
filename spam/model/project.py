@@ -45,6 +45,8 @@ from spam.model.misc import Taggable, Annotable
 import logging
 log = logging.getLogger(__name__)
 
+import re
+
 
 ############################################################
 # Association tables
@@ -626,7 +628,7 @@ class Asset(DeclarativeBase):
     approved = Column(Boolean, default=False)
     approver_id = Column(Integer, ForeignKey('users.user_id'))
     approved_date =  Column(DateTime)
-    description = Column(Unicode(255), default=u'')
+    description = Column(UnicodeText, default=u'')
 
     # Relations
     category = relation('Category', backref=backref('assets'))
@@ -653,7 +655,10 @@ class Asset(DeclarativeBase):
     # Properties
     @property
     def current_task_name(self):
-        return self.current_task.name.upper()
+        if self.current_task:
+            return self.current_task.name.upper()
+        else:
+            return "No Tasks ..."
         
     @property
     def proj_id(self):
@@ -959,7 +964,7 @@ class Task(DeclarativeBase):
     # Columns
     id = Column(Unicode(40), primary_key=True)
     name = Column(Unicode(50))
-    description = Column(Unicode(255))
+    description = Column(UnicodeText)
 
     
 #    # used in one to one relation with asset
@@ -1037,7 +1042,7 @@ class Task(DeclarativeBase):
         self.send_date = datetime.now()
         
         hashable = '%s-%s-%s' % (name, asset.id, datetime.now())
-        self.id = sha1(hashable.encode('utf-8')).hexdigest()
+        self.id = sha1(hashable.encode('utf-8')).hexdigest().decode('utf-8')
         
     def __json__(self):
         return dict(
@@ -1091,8 +1096,10 @@ class Note(DeclarativeBase):
     @property
     def summary(self):
         characters = 75
-        summary = self.text[0:characters]
-        if len(self.text) > characters:
+        text = re.sub("<.*?>", "", self.text)
+        
+        summary = text[0:characters]
+        if len(text) > characters:
             summary = '%s[...]' % summary
         return summary
 
