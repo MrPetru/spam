@@ -26,22 +26,34 @@ ${c.b_shots_status(id="status_%s" % c.scene.id, items=c.scene.shots,
 <br/>
 <br/>
 
-<h2>${_('tags')}</h2>
-% if c.predicates.is_project_admin():
-<a href="${tg.url('/tag/%s/new' % c.scene.id)}"
-   class="button dialog">add tags</a>
-% endif
-${c.b_tags(id="taglist", items=c.scene.tags,
-                    taggable_id=c.scene.taggable.id,
-                    extra_data=c.tag_extra_data,
-                    update_listener_adder="notify.add_listener_tab").display(value=c.scene.tags) | n}
-<br/>
-<br/>
+##<h2>${_('tags')}</h2>
+##% if c.predicates.is_project_admin():
+##<a href="${tg.url('/tag/%s/new' % c.scene.id)}"
+##   class="button dialog">add tags</a>
+##% endif
+##${c.b_tags(id="taglist", items=c.scene.tags,
+##                    taggable_id=c.scene.taggable.id,
+##                    extra_data=c.tag_extra_data,
+##                    update_listener_adder="notify.add_listener_tab").display(value=c.scene.tags) | n}
+##<br/>
+##<br/>
 
-<h2>${_('notes')}</h2>
-% if c.predicates.is_project_admin():
-<a href="${tg.url('/note/%s/%s/new' % (c.project.id, c.scene.id))}"
-   class="button dialog">add note</a>
-% endif
-${c.t_notes.display() | n}
+##<h2>${_('notes')}</h2>
+##% if c.predicates.is_project_admin():
+##<a href="${tg.url('/note/%s/%s/new' % (c.project.id, c.scene.id))}"
+##   class="button dialog">add note</a>
+##% endif
+##${c.t_notes.display() | n}
+
+
+<h2>${_('description')}</h2>
+
+<div class="bibliaheader">
+    % if c.predicates.is_project_admin():
+        ${c.action.display() | n }
+    % endif
+</div>
+<div class="bibliabody">
+    ${scene.description | n }
+</div>
 

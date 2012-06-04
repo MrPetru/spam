@@ -266,7 +266,7 @@ class TableScenes(twl.LiveTable):
         children=[
             twl.Text(id='name', help_text='name')
     ])
-    description = twl.Text(parent_css_class = 'scene_text')
+    short_description = twl.Text(parent_css_class = 'scene_text')
     shots = twl.StatusIconBox(
         parent_css_class = 'scene_shots',
         children=[
@@ -311,7 +311,7 @@ class TableShots(twl.LiveTable):
         children=[
             twl.Text(id='name', help_text='name')
     ])
-    description = twl.Text(parent_css_class = 'shot_text')
+    short_description = twl.Text(parent_css_class = 'shot_text')
     frames = twl.Text(parent_css_class = 'shot_text')
     categories =  twl.StatusIconBox(
         css_class='statusiconbox',
@@ -364,7 +364,7 @@ class TableLibgroups(twl.LiveTable):
             twl.Text(id='name',
                 help_text='name')
     ])
-    description = twl.Text(parent_css_class = 'libgroup_text')
+    short_description = twl.Text(parent_css_class = 'libgroup_text')
     subgroups = twl.StatusIconBox(
         ##dest=url('/libgroup/%(proj_id)s/%(id)s'),
         parent_css_class = 'libgroup_subgroups',
@@ -1094,7 +1094,7 @@ class FormSceneEdit(RestForm):
     sc = twf.HiddenField()
     project_name_ = twf.LabelField()
     scene_name_ = twf.LabelField(label='Name')
-    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class FormSceneConfirm(RestForm):
@@ -1131,7 +1131,7 @@ class FormShotEdit(RestForm):
     project_name_ = twf.LabelField()
     scene_name_ = twf.LabelField()
     shot_name_ = twf.LabelField(label='Name')
-    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     action = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     frames = twf.TextField(validator=twc.IntValidator)
     handle_in = twf.TextField(validator=twc.IntValidator)
@@ -1168,7 +1168,7 @@ class FormLibgroupEdit(RestForm):
     libgroup_id = twf.HiddenField()
     project_name_ = twf.LabelField()
     libgroup_name_ = twf.LabelField(label='Name')
-    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class FormLibgroupConfirm(RestForm):

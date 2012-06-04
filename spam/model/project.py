@@ -258,6 +258,16 @@ class Scene(DeclarativeBase):
     @property
     def key_shots(self):
         return [sh for sh in self.shots if sh.has_tags(['key'])]
+        
+    @property
+    def short_description(self):
+        characters = 75
+        text = re.sub("<.*?>", " ", self.description[:150])
+        
+        summary = text[0:characters]
+        if len(text) > characters:
+            summary = '%s[...]' % summary
+        return summary
     
     # Methods
     def has_tags(self, tag_ids):
@@ -284,6 +294,7 @@ class Scene(DeclarativeBase):
                     shots=self.shots,
                     thumbnail=self.thumbnail,
                     has_preview=self.has_preview,
+                    short_description=self.short_description,
                    )
 
 
@@ -355,6 +366,16 @@ class Shot(DeclarativeBase):
     # Methods
     def has_tags(self, tag_ids):
         return self.taggable.has_tags(tag_ids)
+        
+    @property
+    def short_description(self):
+        characters = 75
+        text = re.sub("<.*?>", " ", self.description[:150])
+        
+        summary = text[0:characters]
+        if len(text) > characters:
+            summary = '%s[...]' % summary
+        return summary
     
     # Special methods
     def __init__(self, parent, name, description=None, action=None,
@@ -394,6 +415,7 @@ class Shot(DeclarativeBase):
                     thumbnail=self.thumbnail,
                     has_preview=self.has_preview,
                     container_type=self.container.association_type,
+                    short_description=self.short_description,
                    )
 
 add_container_props(Shot)
@@ -455,6 +477,16 @@ class Libgroup(DeclarativeBase):
         subgroups_status = compute_status(self.subgroups)
         assets_status = compute_status(self.assets)
         return compute_status((subgroups_status, assets_status))
+        
+    @property
+    def short_description(self):
+        characters = 75
+        text = re.sub("<.*?>", " ", self.description[:150])
+        
+        summary = text[0:characters]
+        if len(text) > characters:
+            summary = '%s[...]' % summary
+        return summary 
             
     # Methods
     def has_tags(self, tag_ids):
@@ -487,6 +519,7 @@ class Libgroup(DeclarativeBase):
                     thumbnail=self.thumbnail,
                     has_preview=self.has_preview,
                     container_type=self.container.association_type,
+                    short_description=self.short_description,
                    )
 
 add_container_props(Libgroup)
@@ -1096,7 +1129,7 @@ class Note(DeclarativeBase):
     @property
     def summary(self):
         characters = 75
-        text = re.sub("<.*?>", "", self.text)
+        text = re.sub("<.*?>", " ", self.text)
         
         summary = text[0:characters]
         if len(text) > characters:

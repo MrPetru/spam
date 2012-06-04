@@ -20,7 +20,7 @@
 #
 """Scene tabs"""
 
-from tg import expose, request, tmpl_context, require
+from tg import expose, request, tmpl_context, require, url
 from pylons.i18n import ugettext as _, lazy_ugettext as l_
 from repoze.what import predicates
 
@@ -29,6 +29,7 @@ from spam.model import scene_get
 from spam.lib.predicates import is_project_user
 from spam.lib.widgets import TableNotes
 from spam.lib.widgets import BoxTags, BoxShotsStatus
+import spam.lib.livewidgets as twl
 
 # live widgets
 b_shots_status = BoxShotsStatus()
@@ -63,5 +64,16 @@ class TabController(SPAMBaseController):
         t_notes.update_filter = scene.annotable.id
         t_notes.extra_data = dict(proj=project.id, user_id=user.user_id)
         tmpl_context.t_notes = t_notes
-        return dict()
+        
+        action = twl.Button(id='edit',
+                    action=url('/scene/%s/%s/edit' % (project.id, scene.name)),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='edit',
+                            icon_class='icon_edit',
+                            help_text='edit'),
+                    ])
+        tmpl_context.action = action
+        
+        return dict(scene=scene)
 

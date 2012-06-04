@@ -38,27 +38,38 @@
     <br/>
 % endif
 
-<h2>${_('tags')}</h2>
-% if c.predicates.is_project_admin():
-<a href="${tg.url('/tag/%s/new' % c.libgroup.id)}"
-   class="button dialog">add tags</a>
-% endif
-${c.b_tags(id="taglist", items=c.libgroup.tags,
-                    taggable_id=c.libgroup.taggable.id,
-                    extra_data=tag_extra_data,
-                    update_listener_adder="notify.add_listener_tab").display(value=c.libgroup.tags) | n}
-<br/>
-<br/>
+##<h2>${_('tags')}</h2>
+##% if c.predicates.is_project_admin():
+##<a href="${tg.url('/tag/%s/new' % c.libgroup.id)}"
+##   class="button dialog">add tags</a>
+##% endif
+##${c.b_tags(id="taglist", items=c.libgroup.tags,
+##                    taggable_id=c.libgroup.taggable.id,
+##                    extra_data=tag_extra_data,
+##                    update_listener_adder="notify.add_listener_tab").display(value=c.libgroup.tags) | n}
+##<br/>
+##<br/>
 
-<h2>${_('notes')}</h2>
-% if c.predicates.is_project_admin():
-<a href="${tg.url('/note/%s/%s/new' % (c.project.id, c.libgroup.id))}"
-   rel="#overlay" class="overlay button dialog">add note</a>
-% endif
-${c.t_notes(id="notestable",
-        value=c.libgroup.notes,
-        annotable_id=c.libgroup.annotable.id,
-        extra_data=note_extra_data,
-        update_listener_adder="notify.add_listener_tab",
-    ).display() | n}
+###<h2>${_('notes')}</h2>
+###% if c.predicates.is_project_admin():
+###<a href="${tg.url('/note/%s/%s/new' % (c.project.id, c.libgroup.id))}"
+###   rel="#overlay" class="overlay button dialog">add note</a>
+###% endif
+###${c.t_notes(id="notestable",
+###        value=c.libgroup.notes,
+###        annotable_id=c.libgroup.annotable.id,
+###        extra_data=note_extra_data,
+###        update_listener_adder="notify.add_listener_tab",
+###    ).display() | n}
 
+
+<h2>${_('description')}</h2>
+
+<div class="bibliaheader">
+    % if c.predicates.is_project_admin():
+        ${c.action.display() | n }
+    % endif
+</div>
+<div class="bibliabody">
+    ${libgroup.description | n }
+</div>

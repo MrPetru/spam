@@ -20,7 +20,7 @@
 #
 """Libgroup tabs"""
 
-from tg import expose, request, tmpl_context, require
+from tg import expose, request, tmpl_context, require, url
 from pylons.i18n import ugettext as _, lazy_ugettext as l_
 from repoze.what import predicates
 
@@ -29,6 +29,7 @@ from spam.model import libgroup_get
 from spam.lib.predicates import is_project_user
 from spam.lib.widgets import TableNotes
 from spam.lib.widgets import BoxTags, BoxLibgroupsStatus, BoxCategoriesStatus
+import spam.lib.livewidgets as twl
 
 # live widgets
 b_libgroups_status = BoxLibgroupsStatus()
@@ -64,6 +65,18 @@ class TabController(SPAMBaseController):
         tag_extra_data = dict(taggable_id=libgroup.id, user_id=user.user_id,
                                                                 project=project)
         note_extra_data = dict(proj=project.id, user_id=user.user_id)
-        return dict(note_extra_data=note_extra_data, cat_extra_data=cat_extra_data, tag_extra_data=tag_extra_data)
+        
+        action = twl.Button(id='edit',
+                    action=url('/libgroup/%s/%s/edit' % (project.id, libgroup.id)),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='edit',
+                            icon_class='icon_edit',
+                            help_text='edit'),
+                    ])
+        tmpl_context.action = action
+        
+        return dict(note_extra_data=note_extra_data, cat_extra_data=cat_extra_data,
+                    tag_extra_data=tag_extra_data, libgroup=libgroup)
 
 
