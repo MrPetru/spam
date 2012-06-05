@@ -681,7 +681,7 @@ th {
 
 #tabbed_content_wrapper {
     margin-top: -2px;
-    min-width: 1320px;
+    min-width: 500px;
 }
 
 .content {
@@ -808,7 +808,7 @@ ul.tabs a.current {
 
 
 .asset_name {
-    max-width: 280px;
+    max-width: 250px;
     vertical-align: middle;
     text-align: left;
     padding-left: 8px;
@@ -895,7 +895,7 @@ ul.tabs a.current {
 }
 
 .short_assets {
-    width: 30%;
+    /*width: 30%;*/
     float: left;
 }
 
@@ -941,13 +941,13 @@ ul.tabs a.current {
 .assetdescription {
 	background-color: #F5F5F5;
 	border-radius: 8px 8px 8px 8px;
-	float: right;
+	/*float: right;*/
 	padding: 15px;
 	/*width: 800px;*/
 	border: 1px solid #666666;
-	min-width: 760px;
+	min-width: 660px;
 	min-height: 300px;
-	display: none;
+	display: block;
 	}
 	
 .maxithumbnail {
@@ -969,7 +969,8 @@ ul.tabs a.current {
 	float: left;
 	height: 180px;
 	padding: 10px;
-	width: 420px;
+	/*width: 420px;*/
+	width: 44%;
 }
 
 .description span {
@@ -979,13 +980,13 @@ ul.tabs a.current {
 
 .tasks {
 	clear: both;
-	width: 742px;
+	/*width: 742px;*/
 	
 	background-color: white;
     /*border: 1px solid #DDDDDD;*/
     border-radius: 8px 8px 8px 8px;
     /*overflow: hidden;*/
-    float: left;
+    /*float: left;*/
     padding: 5px;
     margin: 5px 0;
 }
@@ -997,7 +998,7 @@ ul.tabs a.current {
 }
 
 .leftside {
-	float: left;
+	/*float: left;*/
 }
 
 .assetactions {
@@ -1023,8 +1024,8 @@ ul.tabs a.current {
 }
 
 .currenttaskbody {
-	clear: left;
-	width: 742px;
+	clear: both;
+	/*width: 742px;*/
 	/*border-bottom-width: 2px;
 	border-bottom-style: solid;
 	border-bottom-color: #777777;*/
@@ -1034,15 +1035,15 @@ ul.tabs a.current {
 	overflow: hidden;
 }
 .taskbody {
-	clear: left;
-	width: 742px;
+	/*clear: left;*/
+	/*width: 742px;*/
 	/*border-bottom-width: 2px;
 	border-bottom-style: solid;
 	border-bottom-color: #777777;*/
 	min-height: 75px;
 	/*padding: 10px 0;*/
 	background-color: #FFFFFF;
-	overflow: hidden;
+	/*overflow: hidden;*/
 	display: none;
 }
 
@@ -1077,15 +1078,15 @@ ul.tabs a.current {
 
 .oldtasks {
     clear: both;
-    width: 742px;
+    /*width: 742px;*/
 }
 .oldtaskname {
-	float: left;
+	/*float: left;*/
 	font-size: 12px;
 	background-color: #CCCCCC;
     border-radius: 4px 4px 4px 4px;
     margin: 1px;
-    width: 722px;
+    /*width: 722px;*/
     padding: 1px 10px 1px 10px;
 }
 
@@ -1154,7 +1155,7 @@ ul.tabs a.current {
     border-width: 1px 1px 0 1px;
     /*background-color: #F5F5F5;*/
     border-radius: 8px 8px 0 0 ;
-    width: 1050px;
+    /*width: 1050px;*/
     height: 16px;
     padding:5px;
     text-align: right;
@@ -1168,9 +1169,22 @@ ul.tabs a.current {
     border-width: 0 1px 1px 1px;
     background-color: #F5F5F5;
     border-radius: 0 0 8px 8px;
-    width: 1050px;
+    /*width: 1050px;*/
     /*height: 1485px;*/
     height: 485px;
     padding: 5px;
     overflow-y: auto;
+}
+.usertasks td:nth-child(2){
+    background-color: #EEEEEC;
+}
+.usertasks td:first-child {
+    width: 400px;
+    background-color: #EEEEEC;
+}
+
+.onfocus {
+    -moz-box-shadow: inset 0 0 20px #55AC52, inset 0 0 20px #55AC52;
+    -webkit-box-shadow: inset 0 0 20px #55AC52, inset 0 0 20px #55AC52;
+    box-shadow: inset 0 0 20px #55AC52, inset 0 0 20px #55AC52;
 }

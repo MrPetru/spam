@@ -159,8 +159,8 @@ spam_init = function (cookiebase) {
 	spam.dialog_load = function(elem) {
         $("#dialog").dialog("destroy").dialog({
 	        modal: true,
-            width: 600,
-	        height: 350,
+            width: "70%",
+	        height: "auto",
 	        closeText: '',
         });
         $(".ui-dialog").addClass("loading");
@@ -174,6 +174,11 @@ spam_init = function (cookiebase) {
                 $(".ui-dialog-titlebar > span").html($("#dialog h1").html());
             }
             $("#dialog").fadeIn();
+            if ( $("#comment", this).length != 0 ) {
+                $("#comment", this).cleditor();
+            } else {
+                $("#description", this).cleditor();
+            };
         });
     }
 
@@ -199,7 +204,7 @@ spam_init = function (cookiebase) {
     /* instrument action to get description */
     spam.task_tab_activate = function(form) {
         $(".actiondescription").live("click", function(e) {
-            $(".actiondescription").css("box-shadow", "none");
+            $(".actiondescription > td").removeClass("onfocus");
             $.ajax({
                 type: "GET",
                 url: $(this).children('input').attr("value"),
@@ -207,7 +212,7 @@ spam_init = function (cookiebase) {
                     $(".assetdescription").hide().html(msg).fadeIn('fast');
                 }
             });
-            $(this).css("box-shadow", "16px 4px 20px #55AC52");
+            $("td", this).addClass("onfocus");
 
             return false;
         });

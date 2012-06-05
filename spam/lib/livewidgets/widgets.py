@@ -467,13 +467,6 @@ class CategoryContainer(twc.RepeatingWidget):
     parent_container_id =  twc.Param('Parent container id: shot id or librarygroup id', default='')
     update_on_topic = twc.Param('topic that define if widget needed to be updatetd', default='')
     child = Box(widget_class="toggle expanded", children=[Text(id='id')])
-    
-class RichTextArea(twf.TextArea):
-    template = 'mako:spam.lib.livewidgets.templates.richtextarea'
-#    cleditor_js = twc.JSLink(link=url('/cleditor/jquery.cleditor.min.js'))
-#    cleditor_css = twc.CSSLink(link=url('/cleditor/jquery.cleditor.css'))
-#    
-#    resources = [cleditor_js, cleditor_css]
 
 # DEBUG stuff
 class Dummy(object):

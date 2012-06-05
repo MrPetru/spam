@@ -1094,7 +1094,7 @@ class FormSceneEdit(RestForm):
     sc = twf.HiddenField()
     project_name_ = twf.LabelField()
     scene_name_ = twf.LabelField(label='Name')
-    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class FormSceneConfirm(RestForm):
@@ -1131,7 +1131,7 @@ class FormShotEdit(RestForm):
     project_name_ = twf.LabelField()
     scene_name_ = twf.LabelField()
     shot_name_ = twf.LabelField(label='Name')
-    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     action = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     frames = twf.TextField(validator=twc.IntValidator)
     handle_in = twf.TextField(validator=twc.IntValidator)
@@ -1168,7 +1168,7 @@ class FormLibgroupEdit(RestForm):
     libgroup_id = twf.HiddenField()
     project_name_ = twf.LabelField()
     libgroup_name_ = twf.LabelField(label='Name')
-    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class FormLibgroupConfirm(RestForm):
@@ -1196,7 +1196,7 @@ class FormAssetNew(RestForm):
                                 twc.RegexValidator(regex=G.pattern_seq)),
                         CategoryNamingConvention(category_field='category_id'),
                         required=True))
-    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class FormAssetEdit(RestForm):
@@ -1251,7 +1251,7 @@ class FormAssetPublish(RestForm):
                     required=True))
     uploader = Upload(label='File(s) to Upload')
     spacer = twf.Spacer()
-    comment = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class FormAssetStatus(RestForm):
@@ -1265,7 +1265,7 @@ class FormAssetStatus(RestForm):
     asset_name_ = twf.LabelField(label='Name')
 #    receiver = twf.SingleSelectField(label='send to', options=[],
 #            validator=twc.All(StringLength(max=30), required=True), default='')
-    comment = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     
 class FormAssetStatusAttach(RestForm):
     """Asset status form."""
@@ -1287,7 +1287,7 @@ class FormAssetStatusAttach(RestForm):
     spacer = twf.Spacer()
     receiver = twf.SingleSelectField(label='send to', options=[],
             validator=twc.All(StringLength(max=30)), default='')
-    comment = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 # =====
 # Task
@@ -1311,7 +1311,7 @@ class FormTaskNew(RestForm):
                          }))
     uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
     
-    description = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
     
 class FormAttachUpload(RestForm):
     """Upload an attach form."""
@@ -1329,7 +1329,7 @@ class FormAttachUpload(RestForm):
     #name = twf.TextField(validator=twc.All(required=True))
     uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
     spacer = twf.Spacer()
-    comment = twl.RichTextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
+    comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 
 class TaskAssetDescription(twl.LiveContainer): # repeating widget
@@ -1344,50 +1344,6 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
         maker_template = 'mako:spam.templates.task.box_layout_maker',
         append_selector = '.assetdescription', # definire il selector del suo padre
         )
-    leftside = twl.LiveCompoundWidget(
-        template = 'mako:spam.templates.task.compound',
-        maker_template = 'mako:spam.templates.task.compound_maker',
-        css_class = 'leftside',
-        parent_css_class = '',
-        name = twl.Box(
-            css_class='assetname',
-            parent_css_class = '',
-            children=[
-                twl.Text(id='name', sort_default=True),
-            ]),
-        
-        info = twl.Box(
-            css_class='assetinfo',
-            parent_css_class = '',
-            children=[
-                twl.Text(id='version', css_class='version', condition='data.checkedout',
-                    text='%s: %s &nbsp;&nbsp;| &nbsp;&nbsp;' % ('version', '%(current_fmtver)s'),
-                    help_text='last version in database',
-                ),
-                twl.Text(id='owner_id',
-                    css_class='owner',
-                    condition='data.checkedout',
-                    text='%s: %s &nbsp;&nbsp;| &nbsp;&nbsp;' % ('owned by', '%(owner_user_name)s'),
-                    help_text='%(owner_id)s (%(owner_display_name)s)',
-                ),
-                twl.Text(id='lastchange', css_class='lastchange', condition='data.checkedout',
-                    text='%s: %s' % ('last change by', '%(current_header)s'),
-                    help_text='last change of this asset',
-                )
-            ]),
-        thumbnail = twl.LiveThumbnailM(parent_css_class = '', css_class='maxithumbnail'),
-        description = twl.Box(
-            css_class='description',
-            parent_css_class = '',
-            children=[
-                twl.Text(id='description',
-                    css_class='',
-                    condition='data.checkedout',
-                    text='<span>Asset Description</span> <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%s</p>' % ('%(description)s'),
-                    help_text='asset permanent description',
-                ),
-            ]),
-    )
     rightside = twl.LiveCompoundWidget(
         template = 'mako:spam.templates.task.compound',
         maker_template = 'mako:spam.templates.task.compound_maker',
@@ -1470,6 +1426,50 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
                 ]),
                 ])
             )
+    leftside = twl.LiveCompoundWidget(
+        template = 'mako:spam.templates.task.compound',
+        maker_template = 'mako:spam.templates.task.compound_maker',
+        css_class = 'leftside',
+        parent_css_class = '',
+        name = twl.Box(
+            css_class='assetname',
+            parent_css_class = '',
+            children=[
+                twl.Text(id='name', sort_default=True),
+            ]),
+        
+        info = twl.Box(
+            css_class='assetinfo',
+            parent_css_class = '',
+            children=[
+                twl.Text(id='version', css_class='version', condition='data.checkedout',
+                    text='%s: %s &nbsp;&nbsp;| &nbsp;&nbsp;' % ('version', '%(current_fmtver)s'),
+                    help_text='last version in database',
+                ),
+                twl.Text(id='owner_id',
+                    css_class='owner',
+                    condition='data.checkedout',
+                    text='%s: %s &nbsp;&nbsp;| &nbsp;&nbsp;' % ('owned by', '%(owner_user_name)s'),
+                    help_text='%(owner_id)s (%(owner_display_name)s)',
+                ),
+                twl.Text(id='lastchange', css_class='lastchange', condition='data.checkedout',
+                    text='%s: %s' % ('last change by', '%(current_header)s'),
+                    help_text='last change of this asset',
+                )
+            ]),
+        description = twl.Box(
+            css_class='description',
+            parent_css_class = '',
+            children=[
+                twl.Text(id='description',
+                    css_class='',
+                    condition='data.checkedout',
+                    text='<span>Asset Description</span> <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%s</p>' % ('%(description)s'),
+                    help_text='asset permanent description',
+                ),
+            ]),
+        thumbnail = twl.LiveThumbnailM(parent_css_class = '', css_class='maxithumbnail'),
+    )
             
     current_task = twl.LiveCompoundWidget(
         id='current_task',

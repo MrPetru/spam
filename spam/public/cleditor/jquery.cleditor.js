@@ -22,8 +22,8 @@
 
     // Define the defaults used for all new cleditor instances
     defaultOptions: {
-      width:        500, // width not including margins, borders or padding
-      height:       250, // height not including margins, borders or padding
+      width:        "100%", // width not including margins, borders or padding
+      height:       "100%", // height not including margins, borders or padding
       controls:     // controls to add to the toolbar
                     "bold italic underline strikethrough subscript superscript | font size " +
                     "style | color highlight removeformat | bullets numbering | outdent " +
@@ -889,15 +889,15 @@
 
       var $toolbar = editor.$toolbar,
           $group = $toolbar.children("div:last"),
-          wid = $main.width(400);
+          wid = $main.width();
 
       // Resize the toolbar
       var hgt = $group.offset().top + $group.outerHeight() - $toolbar.offset().top + 1;
-      $toolbar.height(53);
+      $toolbar.height(hgt);
 
       // Resize the iframe
       hgt = (/%/.test("" + options.height) ? $main.height() : parseInt(options.height)) - hgt;
-      $frame.width(wid).height(hgt);
+      $frame.width(wid+15).height(hgt);
 
       // Resize the textarea. IE6 textareas have a 1px top
       // & bottom margin that cannot be removed using css.

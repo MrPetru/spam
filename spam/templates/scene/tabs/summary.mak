@@ -19,13 +19,6 @@
 
 <%inherit file="spam.templates.tab"/>
 
-<h2>${_('shots')}</h2>
-${c.b_shots_status(id="status_%s" % c.scene.id, items=c.scene.shots,
-                    scene_id=c.scene.id,proj_id=c.project.id,
-                    update_listener_adder="notify.add_listener_tab").display(value=c.scene.shots) | n}
-<br/>
-<br/>
-
 ##<h2>${_('tags')}</h2>
 ##% if c.predicates.is_project_admin():
 ##<a href="${tg.url('/tag/%s/new' % c.scene.id)}"
@@ -57,3 +50,11 @@ ${c.b_shots_status(id="status_%s" % c.scene.id, items=c.scene.shots,
     ${scene.description | n }
 </div>
 
+<br/>
+
+<h2>${_('shots')}</h2>
+${c.b_shots_status(id="status_%s" % c.scene.id, items=c.scene.shots,
+                    scene_id=c.scene.id,proj_id=c.project.id,
+                    update_listener_adder="notify.add_listener_tab").display(value=c.scene.shots) | n}
+<br/>
+<br/>
