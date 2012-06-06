@@ -692,6 +692,13 @@ class Asset(DeclarativeBase):
             return self.current_task.name.upper()
         else:
             return "No Tasks ..."
+            
+    @property
+    def task_receiver(self):
+        if self.current_task.receiver:
+            return self.current_task.receiver.user_name
+        else:
+            return "all group"
         
     @property
     def proj_id(self):
@@ -892,7 +899,7 @@ class Asset(DeclarativeBase):
                     current_task=self.current_task,
                     current_task_name=self.current_task_name,
                     task_sender=self.current_task.sender.user_name,
-                    task_receiver=self.current_task.receiver.user_name,
+                    task_receiver=self.task_receiver,
                     #'repopath': self.repopath,
                     #'basedir': self.basedir,
                     #'repobasedir': self.repobasedir,
