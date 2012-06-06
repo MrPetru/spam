@@ -1,6 +1,8 @@
 <%inherit file="item_layout_maker.mak"/>
 
 path_string = data["path"].split("/");
+path_string.push("<"+data["task_sender"]);
+path_string.push(">"+data["task_receiver"]);
 
 content += '<tr class="item-' + data["id"] + ' actiondescription status ' +data["status"] + '">';
 content += '<input type="hidden" class="actionurl" value="/spam/task/'+ data["proj_id"]+'/' + data["id"] +'"/>';

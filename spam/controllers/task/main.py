@@ -110,7 +110,7 @@ class Controller(RestController):
         # get all tasks for current user
         tasks = task_get_all().filter(Task.parent_asset!=None).all()
         
-        all_filter_values = ['wip', 'idle', 'approved', 'submited', 'rejected', 'library', 'scene', 'None']
+        all_filter_values = ['wip', 'idle', 'approved', 'submitted', 'rejected', 'library', 'scene', 'None']
         
         # get all current associated asset for current user
         assets = []

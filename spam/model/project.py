@@ -891,6 +891,8 @@ class Asset(DeclarativeBase):
                     description=self.description,
                     current_task=self.current_task,
                     current_task_name=self.current_task_name,
+                    task_sender=self.current_task.sender.user_name,
+                    task_receiver=self.current_task.receiver.user_name,
                     #'repopath': self.repopath,
                     #'basedir': self.basedir,
                     #'repobasedir': self.repobasedir,

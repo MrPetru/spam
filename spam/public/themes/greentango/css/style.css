@@ -693,7 +693,7 @@ th {
     -webkit-border-radius: 10px;
     background-color: #eeeeec; /* Aluminium 1 */
     color: #2e3436; /* Aluminium 6 */
-    overflow: hidden;
+    overflow: auto;
 }
 
 .content h1, .content h2, .content h3 {

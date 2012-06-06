@@ -2,6 +2,10 @@
     a_path = "%(path)s" % w.data
     path_list = a_path.split('/')
     path_string = ''
+    
+    path_list.append("<%(task_sender)s" % w.data)
+    path_list.append(">%(task_receiver)s" % w.data)
+    
     for i, val in enumerate(path_list):
         if i == 0:
             path_string = val
