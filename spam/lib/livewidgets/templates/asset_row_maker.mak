@@ -1,6 +1,10 @@
 <%inherit file="item_layout_maker.mak"/>
+
+path_string = data["path"].split("/");
+
 content += '<tr class="item-' + data["id"] + ' actiondescription status ' +data["status"] + '">';
-content += '<input type="hidden" value="/spam/task/'+ data["proj_id"]+'/' + data["id"] +'"/>';
+content += '<input type="hidden" class="actionurl" value="/spam/task/'+ data["proj_id"]+'/' + data["id"] +'"/>';
+content += '<input type="hidden" class="filtertags" value="'+data["status"]+','+data["owner_user_name"]+','+path_string +'"/>';
     $.each(field_makers, function() {
         if (this.condition(data)) {
             var css_class = this.css_class;

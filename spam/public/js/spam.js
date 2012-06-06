@@ -160,7 +160,7 @@ spam_init = function (cookiebase) {
         $("#dialog").dialog("destroy").dialog({
 	        modal: true,
             width: "70%",
-	        height: "auto",
+	        height: 600,
 	        closeText: '',
         });
         $(".ui-dialog").addClass("loading");
@@ -207,7 +207,7 @@ spam_init = function (cookiebase) {
             $(".actiondescription > td").removeClass("onfocus");
             $.ajax({
                 type: "GET",
-                url: $(this).children('input').attr("value"),
+                url: $(this).children('.actionurl').attr("value"),
                 success: function(msg){
                     $(".assetdescription").hide().html(msg).fadeIn('fast');
                 }

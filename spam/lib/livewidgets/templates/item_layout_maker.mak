@@ -1,5 +1,6 @@
 function(data) {
     var field_makers = [];
+    var path_string = "";
     var content = "";
     % for index, field in enumerate(w.children):
         field_makers.push({

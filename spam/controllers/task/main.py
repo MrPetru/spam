@@ -70,7 +70,7 @@ from spam.lib.helpers import widget_actions
 from hashlib import sha1
 
 from spam.lib import attachments
-from spam.model import Attach
+from spam.model import Attach, Scene, Libgroup, Category
 
 class Controller(RestController):
     """
@@ -110,35 +110,53 @@ class Controller(RestController):
         # get all tasks for current user
         tasks = task_get_all().filter(Task.parent_asset!=None).all()
         
+        all_filter_values = ['wip', 'idle', 'approved', 'submited', 'rejected', 'library', 'scene', 'None']
+        
         # get all current associated asset for current user
         assets = []
         for t in tasks:
             if t.parent_asset.project == project:
                 if (t.receiver == user or t.sender == user or t.parent_asset.owner == user):
                     assets.append(t.parent_asset)
+                    all_filter_values.append(t.parent_asset.name)
                 else:
                     if not t.receiver:
                         if (user in t.parent_asset.artists) or (user in t.parent_asset.supervisors):
                             assets.append(t.parent_asset)
-                
-        # group asset based on path
-        asset_group = {}
-        for a in assets:
-            tmp_path = a.path.replace('/'+a.name, '')
-            if tmp_path not in asset_group.keys():
-                asset_group.update({tmp_path:[a]})
-            else:
-                asset_group[tmp_path].append(a)
-                
-        asset_group_list = []
-        for k in asset_group.keys():
-            d = dict(id=sha1(k.encode('utf-8')).hexdigest(), path=k, assets=asset_group[k])
-            asset_group_list.append(d)
+                            all_filter_values.append(t.parent_asset.name)
         
         tmpl_context.t_assets = t_assets
         
+        # get prject users
+        for u in project.users:
+            if u.user_name not in all_filter_values:
+                all_filter_values.append(u.user_name)
+                
+        # get project scenes and shots
+        scenes = session.query(Scene).filter(Scene.project == project).all()
+        for sc in scenes:
+            if sc.name not in all_filter_values:
+                all_filter_values.append(sc.name)
+                for sh in sc.shots:
+                    if sh.name not in all_filter_values:
+                        all_filter_values.append(sh.name)
+        
+        # get project libgroups
+        libgroups = session.query(Libgroup).filter(Libgroup.project == project).all()
+        for lg in libgroups:
+            if lg.name not in all_filter_values:
+                all_filter_values.append(lg.name)
+                
+        # get all category
+        categories = session.query(Category).all()
+        for ct in categories:
+            if ct.name not in all_filter_values:
+                all_filter_values.append(ct.name)
+        
+        tmpl_context.all_filter_values = all_filter_values
+        
         return dict(page='user_tasks', sidebar=('projects', project.id),
-            assets_groups=asset_group_list)
+            assets=assets)
 
 
     @project_set_active

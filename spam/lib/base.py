@@ -39,10 +39,12 @@ js_spam = twc.JSLink(link=url('/js/spam.js'))
 js_cleditor = twc.JSLink(link=url('/cleditor/jquery.cleditor.js'))
 css_cleditor = twc.CSSLink(link=url('/cleditor/jquery.cleditor.css'))
 
+js_textext = twc.JSLink(link=url('/js/textext.js'))
+
 # widgets
 w_startup_js = twc.Widget(
     template='mako:spam.templates.widgets.startup_js',
-    resources=[js_jquery_spamkit, js_spam, js_cleditor, css_cleditor],
+    resources=[js_jquery_spamkit, js_spam, js_cleditor, css_cleditor, js_textext],
     )
 l_projects = ListProjects()
 

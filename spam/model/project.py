@@ -869,7 +869,7 @@ class Asset(DeclarativeBase):
                     approved=self.approved,
                     owner=self.owner,
                     owner_id=self.owner and self.owner.user_id or None,
-                    owner_user_name=self.owner and self.owner.user_name or None,
+                    owner_user_name=self.owner and self.owner.user_name or 'None',
                     owner_display_name=(self.owner and self.owner.display_name
                                                                     or None),
                     path=self.path,
