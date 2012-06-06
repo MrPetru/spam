@@ -151,9 +151,16 @@
                     $(element).fadeIn();
                 });
             } else {
-                $.each(all_assets, function (i, element) {
-                    $(element).fadeIn();
-                });
+                if (selected_tags[0] == '') {
+                    $.each(all_assets, function (i, element) {
+                        $(element).fadeIn();
+                    });
+                } else {
+                    $.each(all_assets, function (i, element) {
+                        $(element).fadeOut();
+                    });
+                }
+                
             }
             //alert('assets:'+selected_assets);
         },
@@ -183,7 +190,7 @@
 </td>
 <td>
     <div class="assetdescription">
-        <h2>NO ASSET SELECTED </h2>
+        <h2>SELECT AN ASSET</h2>
     </div>
 </td>
 </tr>
