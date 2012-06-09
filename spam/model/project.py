@@ -262,7 +262,7 @@ class Scene(DeclarativeBase):
     @property
     def short_description(self):
         characters = 75
-        text = re.sub("<.*?>", " ", self.description[:150])
+        text = re.sub("<.*?>", " ", self.description)
         
         summary = text[0:characters]
         if len(text) > characters:
@@ -370,7 +370,7 @@ class Shot(DeclarativeBase):
     @property
     def short_description(self):
         characters = 75
-        text = re.sub("<.*?>", " ", self.description[:150])
+        text = re.sub("<.*?>", " ", self.description)
         
         summary = text[0:characters]
         if len(text) > characters:
@@ -481,7 +481,7 @@ class Libgroup(DeclarativeBase):
     @property
     def short_description(self):
         characters = 75
-        text = re.sub("<.*?>", " ", self.description[:150])
+        text = re.sub("<.*?>", " ", self.description)
         
         summary = text[0:characters]
         if len(text) > characters:
