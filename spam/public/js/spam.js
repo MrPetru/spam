@@ -201,8 +201,9 @@ spam_init = function (cookiebase) {
             $("#dialog").dialog("destroy");
         }
     }
+    
     /* instrument action to get description */
-    spam.task_tab_activate = function(form) {
+    spam.task_tab_activate = function() {
         $(".actiondescription").live("click", function(e) {
             $(".actiondescription > td").removeClass("onfocus");
             $.ajax({
@@ -217,6 +218,19 @@ spam_init = function (cookiebase) {
             return false;
         });
     }
+    
+    /* toggle visibiliti of side bar */
+    spam.toggle_side_bar = function() {
+        $("#sidetogglevisible").live("click", function(e) {
+            var position = $("#side").position();
+            if (position.left == 0) {
+                $("#side").css("left","-205px");
+            } else {
+                $("#side").css("left","0");
+            }
+        });
+    }
+
 
 
     /****************************************
@@ -245,6 +259,7 @@ spam_init = function (cookiebase) {
         });
         
         spam.task_tab_activate();
+        spam.toggle_side_bar();
         
      });
 }

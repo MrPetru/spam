@@ -51,6 +51,7 @@
 
     <div id="side">
     % if request.identity:
+    <div id='sidetogglevisible'> </div>
         <div id="side_fixed" class="side">
             ${sidebars.sb_admin()}
             ${sidebars.sb_user()}

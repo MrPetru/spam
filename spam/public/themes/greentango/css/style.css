@@ -198,24 +198,28 @@ table {
 .update_on_assets table {
     border: 1px solid #bbbbbb;   
     -moz-border-radius: 8px;
+    border-radius: 8px;
     -webkit-border-radius: 8px;
 }
 
 .update_on_shots table {
     border: 1px solid #bbbbbb;   
     -moz-border-radius: 8px;
+    border-radius: 8px;
     -webkit-border-radius: 8px;
 }
 
 .update_on_scenes table {
     border: 1px solid #bbbbbb;   
     -moz-border-radius: 8px;
+    border-radius: 8px;
     -webkit-border-radius: 8px;
 }
 
 .update_on_libgroups table {
     border: 1px solid #bbbbbb;   
     -moz-border-radius: 8px;
+    border-radius: 8px;
     -webkit-border-radius: 8px;
 }
 
@@ -239,6 +243,7 @@ table td.icon {
 .pager_curpage {
     padding: 0 5px;
     -moz-border-radius: 4px;
+    border-radius: 4px;
     -webkit-border-radius: 4px;
     background-color: #8ae234; /* Chameleon 1 */
     color: #f6f6f4; /* Aluminium 0 */
@@ -247,6 +252,7 @@ table td.icon {
 .pager_link {
     padding: 0 5px;
     -moz-border-radius: 4px;
+    border-radius: 4px;
     -webkit-border-radius: 4px;
     background-color: #3465a4; /* Sky Blue 2 */
     color: #f6f6f4; /* Aluminium 0 */
@@ -261,6 +267,7 @@ table td.icon {
     height: 16px;
     width: 16px;
     -moz-border-radius: 4px;
+    border-radius: 4px;
     -webkit-border-radius: 4px;
     border: 1px solid #666666;
 }
@@ -373,6 +380,7 @@ div.note_header {
 .ui-dialog {
     border: 2px solid #73d216; /* Chameleon 2 */
     -moz-border-radius: 10px;
+    border-radius: 10px;
     -webkit-border-radius: 10px;
     -moz-box-shadow: 0 0 25px 5px #333;
     background-color: #eeeeec; /* Aluminium 1 */
@@ -396,6 +404,7 @@ div.note_header {
     color: #f6f6f4; /* Aluminium 0 */
     font-size: large;
     -moz-border-radius: 8px 8px 0 0;
+    border-radius: 8px 8px 0 0;
     -webkit-border-radius: 8px 8px 0 0;
     cursor: move;
 }
@@ -434,6 +443,7 @@ form {
     font-size: large;
     color: #f6f6f4; /* Aluminium 0 */
     -moz-border-radius: 10px;
+    border-radius: 10px;
     -webkit-border-radius: 10px;
 }
 
@@ -484,6 +494,7 @@ th {
     text-align: left;
     border: 1px solid black;
     -moz-border-radius: 5px;
+    border-radius: 5px;
 }
 
 .ui-progressbar .ui-progressbar-value {
@@ -491,6 +502,7 @@ th {
     height:100%;
     background-color: #4e9a06; /* Chameleon 3 */
     -moz-border-radius: 4px;
+    border-radius: 4px;
 }
 
 .upload_progress.error .ui-progressbar-value {
@@ -510,6 +522,7 @@ th {
     padding: 5px 20px;
     background-color: #73d216; /* Chameleon 2 */
     -moz-border-radius: 10px;
+    border-radius: 10px;
     -webkit-border-radius: 10px;
     color: #f6f6f4; /* Aluminium 0 */
 }
@@ -566,12 +579,14 @@ th {
 #flash .ok, #notify .ok {
     background: #729fcf url(../images/ok.png) no-repeat scroll 10px center; /* Sky Blue 1 */
     -moz-border-radius: 0 0 10px 10px;
+    border-radius: 0 0 10px 10px;
     -webkit-border-radius: 0 0 10px 10px;
 }
 
 #flash .warning, #notify .warning  {
     background: #edd400 url(../images/warning.png) no-repeat scroll 10px center; /* Butter 1 */
     -moz-border-radius: 0 0 10px 10px;
+    border-radius: 0 0 10px 10px;
     -webkit-border-radius: 0 0 10px 10px;
 }
 
@@ -579,12 +594,14 @@ th {
     background:#ef2929 url(../images/error.png) no-repeat scroll 10px center; /* Scarlet Red 1 */
     color: #f6f6f4; /* Aluminium 0 */
     -moz-border-radius: 0 0 10px 10px;
+    border-radius: 0 0 10px 10px;
     -webkit-border-radius: 0 0 10px 10px;
 }
 
 #flash .alert, #flash .info, #notify .alert, #notify .info {
     background:#babdb6 url(../images/info.png) no-repeat scroll 10px center; /* Aluminium 3 */
     -moz-border-radius: 0 0 10px 10px;
+    border-radius: 0 0 10px 10px;
     -webkit-border-radius: 0 0 10px 10px;
 }
 
@@ -594,6 +611,26 @@ th {
  ****************************************/
 #side {
     float: left;
+    background-color: #EAEAEA;
+    height: 100%;
+    left: -205px;
+    padding: 0 0 0 10px;
+    position: fixed;
+    top: 15px;
+    z-index: 2;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 0 10px #555555;
+}
+
+#sidetogglevisible {
+    float: right;
+    height: 100%;
+    float: right;
+    height: 100%;
+    margin-left: 10px;
+    width: 15px;
+    background-color: #63C206;
+    border-radius: 0 8px 8px 0;
 }
 
 .side {
@@ -602,9 +639,11 @@ th {
     width: 180px;
     background-color: #eeeeec; /* Aluminium 1 */
     -moz-border-radius: 10px;
+    border-radius: 10px;
     -webkit-border-radius: 10px;
     border: 2px solid #73d216; /* Chameleon 2 */
     font-size: 0.9em;
+    float: left;
 }    
 
 .side .sidebar {
@@ -644,6 +683,8 @@ th {
 
 #side_overflow_container {
     position: relative;
+    float: left;
+    clear: left;
 }
 
 #side_overflow_activearea {
@@ -676,7 +717,7 @@ th {
  * Content
  ****************************************/
 #content_wrapper {
-    margin: 15px 0 15px 200px;
+    margin: 15px 0 15px 0;
 }
 
 #tabbed_content_wrapper {
@@ -690,6 +731,7 @@ th {
     padding: 15px 20px;
     border: 2px solid #73d216; /* Chameleon 2 */
     -moz-border-radius: 10px;
+    border-radius: 10px;
     -webkit-border-radius: 10px;
     background-color: #eeeeec; /* Aluminium 1 */
     color: #2e3436; /* Aluminium 6 */
@@ -733,6 +775,7 @@ ul.tabs a {
     margin-right: 2px;
     -moz-border-radius-topleft: 10px;
     -moz-border-radius-topright: 10px;
+    border-radius: 8px 8px 0 0;
     -webkit-border-top-left-radius: 10px;
     -webkit-border-top-right-radius: 10px;
 }
@@ -766,6 +809,7 @@ ul.tabs a.current {
     padding: 5px 20px;
     background-color: #73d216; /* Chameleon 2 */
     -moz-border-radius: 10px;
+    border-radius: 10px;
     -webkit-border-radius: 10px;
     color: #f6f6f4; /* Aluminium 0 */
 }
@@ -913,6 +957,7 @@ ul.tabs a.current {
 .short_assets table {
     border: 1px solid #bbbbbb;   
     -moz-border-radius: 8px;
+    border-radius: 8px;
     -webkit-border-radius: 8px;
 }
 
@@ -931,6 +976,7 @@ ul.tabs a.current {
 	float: left;
 	border: 1px solid #bbbbbb;   
 	-moz-border-radius: 8px;
+	border-radius: 8px;
 	-webkit-border-radius: 8px;
 }
 
