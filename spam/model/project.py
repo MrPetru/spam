@@ -1022,13 +1022,6 @@ class Task(DeclarativeBase):
     name = Column(Unicode(50))
     description = Column(UnicodeText)
 
-    
-#    # used in one to one relation with asset
-#    # back reference name is parent_asset
-#        # this may be eliminated by replacing in asset
-#        # current_task = relation('Task', uselist=False, backref="parent_asset")
-#        # with
-#        # current_task = relation('Task', backref=backref("parent_asset", uselist=False))
     parent_id = Column(Integer, ForeignKey('assets.id'))
     
     # used to record for old tasks on wich asset was

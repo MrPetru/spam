@@ -239,15 +239,36 @@ class Controller(RestController):
         session = session_get()
         user = tmpl_context.user
         asset = asset_get(proj, asset_id)
-
+        
+        if asset.current_task:
+            for n in asset.current_task.notes:
+                if n.attachment:
+                    session.delete(n.attachment)
+                session.flush()
+                session.delete(n)
+            session.delete(asset.current_task)
+        session.flush()
+        
+        session.refresh(asset)
+        
         session.delete(asset)
+        session.flush()
+        #get tasks an delete him
+        tasks = session.query(Task).filter(Task.asset_id==asset.id).all()
+        for t in tasks:
+            if t.notes:
+                for n in t.notes:
+                    if n.attachment:
+                        session.delete(n.attachment)
+                    session.delete(n)
+            session.delete(t)
 
         # delete association objects or they will be orphaned
         session.flush()
         for ver in asset.versions:
             session.delete(ver.annotable)
         session.delete(asset.taggable)
-
+        session.flush()
         msg = '%s %s' % (_('Deleted Asset:'), asset.path)
 
         # log into Journal
@@ -515,7 +536,11 @@ class Controller(RestController):
             
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('submitted'), asset.current.ver)
-            old_task = asset.current_task
+            if asset.current_task:
+                old_task = asset.current_task
+            else:
+                old_task = None
+                
             task_name = u'Submited For Revision'
             new_task = Task(task_name, comment, asset, sender, receiver)
             new_task.previous_task = old_task
