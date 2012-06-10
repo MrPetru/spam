@@ -5,8 +5,9 @@
     
     path_list.append("from:%(task_sender)s" % w.data)
     path_list.append("to:%(task_receiver)s" % w.data)
-    if w.data['modified'][w.data['user_id']]:
-        path_list.append('modified')
+    if w.data['modified'].has_key(w.data['user_id']):
+        if w.data['modified'][w.data['user_id']]:
+            path_list.append('modified')
         
     for i, val in enumerate(path_list):
         if i == 0:
