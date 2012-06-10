@@ -71,7 +71,7 @@ from hashlib import sha1
 from spam.lib import attachments
 from spam.model import Attach, Scene, Libgroup, Category
 
-from spam.model import modifier_to_artist
+from spam.model import modifier_to_artist, modifier_delete_all
 
 class Controller(RestController):
     """
@@ -117,7 +117,7 @@ class Controller(RestController):
         # get all tasks for current user
         tasks = task_get_all().filter(Task.parent_asset!=None).all()
         
-        all_filter_values = ['wip', 'idle', 'approved', 'submitted', 'rejected', 'library', 'scene', 'None']
+        all_filter_values = ['wip', 'idle', 'approved', 'submitted', 'rejected', 'library', 'scene', 'None', 'modified']
         
         # get all current associated asset for current user
         assets = []
@@ -138,6 +138,8 @@ class Controller(RestController):
         for u in project.users:
             if u.user_name not in all_filter_values:
                 all_filter_values.append(u.user_name)
+                all_filter_values.append('from:%s' % u.user_name)
+                all_filter_values.append('to:%s' % u.user_name)
                 
         # get project scenes and shots
         scenes = session.query(Scene).filter(Scene.project == project).all()
@@ -240,6 +242,10 @@ class Controller(RestController):
         new_note.attachment = new_attachment
         
         asset.current.notes.append(new_note)
+        
+        # delete all modifiers entry
+        modifier_delete_all(asset)
+        
         session.refresh(asset.current.annotable)
         
         # sign asset as modified for receiver

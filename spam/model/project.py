@@ -818,6 +818,12 @@ class Asset(DeclarativeBase):
     def artists(self):
         return (set(self.project.artists[self.category]) |
                 set(self.project.admins))
+    @property
+    def modified(self):
+        d = {}
+        for m in self.modified_entries:
+            d[m.user_id] = m.modified
+        return d
     
     # Methods
     def has_tags(self, tag_ids):
@@ -917,6 +923,7 @@ class Asset(DeclarativeBase):
                     current_task_name=self.current_task_name,
                     task_sender=self.task_sender,
                     task_receiver=self.task_receiver,
+                    modified=self.modified,
                     #'repopath': self.repopath,
                     #'basedir': self.basedir,
                     #'repobasedir': self.repobasedir,

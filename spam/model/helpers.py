@@ -387,3 +387,12 @@ def modifier_to_supervisor(asset, sender, receiver):
                     session.add(receiver_mod)
                 except MultipleResultsFound:
                     raise SPAMDBError('Multipe entry found for asset=%s and user=%' %(asset.id, art.user_id))
+                    
+def modifier_delete_all(asset):
+    # delete all modifier entries for this asset before creating new relation
+    # for new tasks
+    session = session_get()
+    mods = session.query(Modified).filter(Modified.asset==asset).all()
+    for m in mods:
+        session.delete(m)
+    session.flush()
