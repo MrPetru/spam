@@ -17,6 +17,7 @@
 #
 # Original Copyright (c) 2010, Lorenzo Pierfederici <lpierfederici@gmail.com>
 # Contributor(s): 
+# Petru Ciobanu <petrea.email@gmail.com>
 #
 """
 Project data model.
@@ -42,10 +43,12 @@ from spam.model.utils import mapped_list, compute_status, add_container_props
 from spam.model.auth import User
 from spam.model.misc import Taggable, Annotable
 
+import re
+
 import logging
 log = logging.getLogger(__name__)
 
-import re
+
 
 
 ############################################################
@@ -1050,14 +1053,10 @@ class Task(DeclarativeBase):
     previous_task_id = Column(Unicode, ForeignKey('tasks.id'))
     previous_task = relation('Task', remote_side=[id])
     
-    # one to many relation with actions
-    #actions = relation("Action", backref=backref("task"))
-    
     notes = relation("Note", backref=backref("task"), order_by="Note.created")
-    
-    #last_attach = relation("Attach", backref=backref("task", uselist=False))
     last_attach = relation("Attach", uselist=False, backref="task")
     
+    # Properties
     @property
     def noteslist(self):
         new_list = []
@@ -1080,6 +1079,7 @@ class Task(DeclarativeBase):
             return self.receiver.display_name
         else:
             return (u'ALL GROUP')
+            
     # Special methods
     def __init__(self, name, description, asset, sender, receiver):
         self.name = name
@@ -1098,7 +1098,6 @@ class Task(DeclarativeBase):
                     id=self.id,
                     name=self.name.upper(),
                     description=self.description,
-                    #notes=self.notes,
                     notes=self.non_void_notes,
                     sender_name=self.sender.display_name,
                     receiver_name=self.receiver_name,
@@ -1205,7 +1204,6 @@ class Note(DeclarativeBase):
                     user_name=self.user.user_name,
                     created=self.created.strftime('%d %b %Y at %H:%M'),
                     text=self.text,
-#                    action="%s at %s" % (self.action, self.created.strftime('%d %b %Y at %H:%M')),
                     action=self.action,
                     task_id=self.task_id,
                     sticky=self.sticky,
@@ -1223,15 +1221,12 @@ class Attach(DeclarativeBase):
     __tablename__ = 'attachments'
 
     # Columns
-    #id = Column(Integer, primary_key=True)
     id = Column(String(40), primary_key=True)
-    
-    #file_name = Column(String(100))
     file_path = Column(Unicode(255))
     preview_path = Column(Unicode(255))
-    
     order = Column(Integer)
     
+    # Properties
     @property
     def file_name(self):
         return self.id
@@ -1255,4 +1250,49 @@ class Attach(DeclarativeBase):
                 note_id=self.note_id,
                 )
         
+
+class Modified(DeclarativeBase): 
+    __tablename__ = 'modifiedassets'
     
+    # Columns
+    id = Column(Integer, primary_key=True)
+    
+    #asset = ?
+    # many to one relation
+    asset_id = Column(String(40), ForeignKey('assets.id'))
+    asset = relation('Asset', backref='modified_entries')
+    
+#    asset_id = Column(Integer, ForeignKey('asset.id'))
+#    child = relationship("Child", backref=backref("parent", uselist=False))
+    
+    #user = ?
+    user_id = Column(Unicode(40), ForeignKey('users.user_id'))
+    user = relation('User', backref='modified_entries')
+    
+    modified_time = Column(DateTime, default=datetime.min)
+    user_acces_time = Column(DateTime, default=datetime.min)
+    
+    @property
+    def modified(self):
+        if self.user_acces_time:
+            if (self.user_acces_time < self.modified_time):
+                return True
+            else:
+                return False
+        return True
+            
+    def modify(self):
+        self.modified_time = datetime.now()
+    
+    def accesed(self):
+        self.user_acces_time = datetime.now()
+            
+    def __init__(self, asset, user):
+        self.asset = asset
+        self.user = user
+        self.modified_time = datetime.now()
+        
+    def __json__(self):
+        return dict(
+                id=self.id,
+                )

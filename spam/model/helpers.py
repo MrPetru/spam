@@ -23,14 +23,14 @@
 from datetime import datetime
 from pylons import cache
 from tg import config
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_
 from sqlalchemy.exceptions import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from spam.lib.exceptions import SPAMDBError, SPAMDBNotFound
 from spam.model import DBSession, Project, Scene, Shot, Libgroup, Asset
 from spam.model import Category, User, Group, Taggable, Tag, Annotable, Note
 from spam.model import AssetVersion, AssetContainer
-from spam.model import Task, Attach
+from spam.model import Task, Attach, Modified
 
 import logging
 log = logging.getLogger(__name__)
@@ -299,3 +299,91 @@ def attach_get(proj, attach_id):
     except MultipleResultsFound:
         raise SPAMDBError('Error when searching attach "%s".' %
                                                                     assetver_id)
+                                                                    
+# for asset modifiers. utiliti to know if an asset was modified or not
+
+def modifier_to_artist(asset, sender, receiver):
+    # create a new task for artist, means the receiver may be None
+    # create modified for sender
+    session = session_get()
+    try:
+        sender_mod = session.query(Modified).filter(and_(Modified.asset==asset, Modified.user==sender)).one()
+        sender_mod.accesed()
+        session.add(sender_mod)
+    except NoResultFound:
+        # create an entry
+        sender_mod = Modified(asset, sender)
+        sender_mod.accesed()
+        session.add(sender_mod)
+    except MultipleResultsFound:
+        raise SPAMDBError('Multipe entry found for asset=%s and user=%' %(asset.id, sender.user_id))
+        
+    # create modified for receiver
+    if receiver != None:
+        try:
+            receiver_mod = session.query(Modified).filter(and_(Modified.asset==asset, Modified.user==receiver)).one()
+            receiver_mod.modify()
+            session.add(receiver_mod)
+        except NoResultFound:
+            # create an entry
+            receiver_mod = Modified(asset, receiver)
+            session.add(receiver_mod)
+        except MultipleResultsFound:
+            raise SPAMDBError('Multipe entry found for asset=%s and user=%' %(asset.id, receiver.user_id))
+    else:
+        # this means this asset was send to all artist groups
+        for art in asset.artists:
+            if art != sender:
+                try:
+                    receiver_mod = session.query(Modified).filter(and_(Modified.asset==asset, Modified.user==art)).one()
+                    receiver_mod.modify()
+                    session.add(receiver_mod)
+                except NoResultFound:
+                    # create an entry
+                    receiver_mod = Modified(asset, art)
+                    session.add(receiver_mod)
+                except MultipleResultsFound:
+                    raise SPAMDBError('Multipe entry found for asset=%s and user=%' %(asset.id, art.user_id))
+                    
+def modifier_to_supervisor(asset, sender, receiver):
+    # create a new task for supervisor, means the receiver may be None
+    # create modified for sender
+    session = session_get()
+    try:
+        sender_mod = session.query(Modified).filter(and_(Modified.asset==asset, Modified.user==sender)).one()
+        sender_mod.accesed()
+        session.add(sender_mod)
+    except NoResultFound:
+        # create an entry
+        sender_mod = Modified(asset, sender)
+        sender_mod.accesed()
+        session.add(sender_mod)
+    except MultipleResultsFound:
+        raise SPAMDBError('Multipe entry found for asset=%s and user=%' %(asset.id, sender.user_id))
+        
+    # create modified for receiver
+    if receiver != None:
+        try:
+            receiver_mod = session.query(Modified).filter(and_(Modified.asset==asset, Modified.user==receiver)).one()
+            receiver_mod.modify()
+            session.add(receiver_mod)
+        except NoResultFound:
+            # create an entry
+            receiver_mod = Modified(asset, receiver)
+            session.add(receiver_mod)
+        except MultipleResultsFound:
+            raise SPAMDBError('Multipe entry found for asset=%s and user=%' %(asset.id, receiver.user_id))
+    else:
+        # this means this asset was send to all supervisors of group
+        for sup in asset.supervisors:
+            if sup != sender:
+                try:
+                    receiver_mod = session.query(Modified).filter(and_(Modified.asset==asset, Modified.user==sup)).one()
+                    receiver_mod.modify()
+                    session.add(receiver_mod)
+                except NoResultFound:
+                    # create an entry
+                    receiver_mod = Modified(asset, sup)
+                    session.add(receiver_mod)
+                except MultipleResultsFound:
+                    raise SPAMDBError('Multipe entry found for asset=%s and user=%' %(asset.id, art.user_id))

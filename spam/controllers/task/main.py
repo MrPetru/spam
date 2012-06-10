@@ -42,7 +42,6 @@ from spam.lib.predicates import is_project_user, is_project_admin
 from spam.lib.predicates import is_asset_supervisor, is_asset_artist
 from spam.lib.predicates import is_asset_owner
 
-from spam.lib.helpers import widget_actions
 from tg import app_globals as G
 
 # for tasks
@@ -72,6 +71,8 @@ from hashlib import sha1
 from spam.lib import attachments
 from spam.model import Attach, Scene, Libgroup, Category
 
+from spam.model import modifier_to_artist
+
 class Controller(RestController):
     """
         manipulate with tasks
@@ -86,13 +87,19 @@ class Controller(RestController):
         
         project = tmpl_context.project
         asset = asset_get(project, asset_id)
+        user = tmpl_context.user
+        
         old_tasks = []
         if asset.current_task:
             ct = asset.current_task
             while ct.previous_task:
                 old_tasks.append(ct.previous_task)
                 ct = ct.previous_task
-            
+
+        for m in asset.modified_entries:
+            if m.user == user:
+                m.accesed()
+                
         tmpl_context.asset_description = asset_description
         tmpl_context.o_tasks = o_tasks
 
@@ -234,6 +241,9 @@ class Controller(RestController):
         
         asset.current.notes.append(new_note)
         session.refresh(asset.current.annotable)
+        
+        # sign asset as modified for receiver
+        modifier_to_artist(asset, sender, receiver)
         
         #########
         

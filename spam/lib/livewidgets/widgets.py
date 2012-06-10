@@ -17,6 +17,7 @@
 #
 # Original Copyright (c) 2010, Lorenzo Pierfederici <lpierfederici@gmail.com>
 # Contributor(s): 
+# Petru Ciobanu <petrea.email@gmail.com>
 #
 """A collection of ToscaWidget2 that can update in realtime"""
 

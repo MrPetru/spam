@@ -48,7 +48,7 @@ from auth import User, Group, Permission
 from misc import Taggable, Tag, Annotable, Journal, Migrate
 from project import Project, Scene, Shot, Libgroup, AssetContainer
 from project import Category, Supervisor, Artist, Asset, AssetVersion
-from project import Task, Note, Attach
+from project import Task, Note, Attach, Modified
 
 # Caching & helpers
 from helpers import query_projects, query_projects_archived, project_get
@@ -57,7 +57,7 @@ from helpers import container_get, asset_get, category_get, libgroup_get
 from helpers import group_get, taggable_get, tag_get, user_get
 from helpers import annotable_get, note_get, assetversion_get
 from helpers import task_get_all, task_get
-from helpers import attach_get
+from helpers import attach_get, modifier_to_artist, modifier_to_supervisor
 
 # Init model
 def init_model(engine):

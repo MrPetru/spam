@@ -46,6 +46,7 @@ from tg import app_globals as G
 from spam.model import User, Task, user_get
 from spam.lib import attachments
 from spam.model import Attach
+from spam.model import modifier_to_supervisor, modifier_to_artist
 
 import logging
 log = logging.getLogger(__name__)
@@ -244,9 +245,13 @@ class Controller(RestController):
             for n in asset.current_task.notes:
                 if n.attachment:
                     session.delete(n.attachment)
-                session.flush()
+                    session.flush()
                 session.delete(n)
             session.delete(asset.current_task)
+        session.flush()
+        
+        for n in asset.modified_entries:
+            session.delete(n)
         session.flush()
         
         session.refresh(asset)
@@ -533,6 +538,9 @@ class Controller(RestController):
                 new_attachment.order = 1
             else:
                 new_attachment = None
+                
+            # mark asset as modified for supervisor or supervisors
+            modifier_to_supervisor(asset, sender, receiver)
             
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('submitted'), asset.current.ver)
@@ -710,6 +718,9 @@ class Controller(RestController):
                 new_attachment.order = 1
             else:
                 new_attachment = None
+            
+            # mark asset a modified for receiver or receivers    
+            modifier_to_artist(asset, sender, receiver)
                 
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('sent back for revisions'), asset.current.ver)

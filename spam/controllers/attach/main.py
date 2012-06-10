@@ -119,6 +119,10 @@ class Controller(RestController):
             new_attachment = Attach(result['file_name'], result['file_path'], result['preview_path'])
         else:
             new_attachment = None
+            
+        for m in asset.modified_entries:
+            if m.user != user:
+                m.modify()
         
         # create Note for this attachment
         action = u'[%s v%03d]' % (_('comented'), asset.current.ver)

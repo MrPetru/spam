@@ -1238,3 +1238,10 @@ ul.tabs a.current {
 
 #filtertextarea {
 }
+
+.assetwasmodified {
+    width: 28px;
+    height: 28px;
+    float: right;
+    background: url(../images/info.png) left center no-repeat;
+}

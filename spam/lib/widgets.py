@@ -16,7 +16,8 @@
 # along with SPAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Original Copyright (c) 2010, Lorenzo Pierfederici <lpierfederici@gmail.com>
-# Contributor(s): 
+# Contributor(s):
+# Petru Ciobanu <petrea.email@gmail.com>
 #
 """Custom ToscaWidgets for SPAM."""
 
@@ -422,14 +423,21 @@ class TableAssetShort(twl.LiveTable):
     show_headers = False
 
     thumbnail = twl.LiveThumbnail(parent_css_class = 'thumbnail')
-    
-    name = twl.Box(
+    name = twl.BoxAction(
         css_class='',
         parent_css_class = 'asset_name',
         children=[
             twl.Text(id = 'name', sort_default=True, text="%(name)s"),
             twl.Text(id = 'owner_id',sort_default=True,
                         text="owned by: %(owner_user_name)s", css_class='owner'),
+            
+            twl.ActionButton(id='assetwasmodified',
+                index = '14',
+                css_class = 'assetwasmodified',
+                help_text='asset was modified',
+                template = 'mako:spam.lib.livewidgets.templates.infobox',
+                maker_template = 'mako:spam.lib.livewidgets.templates.infobox_maker',
+                ),
         ])
     
 class TableAssets(twl.LiveTable):
