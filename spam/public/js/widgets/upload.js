@@ -22,14 +22,14 @@
 var upload = new Object;
 upload.uploading = 0;
 
-XMLHttpRequest.prototype.sendAsBinary = function(datastr) {
-    function byteValue(x) {
-        return x.charCodeAt(0) & 0xff;
-    }
-    var ords = Array.prototype.map.call(datastr, byteValue);
-    var ui8a = new Uint8Array(ords);
-    this.send(ui8a.buffer);
-}
+//XMLHttpRequest.prototype.sendAsBinary = function(datastr) {
+//    function byteValue(x) {
+//        return x.charCodeAt(0) & 0xff;
+//    }
+//    var ords = Array.prototype.map.call(datastr, byteValue);
+//    var ui8a = new Uint8Array(ords);
+//    this.send(ui8a.buffer);
+//}
 
 upload.queue = {length: 0, files: {},
                 add_file: function(file) {
@@ -48,13 +48,20 @@ upload.queue = {length: 0, files: {},
                };
 
 upload.file_read = function(queue_id, file) {
-    var reader = new FileReader();
+    
+    var formData = new FormData();
+    formData.append('uploadfile', file);
     upload.uploading += 1;
     $(upload.config.submitter).attr('disabled', 'disabled');
-    reader.onloadend = function(e) {
-        upload.file_upload(queue_id, e.target.result);
-    };
-    reader.readAsBinaryString(file);
+    upload.file_upload(queue_id, formData);
+    
+//    var reader = new FileReader();
+//    upload.uploading += 1;
+//    $(upload.config.submitter).attr('disabled', 'disabled');
+//    reader.onloadend = function(e) {
+//        upload.file_upload(queue_id, e.target.result);
+//    };
+//    reader.readAsBinaryString(file);
 }
 
 upload.handle_files = function(queue, files) {
@@ -118,28 +125,30 @@ upload.file_upload = function(queue_id, fileData) {
         progress.addClass("error");
     });
 
-    var boundary = "S-P-A-M----u-p-l-o-a-d--X30";
+//    var boundary = "S-P-A-M----u-p-l-o-a-d--X30";
 
 
-    var content = new String();
-    content += '--' + boundary + '\r\n';
-    content += 'Content-disposition: form-data;name="uploader"\r\n';
-    content += '\r\n';
-    content += '1';
-    content += '\r\n';
-    content += '--' + boundary + '\r\n';
-    content += 'Content-Disposition: file; name="uploadfile"; filename="' + file.name + '"\r\n';
-    content += 'Content-Type: ' + file.type + '\r\n';
-    content += 'Content-Length: ' + fileData.length + '\r\n';
-    content += '\r\n';
-    content += fileData + '\r\n';
-    content += '\r\n';
-    content += '--' + boundary + '--\r\n';
+//    var content = new String();
+//    content += '--' + boundary + '\r\n';
+//    content += 'Content-disposition: form-data;name="uploader"\r\n';
+//    content += '\r\n';
+//    content += '1';
+//    content += '\r\n';
+//    content += '--' + boundary + '\r\n';
+//    content += 'Content-Disposition: file; name="uploadfile"; filename="' + file.name + '"\r\n';
+//    content += 'Content-Type: ' + file.type + '\r\n';
+//    content += 'Content-Length: ' + fileData.length + '\r\n';
+//    content += '\r\n';
+//    content += fileData + '\r\n';
+//    content += '\r\n';
+//    content += '--' + boundary + '--\r\n';
 
     xhr.open("POST", upload.config.target);
-    xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
-    xhr.setRequestHeader('Content-Length', content.length);
-    xhr.sendAsBinary(content);
+//    xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
+//    xhr.setRequestHeader('Content-Length', content.length);
+//    xhr.sendAsBinary(content);
+    
+    xhr.send(fileData);
 
 }
 
