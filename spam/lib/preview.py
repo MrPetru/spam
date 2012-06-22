@@ -120,6 +120,8 @@ def make_thumb(asset):
     dirname, basename = os.path.split(asset.path)
     name, ext = os.path.splitext(basename)
     
+    ext = ext.lower()
+    
     if not asset.is_sequence:
         if ext in image_types:
             src = os.path.join(repo_path, asset.path)
