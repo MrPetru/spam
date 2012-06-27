@@ -340,7 +340,7 @@ def modifier_send(asset, task_sender, task_receiver, message_sender=None):
         except NoResultFound:
             # create an entry
             mod = Modified(asset, usr)
-            if usr == to_not_notify:
+            if usr == message_sender:
                 mod.accesed()
             session.add(mod)
         except MultipleResultsFound:

@@ -132,7 +132,6 @@ class Controller(RestController):
         
         sender = task.sender
         receiver = task.receiver
-        print (user)
         modifier_send(asset, sender, receiver, user)
         
         if new_attachment:
