@@ -311,7 +311,7 @@ def modifier_send(asset, task_sender, task_receiver, message_sender=None):
         to_not_notify = task_sender
     else:
         notified_users.append(message_sender)
-        to_not_notify = task_sender
+        to_not_notify = message_sender
     
     if task_sender not in notified_users:
         notified_users.append(task_sender)
