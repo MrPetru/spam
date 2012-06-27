@@ -58,6 +58,8 @@ from hashlib import sha1
 
 from spam.lib.helpers import widget_actions
 from spam.model import attach_get
+from spam.model import modifier_send
+from spam.model import modifier_delete_all
 
 class Controller(RestController):
     """
@@ -127,6 +129,12 @@ class Controller(RestController):
         # create Note for this attachment
         action = u'[%s v%03d]' % (_('comented'), asset.current.ver)
         task = asset.current_task
+        
+        sender = task.sender
+        receiver = task.receiver
+        print (user)
+        modifier_send(asset, sender, receiver, user)
+        
         if new_attachment:
             if task.last_attach:
                 new_attachment.order = task.last_attach.order + 1

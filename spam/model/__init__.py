@@ -57,7 +57,7 @@ from helpers import container_get, asset_get, category_get, libgroup_get
 from helpers import group_get, taggable_get, tag_get, user_get
 from helpers import annotable_get, note_get, assetversion_get
 from helpers import task_get_all, task_get
-from helpers import attach_get, modifier_to_artist, modifier_to_supervisor, modifier_delete_all
+from helpers import attach_get, modifier_send, modifier_delete_all
 
 # Init model
 def init_model(engine):

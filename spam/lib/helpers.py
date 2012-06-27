@@ -87,10 +87,12 @@ class widget_actions():
         
         display_flags[11] = 0
         
-        display_flags[12] = int(cur_user == asset_json['owner_id'] and
+        display_flags[12] = int((cur_user == asset_json['owner_id'] and
                                 asset_json['checkedout'] and
                                 not asset_json['submitted'] and
-                                not asset_json['approved'])
+                                not asset_json['approved']) or 
+                                ((cur_user in asset_json['supervisor_ids']) and 
+                                asset_json['submitted']))
                                 
         display_flags[13] = int((cur_user in asset_json['supervisor_ids']) or
                                 (cur_user in asset_json['supervisor_ids'] and receiver == u''))

@@ -71,7 +71,7 @@ from hashlib import sha1
 from spam.lib import attachments
 from spam.model import Attach, Scene, Libgroup, Category
 
-from spam.model import modifier_to_artist, modifier_delete_all
+from spam.model import modifier_send, modifier_delete_all
 
 class Controller(RestController):
     """
@@ -249,7 +249,7 @@ class Controller(RestController):
         session.refresh(asset.current.annotable)
         
         # sign asset as modified for receiver
-        modifier_to_artist(asset, sender, receiver)
+        modifier_send(asset, sender, receiver)
         
         #########
         
