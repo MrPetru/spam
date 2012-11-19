@@ -52,5 +52,10 @@ class Globals(object):
         self.pattern_file = re.compile('^[a-zA-Z0-9_\-]+\.[a-zA-Z0-9]+$')
         self.pattern_seq = re.compile('^[a-zA-Z0-9_\-]+\.#\.[a-zA-Z0-9]+$')
         self.pattern_tags = re.compile('^([a-zA-Z0-9_\-]+(, )?)+$')
+        
+        self.smtp_server = config.get('smtp_server', '')
+        self.notification_email_from = config.get('notification_email_from', '')
+        self.notification_host = config.get('notification_host', '')
+        self.notification_email_password = config.get('notification_email_password', '')
 
 

@@ -127,12 +127,12 @@ class Controller(RestController):
                 m.modify()
         
         # create Note for this attachment
-        action = u'[%s v%03d]' % (_('comented'), asset.current.ver)
+        action = u'[%s v%03d]' % (_('commented'), asset.current.ver)
         task = asset.current_task
         
         sender = task.sender
         receiver = task.receiver
-        modifier_send(asset, sender, receiver, user)
+        modifier_send(asset, sender, receiver, action, user)
         
         if new_attachment:
             if task.last_attach:
@@ -145,7 +145,7 @@ class Controller(RestController):
         asset.current.notes.append(new_note)
         session.refresh(asset.current.annotable)
 
-        msg = '%s %s v%03d' % (_('Comented'), asset.path, asset.current.ver)
+        msg = '%s %s v%03d' % (_('Commented'), asset.path, asset.current.ver)
         updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS, extra_data = dict(actions_display_status = self.wa.main(asset, user.id)))]
 
         # log into Journal

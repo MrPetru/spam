@@ -31,6 +31,7 @@ from spam.model import DBSession, Project, Scene, Shot, Libgroup, Asset
 from spam.model import Category, User, Group, Taggable, Tag, Annotable, Note
 from spam.model import AssetVersion, AssetContainer
 from spam.model import Task, Attach, Modified
+from tg import app_globals as G
 
 import logging
 log = logging.getLogger(__name__)
@@ -299,15 +300,74 @@ def attach_get(proj, attach_id):
     except MultipleResultsFound:
         raise SPAMDBError('Error when searching attach "%s".' %
                                                                     assetver_id)
-                                                                    
+
+def send_email_notification(asset, notified_users, action, message_sender = None):
+
+    import smtplib
+    from email.mime.text import MIMEText
+    from tg import url
+    
+    if G.notification_email_from == '':
+        return "no notification_email_from value was inserted"
+    
+    commented = True
+    if not message_sender:
+        commented = False
+        message_sender = asset.current_task.sender
+    
+    send_to = []
+    for u in notified_users:
+        if u.email_address and (u != message_sender):
+            if u.email_address not in send_to:
+                send_to.append(u.email_address.encode())
+    if not len(send_to):
+        return "no users with email"
+        
+    sender = G.notification_email_from
+    receiver = send_to
+    
+    message_text = "Hello,"
+    message_text += "\nyou're receiving this e-mail because you're involved "
+    message_text += "in the  project %s that relies on  SPAM." % asset.proj_id
+    message_text += "\n\n%s made a change in the asset: %s" % (message_sender.user_name, asset.name)
+    message_text += "\n\nthe action has been: %s" % action
+    message_text += "\n\nIf you want to know more please check the following link:\n"
+    message_text += "%s%s" % (G.notification_host, str(url("/project/"+asset.proj_id)))
+    message_text += "\n\nThis message has been automatically generated, please do not reply to the sender."
+    message_text += "\nHappy working!\nthe SPAM team\n"
+    
+    # Create a text/plain message
+    message = MIMEText(message_text)
+    
+    message['Subject'] = "modified asset %s" % asset.name
+
+    message['From'] = sender
+    
+    tmp_txt = ""
+    for i, rec in enumerate(receiver):
+        if i == 0:
+            tmp_txt += rec
+        else:
+            tmp_txt += ", "+rec
+    message['To'] = tmp_txt
+
+    s = smtplib.SMTP(G.smtp_server)
+    s.login(G.notification_email_from, G.notification_email_password)
+    
+    try:
+       s.sendmail(sender, receiver, message.as_string())
+    except:
+       print "Error: unable to send email"
+
+    s.quit()
+    
 # for asset modifiers. utility to know if an asset was modified or not
-def modifier_send(asset, task_sender, task_receiver, message_sender=None):
+def modifier_send(asset, task_sender, task_receiver, action, message_sender=None):
     
     notified_users = []
     to_not_notify = None
     
     if not message_sender:
-        message_sender = task_sender
         to_not_notify = task_sender
     else:
         notified_users.append(message_sender)
@@ -340,11 +400,14 @@ def modifier_send(asset, task_sender, task_receiver, message_sender=None):
         except NoResultFound:
             # create an entry
             mod = Modified(asset, usr)
-            if usr == message_sender:
+            if usr == to_not_notify:
                 mod.accesed()
             session.add(mod)
         except MultipleResultsFound:
             raise SPAMDBError('Multipe entry found for asset=%s and user=%' %(asset.id, usr.user_id))
+            
+    # send notifications via email
+    send_email_notification(asset, notified_users, action, message_sender)
                     
 def modifier_delete_all(asset):
     # delete all modifier entries for this asset before creating new relation

@@ -454,6 +454,9 @@ class Controller(RestController):
         task = newver.asset.current_task
         text = u'%s' % comment
         action = u'[%s v%03d]' % (_('published'), newver.ver)
+        if task :
+            if task.sender :
+                modifier_send(asset, task.sender, task.receiver, action, user)
         newver.notes.append(Note(user, action, text, task))
         session.flush()
         session.refresh(asset)
@@ -539,19 +542,20 @@ class Controller(RestController):
             else:
                 new_attachment = None
             
+            text = u'%s' % (comment or '')
+            action = u'[%s v%03d]' % (_('submitted'), asset.current.ver)
+            
             #delete old modifiers
             modifier_delete_all(asset)
             # mark asset as modified for supervisor or supervisors
-            modifier_send(asset, sender, receiver)
+            modifier_send(asset, sender, receiver, action, user)
             
-            text = u'%s' % (comment or '')
-            action = u'[%s v%03d]' % (_('submitted'), asset.current.ver)
             if asset.current_task:
                 old_task = asset.current_task
             else:
                 old_task = None
                 
-            task_name = u'Submited For Revision'
+            task_name = u'Submitted For Revision'
             new_task = Task(task_name, comment, asset, sender, receiver)
             new_task.previous_task = old_task
             
@@ -720,13 +724,14 @@ class Controller(RestController):
                 new_attachment.order = 1
             else:
                 new_attachment = None
-            # delete old modifiers
-            modifier_delete_all(asset)
-            # mark asset a modified for receiver or receivers    
-            modifier_send(asset, sender, receiver)
                 
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('sent back for revisions'), asset.current.ver)
+            
+            # delete old modifiers
+            modifier_delete_all(asset)
+            # mark asset a modified for receiver or receivers    
+            modifier_send(asset, sender, receiver, action, user)
             
             old_task = asset.current_task
             task_name = u'Sent Back For Revision'
@@ -800,7 +805,7 @@ class Controller(RestController):
 #            text = u'[%s v%03d]\n%s' % (_('approved'), asset.current.ver,
 #                                                                comment or '')
             old_task = asset.current_task
-            task_name = u'Aprouved'
+            task_name = u'Approved'
             new_task = Task(task_name, comment, asset, user, old_task.sender)
             new_task.previous_task = old_task
             
@@ -808,6 +813,8 @@ class Controller(RestController):
             action = u'[%s v%03d]' % (_('approved'), asset.current.ver)
             asset.current.notes.append(Note(user, action, text, new_task))
             session.refresh(asset.current.annotable)
+            
+            modifier_send(asset, asset.current_task.sender, asset.current_task.receiver, action, user)
 
             msg = '%s %s' % (_('Approved Asset:'), asset.path)
             updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
@@ -886,10 +893,12 @@ class Controller(RestController):
     @project_set_active
     @require(is_project_user())
     @expose()
-    def download(self, proj, assetver_id):
+    def download(self, proj, assetver_id, assetver=None):
         """Return a version of an asset from the repository as a file 
         attachment in the response body."""
-        assetver = assetversion_get(proj, assetver_id)
+        if not assetver:
+            assetver = assetversion_get(proj, assetver_id)
+            
         f = repo.cat(proj, assetver)
         
         if assetver.asset.is_sequence:

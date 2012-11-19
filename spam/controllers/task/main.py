@@ -232,7 +232,7 @@ class Controller(RestController):
             new_attachment = None
         
         old_task = asset.current_task
-        task_name = u'Submited For Revision'
+        task_name = u'Submitted For Revision'
         new_task = Task(name, description, asset, sender, receiver)
         new_task.previous_task = old_task
         
@@ -249,7 +249,7 @@ class Controller(RestController):
         session.refresh(asset.current.annotable)
         
         # sign asset as modified for receiver
-        modifier_send(asset, sender, receiver)
+        modifier_send(asset, sender, receiver, action)
         
         #########
         

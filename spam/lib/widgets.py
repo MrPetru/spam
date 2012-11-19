@@ -1164,7 +1164,7 @@ class FormLibgroupNew(RestForm):
     parent_id = twf.HiddenField()
     project_name_ = twf.LabelField()
     parent_ = twf.LabelField()
-    name = twf.TextField(validator=twc.All(StringLength(max=15),
+    name = twf.TextField(validator=twc.All(StringLength(max=40),
                     twc.RegexValidator(regex=G.pattern_name), required=True))
     description = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
