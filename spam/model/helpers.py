@@ -328,13 +328,13 @@ def send_email_notification(asset, notified_users, action, message_sender = None
     
     message_text = "Hello,"
     message_text += "\nyou're receiving this e-mail because you're involved "
-    message_text += "in the  project %s that relies on  SPAM." % asset.proj_id
+    message_text += "in the  project %s that relies on  OPAM." % asset.proj_id
     message_text += "\n\n%s made a change in the asset: %s" % (message_sender.user_name, asset.name)
     message_text += "\n\nthe action has been: %s" % action
     message_text += "\n\nIf you want to know more please check the following link:\n"
     message_text += "%s%s" % (G.notification_host, str(url("/project/"+asset.proj_id)))
     message_text += "\n\nThis message has been automatically generated, please do not reply to the sender."
-    message_text += "\nHappy working!\nthe SPAM team\n"
+    message_text += "\nHappy working!\nthe OPAM team\n"
     
     # Create a text/plain message
     message = MIMEText(message_text)
