@@ -1603,7 +1603,7 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
                     dest=url('/attach/%(proj_id)s/%(file_name)s/download'),
                     widget_class = 'actionheader',
                     children=[
-                        twl.Image(id='file_path', css_class = "attache_preview", src="%(preview_path)s"),
+                        twl.Image(id='file_path', css_class = "attache_preview", src=(url("/")[:-1] + "%(preview_path)s")),
                     ]),
 #                file_name = twl.Text(id='file_path', sort_default=True,
 #                        text='<img class="attache_preview" src="/repo/%s" />' % ('%(file_path)s'),
@@ -1657,7 +1657,7 @@ class OldTasks (twl.LiveContainer):
                     dest=url('/attach/%(proj_id)s/%(file_name)s/download'),
                     widget_class = 'actionheader',
                     children=[
-                        twl.Image(id='preview_path', css_class = "attache_preview", src="%(preview_path)s"),
+                        twl.Image(id='preview_path', css_class = "attache_preview", src=(url("/")[:-1] +  "%(preview_path)s")),
                     ]),
 #                file_name = twl.Text(id='file_name', sort_default=True,
 #                        text='<img class="attache_preview" src="/repo/%s" />' % ('%(file_path)s'),

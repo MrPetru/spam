@@ -13,7 +13,7 @@ function(data) {
     
     title = $.sprintf('${w.help_text | n}', data);
     var css_class = $.sprintf('${w.css_class | n}', data);
-    if ((src != "/repo/") && (src != "")) {
+    if ((src != "/opam") && (src != "")) {
         var field = '<img src="' + src + '" class="${w.widget_class} ' + css_class + '"  title="' + title + '"></img>';
     } else {
         var field = '';

@@ -332,7 +332,8 @@ class LiveContainer(twc.RepeatingWidget, LiveWidget):
     children = twc.Required
 
     resources = [
-        twc.JSLink(modname=__name__, filename='static/livewidgets.js'),
+        #twc.JSLink(modname=__name__, filename='static/livewidgets.js'),
+        twc.JSLink(link=url('/js/livewidgets.js')),
 #        twc.JSLink(modname=__name__, filename='static/jquery.js'),
     ]
 
@@ -430,7 +431,7 @@ class LiveThumbnail(LiveCompoundWidget):
             help_text='thumbnail',
             css_class='thumbnail',
             condition='data.has_preview',
-            src='/repo/%(thumbnail)s',
+            src=url('/repo/%(thumbnail)s'),
             )
     ]
 
@@ -456,7 +457,7 @@ class LiveThumbnailM(LiveCompoundWidget):
             help_text='thumbnail',
             css_class='maxithumbnail',
             condition='data.has_preview',
-            src='/repo/%(thumbnail)s',
+            src=url('/repo/%(thumbnail)s'),
             )
     ]
 
