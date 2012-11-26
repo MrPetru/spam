@@ -186,6 +186,7 @@ spam_init = function (cookiebase) {
         $(form).addClass("loading");
         $("#submit", form).attr("disabled", "disabled");
         var target = $(form).attr("action") + '.json';
+        $("#uploader:file")[0].value = ""
         var formdata = new FormData(form);
         var result = spam.action(target, formdata);
         $(form).removeClass("loading");
