@@ -24,9 +24,7 @@
     
     ${_('Your Details, registered:')} ${str(c.user.created)[0:19]}
     <hr />
-    
-    <img src="/spam/themes/greentango/images/logo.png" width="120" heght="160" /> 
-    <br /><br />
+    <br />
     ${_('Username:')} <b>${c.user.user_name}</b>
     <br />
     ${_('Display Name:')} <b>${c.user.display_name}</b>
