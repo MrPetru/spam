@@ -15,6 +15,7 @@
 data/
 development_*.ini
 deployment_*.ini
+spam_local.wsgi
 paster.log
 paster.pid
 */public/themes/local_*
