@@ -30,7 +30,7 @@ from spam.lib.widgets import ListProjects
 from spam.lib import predicates 
 
 # JQuery and plugins
-js_jquery_spamkit = twc.JSLink(link=url('/js/jquery.spamkit.js.gz'))
+js_jquery_spamkit = twc.JSLink(link=url('/js/jquery.spamkit.js'))
 #jquery_tablesorter_js = twc.JSLink(link=url('/js/jquery.tablesorter.js'))
 
 # SPAM
