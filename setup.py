@@ -39,6 +39,7 @@ setup(
         "nose == 0.11.1",
         "SQLAlchemy == 0.6.3",
         "Mako == 0.3.4",
+        "WebHelpers == 1.3",
                 ],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'spam'],
     packages=find_packages(exclude=['ez_setup']),
