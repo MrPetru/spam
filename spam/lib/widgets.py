@@ -1234,7 +1234,7 @@ class Upload(twf.FormField):
     queue = twc.Param('DOM id of the upload queue element',
         default='#upload_queue')
     submitter = twc.Param('DOM class of the submit button. It will be used to'
-        'disable the button while uploading files', default='.submitbutton')
+        'disable the button while uploading files', default='#submit')
     ext = twc.Param('Restrict uploading to files with this extension. Use None'
         'to allow all files', default=None)
 
