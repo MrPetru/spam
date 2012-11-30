@@ -31,6 +31,8 @@ import gtk
 import logging
 log = logging.getLogger(__name__)
 
+from spam.lib import blendthumb
+
 #THUMB_WIDTH = 120
 #THUMB_HEIGHT = 68
 THUMB_WIDTH = 320
@@ -156,6 +158,34 @@ def make_thumb(asset):
                 os.symlink(dest_name, unversioned_dest)
             except OSError:
                 os.link(dest_name, unversioned_dest)
+
+        if ext == '.blend':
+            # create a thumbnail for blender files
+            src = os.path.join(repo_path, asset.path)
+            dest_name = '%s_%s-thumb.png' % (name, asset.current.fmtver)
+            dest = os.path.join(previews_path, dirname, dest_name)
+            if not os.path.exists(os.path.dirname(dest)):
+                os.makedirs(os.path.dirname(dest))
+            
+            buf, width, height = blendthumb.blend_extract_thumb(src)
+
+            if buf:
+                file_out = dest
+
+                f = open(file_out, "wb")
+                f.write(blendthumb.write_png(buf, width, height))
+                f.close()
+                
+                unversioned_dest_name = '%s-thumb.png' % name
+                unversioned_dest = os.path.join(previews_path, dirname,
+                                                            unversioned_dest_name)
+                if os.path.exists(unversioned_dest):
+                    os.remove(unversioned_dest)
+                try:
+                    os.symlink(dest_name, unversioned_dest)
+                except OSError:
+                    os.link(dest_name, unversioned_dest)
+                
                 
 def make_attach_thumb(image, final_thumb_path):
     image_types = ['.png', '.jpg', '.tif']
