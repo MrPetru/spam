@@ -63,23 +63,23 @@ def blend_extract_thumb(path):
 
     head = blendfile.read(12)
 
-    if head[0:2] == b'\x1f\x8b':  # gzip magic
+    if head[0:2] == '\x1f\x8b':  # gzip magic
         import gzip
         blendfile.close()
         blendfile = gzip.GzipFile('', 'rb', 0, open_wrapper(path, 'rb'))
         head = blendfile.read(12)
 
-    if not head.startswith(b'BLENDER'):
+    if not head.startswith('BLENDER'):
         blendfile.close()
         return None, 0, 0
 
-    is_64_bit = (head[7] == b'-'[0])
+    is_64_bit = (head[7] == '-'[0])
 
     # true for PPC, false for X86
-    is_big_endian = (head[8] == b'V'[0])
+    is_big_endian = (head[8] == 'V'[0])
 
     # blender pre 2.5 had no thumbs
-    if head[9:11] <= b'24':
+    if head[9:11] <= '24':
         return None, 0, 0
 
     sizeof_bhead = 24 if is_64_bit else 20
@@ -124,17 +124,17 @@ def write_png(buf, width, height):
 
     # reverse the vertical line order and add null bytes at the start
     width_byte_4 = width * 4
-    raw_data = b"".join(b'\x00' + buf[span:span + width_byte_4] for span in range((height - 1) * width * 4, -1, - width_byte_4))
+    raw_data = "".join('\x00' + buf[span:span + width_byte_4] for span in range((height - 1) * width * 4, -1, - width_byte_4))
 
     def png_pack(png_tag, data):
         chunk_head = png_tag + data
         return struct.pack("!I", len(data)) + chunk_head + struct.pack("!I", 0xFFFFFFFF & zlib.crc32(chunk_head))
 
-    return b"".join([
-        b'\x89PNG\r\n\x1a\n',
-        png_pack(b'IHDR', struct.pack("!2I5B", width, height, 8, 6, 0, 0, 0)),
-        png_pack(b'IDAT', zlib.compress(raw_data, 9)),
-        png_pack(b'IEND', b'')])
+    return "".join([
+        '\x89PNG\r\n\x1a\n',
+        png_pack('IHDR', struct.pack("!2I5B", width, height, 8, 6, 0, 0, 0)),
+        png_pack('IDAT', zlib.compress(raw_data, 9)),
+        png_pack('IEND', '')])
 
 
 #if __name__ == '__main__':
