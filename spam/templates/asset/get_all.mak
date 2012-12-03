@@ -21,7 +21,7 @@
 
 <%inherit file="spam.templates.tab"/>
 
-% if c.predicates.is_project_admin():
+% if (c.predicates.is_project_admin() or c.predicates.is_project_user()):
 <a href="${tg.url('/asset/%s/%s/%s/new' % (c.project.id, container_type, container_id))}"
    class="button dialog">new asset</a>
 <br/>

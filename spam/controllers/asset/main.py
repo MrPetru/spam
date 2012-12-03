@@ -43,10 +43,11 @@ from spam.lib.predicates import is_asset_owner
 
 from spam.lib.helpers import widget_actions
 from tg import app_globals as G
-from spam.model import User, Task, user_get
+from spam.model import User, Task, user_get, Artist, Supervisor
 from spam.lib import attachments
 from spam.model import Attach
 from spam.model import modifier_send, modifier_delete_all
+from sqlalchemy import or_
 
 import logging
 log = logging.getLogger(__name__)
@@ -146,7 +147,7 @@ class Controller(RestController):
         return dict(asset=asset, history=history)
 
     @project_set_active
-    @require(is_project_admin())
+    @require(Any(is_project_admin(), is_project_user()))
     @expose('spam.templates.forms.form')
     def new(self, proj, container_type, container_id, **kwargs):
         """Display a NEW form."""
@@ -159,7 +160,13 @@ class Controller(RestController):
                            project_name_=project.name,
                           )
 
-        query = session_get().query(Category)
+        # get artist
+        artist = session_get().query(Artist).filter(Artist.user == tmpl_context.user).first()
+
+        # get supervisor
+        supervisor = session_get().query(Supervisor).filter(Supervisor.user == tmpl_context.user).first()
+        
+        query = session_get().query(Category).filter(or_(Category.artists.contains(artist), Category.supervisors.contains(supervisor)))
         categories = query.order_by('ordering', 'id')
         category_choices = ['']
         category_choices.extend([cat.id for cat in categories])
@@ -169,7 +176,7 @@ class Controller(RestController):
         return dict(title=_('Create a new asset'))
 
     @project_set_active
-    @require(is_project_admin())
+    @require(Any(is_project_admin(), is_project_user()))
     @expose('json')
     @expose('spam.templates.forms.result')
     @validate(f_new, error_handler=new)
