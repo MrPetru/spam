@@ -339,7 +339,7 @@ def send_email_notification(asset, notified_users, action, message_sender = None
     # Create a text/plain message
     message = MIMEText(message_text)
     
-    message['Subject'] = "modified asset %s" % asset.name
+    message['Subject'] = "asset %s: %s" % (asset.name, action)
 
     message['From'] = sender
     

@@ -43,6 +43,9 @@ class widget_actions():
             0, # 13, new_task - crea un nuovo task
             1, # 14, the asset was modified?
             ]
+        if isinstance(asset, dict):
+            return [0]*15
+
         asset_json = asset.__json__()
         if asset.current_task:
             if asset.current_task.receiver:

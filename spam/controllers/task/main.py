@@ -236,7 +236,7 @@ class Controller(RestController):
         new_task = Task(name, description, asset, sender, receiver)
         new_task.previous_task = old_task
         
-        action = '[%s]' % (_('task was created created'))
+        action = '[%s]' % (_('task was created'))
         
         new_note = Note(user, action, description, new_task)
         new_note.attachment = new_attachment
