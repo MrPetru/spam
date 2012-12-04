@@ -24,7 +24,7 @@ setup(
         "zope.sqlalchemy",
         "repoze.tm2 >= 1.0a4",
         "repoze.what-quickstart >= 1.0",
-        "mercurial == 1.6.3",
+        "mercurial == 1.9",
         # if we dont use mysql as database backend we can omit this package
         # to avoid cluttering of our sistem with unided stuff
         #"MySQL-python",
