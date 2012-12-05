@@ -47,7 +47,6 @@ from spam.model import User, Task, user_get, Artist, Supervisor
 from spam.lib import attachments
 from spam.model import Attach
 from spam.model import modifier_send, modifier_delete_all
-from sqlalchemy import or_
 
 import logging
 log = logging.getLogger(__name__)
@@ -159,15 +158,18 @@ class Controller(RestController):
                            container_id=container_id,
                            project_name_=project.name,
                           )
-
-        # get artist
-        artist = session_get().query(Artist).filter(Artist.user == tmpl_context.user).first()
-
-        # get supervisor
-        supervisor = session_get().query(Supervisor).filter(Supervisor.user == tmpl_context.user).first()
+    
+        if tmpl_context.user in project.admins:
+            query = session_get().query(Category)
+            categories = query.order_by('ordering', 'id')
+            
+        else:
+            art = session_get().query(Category).join(Category.artists).filter(Artist.project == project).filter(Artist.user == tmpl_context.user)
+            sup = session_get().query(Category).join(Category.supervisors).filter(Artist.project == project).filter(Supervisor.user == tmpl_context.user)
         
-        query = session_get().query(Category).filter(or_(Category.artists.contains(artist), Category.supervisors.contains(supervisor)))
-        categories = query.order_by('ordering', 'id')
+            query = art.union(sup)
+            categories = query.order_by("categories_ordering", "categories_id")
+        
         category_choices = ['']
         category_choices.extend([cat.id for cat in categories])
         f_new.child.children.category_id.options = category_choices
