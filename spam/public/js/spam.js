@@ -200,6 +200,13 @@ spam_init = function (cookiebase) {
             $("#dialog").hide().html(result.xhr.responseText);
             $("#dialog h1").hide();
             $("#dialog").fadeIn();
+            
+            if ( $("#comment").length != 0 ) {
+                $("#comment").cleditor();
+            } else {
+                $("#description").cleditor();
+            };
+            
         } else {
             $("#dialog").dialog("destroy");
         }
