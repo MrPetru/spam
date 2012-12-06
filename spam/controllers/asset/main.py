@@ -447,7 +447,7 @@ class Controller(RestController):
         name, ext = os.path.splitext(asset.name)
         for uf in uploaded:
             uf_name, uf_ext = os.path.splitext(uf)
-            if not uf_ext == ext:
+            if not uf_ext.lower() == ext.lower():
                 msg = '%s %s' % (_('Uploaded file must be of type:'), ext)
                 return dict(msg=msg, status='error', updates=[])
 
