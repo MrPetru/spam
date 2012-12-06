@@ -352,6 +352,11 @@ def send_email_notification(asset, notified_users, action, message_sender = None
     message['To'] = tmp_txt
 
     s = smtplib.SMTP(G.smtp_server)
+    
+    s.ehlo() # for tls add this line
+    s.starttls() # for tls add this line
+    s.ehlo() # for tls add this line
+    
     s.login(G.notification_email_from, G.notification_email_password)
     
     try:
