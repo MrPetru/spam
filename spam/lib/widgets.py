@@ -616,8 +616,8 @@ class TableAssets(twl.LiveTable):
                 index = '12',
                 condition=('data.approved '
                     '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
-                action=('http://localhost:8083/open?%(proj_id)s/%(path)s'),
-                dialog=True,
+                action=('http://localhost:8083/open?path=%(proj_id)s/%(path)s'),
+                #dialog=True,
                 children=[
                     twl.Icon(id='open',
                         icon_class='icon_open',
@@ -1415,8 +1415,8 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
                     index = '12',
                     condition=('data.approved '
                         '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
-                    action=('http://localhost:8083/open?%(proj_id)s/%(path)s'),
-                    dialog=True,
+                    action=('http://localhost:8083/open?path=%(proj_id)s/%(path)s'),
+                    #dialog=True,
                     children=[
                         twl.Icon(id='open',
                             icon_class='icon_open',

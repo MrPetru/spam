@@ -128,7 +128,14 @@ spam_init = function (cookiebase) {
         var xhr = new XMLHttpRequest();
         var method = formdata ? "POST" : "GET"
         xhr.open(method, target, false);
-        xhr.send(formdata);
+
+        try {
+            xhr.send(formdata);
+        } catch(e) {
+            spam.notify('OPAMD service is unaviable please use DOWNLOAD button', 'error');
+            return {'status':'error', 'xhr':''}
+        }
+
         if (xhr.status == 200 || xhr.status == 0) {
             if (xhr.getResponseHeader("Content-Type") == 'application/json; charset=utf-8') {
                 var result = JSON.parse(xhr.responseText);
