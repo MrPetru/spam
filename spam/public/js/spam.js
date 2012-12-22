@@ -132,7 +132,7 @@ spam_init = function (cookiebase) {
         try {
             xhr.send(formdata);
         } catch(e) {
-            spam.notify('OPAMD service is unaviable please use DOWNLOAD button', 'error');
+            spam.notify('OPAMD service is unavailable', 'error');
             return {'status':'error', 'xhr':''}
         }
 
