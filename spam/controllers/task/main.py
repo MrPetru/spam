@@ -164,6 +164,33 @@ class Controller(RestController):
         
         tmpl_context.all_filter_values = all_filter_values
         
+        def cpmModified(a, b):
+            ma = a.modified_entries
+            mb = b.modified_entries
+            sa = 0
+            sb = 0
+            for m in ma:
+                if m.user == user:
+                    sa = int(m.modified)
+            
+            for m in mb:
+                if m.user == user:
+                    sb = int(m.modified)
+                
+            return sb - sa
+            
+        def cmpCategory(a, b):
+            return a.category.ordering - b.category.ordering
+            
+        def cmpName(a, b):
+            if a.name > b.name:
+                return 1
+            return -1
+        
+        assets.sort(cmp=cmpName)
+        assets.sort(cmp=cmpCategory)    
+        assets.sort(cmp=cpmModified)
+        
         return dict(page='user_tasks', sidebar=('projects', project.id),
             assets=assets)
 
