@@ -501,7 +501,7 @@ class Libgroup(DeclarativeBase):
         self.name = name
         if parent: self.parent_id = parent.id
         self.description = description
-        hashable = '%s-%s' % (self.parent_id, self.name)
+        hashable = '%s-%s-%s' % (self.proj_id, self.parent_id, self.name)
         self.id = sha1(hashable.encode('utf-8')).hexdigest()
         self.container = AssetContainer(self.id, u'libgroup')
         self.taggable = Taggable(self.id, u'libgroup')
