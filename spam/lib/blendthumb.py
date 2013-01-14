@@ -28,6 +28,7 @@ To run automatically with nautilus:
 """
 
 import struct
+import sys
 
 
 def open_wrapper_get():
@@ -85,6 +86,14 @@ def blend_extract_thumb(path):
     sizeof_bhead = 24 if is_64_bit else 20
     int_endian_pair = '>ii' if is_big_endian else '<ii'
 
+    pyVer = sys.version_info
+    isPy25 = False
+    
+    if pyVer[0] == 2 and pyVer[1] == 5:
+        isPy25 = True
+    
+    offset_from_begin = 12 + sizeof_bhead
+
     while True:
         bhead = blendfile.read(sizeof_bhead)
 
@@ -94,7 +103,11 @@ def blend_extract_thumb(path):
         code, length = struct.unpack(int_endian_pair, bhead[0:8])  # 8 == sizeof(int) * 2
 
         if code == REND:
-            blendfile.seek(length, os.SEEK_CUR)
+            if isPy25:
+                offset_from_begin += length
+                blendfile.seek(offset_from_begin)
+            else:
+                blendfile.seek(length, os.SEEK_CUR)
         else:
             break
 
