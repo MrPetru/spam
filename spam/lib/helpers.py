@@ -62,9 +62,8 @@ class widget_actions():
                             ((cur_user in asset_json['supervisor_ids']) or 
                             (cur_user in asset_json['artist_ids']) or (cur_user == receiver)))
                             
-        display_flags[4] = int(asset_json['checkedout'] and ((cur_user in 
-                            asset_json['artist_ids']) or (cur_user in 
-                            asset_json['supervisor_ids']) or (cur_user == asset_json['owner_id'])))
+        display_flags[4] = int(asset_json['checkedout'] and
+                                (cur_user == asset_json['owner_id'] or cur_user in asset_json['supervisor_ids']))
         
         display_flags[5] = int(cur_user == asset_json['owner_id'] and 
                                 (not asset_json['approved']) and
