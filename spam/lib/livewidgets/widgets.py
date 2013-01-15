@@ -241,9 +241,7 @@ class Image(LiveWidget):
 
     def prepare(self):
         if (self.id == 'thumbnail') or (self.id == 'maxithumbnail'):
-            if self.data.has_key('thumbnail') and self.data['thumbnail'] == '':
-            #if self.value == '' or self.value == None:
-                #self.parent.css_class = 'thumbnail_image_not_found'
+            if self.data and (not self.data['has_preview']):
                 self.src = url("/themes/default/images/preview_not_found.png")
                 self.help_text = ''
             else:
@@ -251,7 +249,7 @@ class Image(LiveWidget):
         else:
             # use widget value if "src" was not given
             self.src = self.src or self.value or ''
-        #print self.data
+
         super(Image, self).prepare()
 
 

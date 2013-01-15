@@ -654,15 +654,15 @@ class TableAssetHistory(twl.LiveTable):
     """Asset history livetable."""
     show_headers = False
     thumbnail = twl.LiveThumbnail()
-    fmtver = twl.Text(help_text='ver')
+    fmtver = twl.Text(help_text='version number')
+    user_name = twl.Text(help_text='submitted by')
     note = twl.Box(
         children=[
             twl.Text(id='header',
                 css_class='note_header',
                 help_text=''),
             twl.Text(id='text',
-                #css_class='note_header',
-                help_text=''),
+                help_text='version description'),
 #            twl.Box(id='lines',
 #                children=[
 #                    twl.Text(id='item_line',

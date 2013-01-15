@@ -126,15 +126,12 @@ class Controller(RestController):
         # thumb, ver, note
         history = []
         for ver in asset.versions:
-            if 0:#ver.notes:
-                for note in ver.notes:
-                    history.append(dict(id=None, proj_id=None, thumbnail=None,
-                                    ver=None, fmtver=None, header=note.header,
-                                    text=note.text, lines=note.lines))
-            else:
-                history.append(dict(id=None, proj_id=None, thumbnail=None,
-                                    ver=None, fmtver=None, header='',
-                                    text='', lines=[]))
+            if ver.ver == 0:
+                continue
+
+            history.append(dict(id=None, proj_id=None, thumbnail=None,
+                                ver=None, fmtver=None, header='',
+                                text='', lines=[]))
             
             history[-1]['id'] = ver.id
             history[-1]['proj_id'] = ver.asset.proj_id
@@ -143,6 +140,7 @@ class Controller(RestController):
             history[-1]['thumbnail'] = ver.thumbnail
             history[-1]['ver'] = ver.ver
             history[-1]['fmtver'] = ver.fmtver
+            history[-1]['user_name'] = ver.user.user_name
         
         return dict(asset=asset, history=history)
 
