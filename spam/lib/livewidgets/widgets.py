@@ -241,7 +241,7 @@ class Image(LiveWidget):
 
     def prepare(self):
         if (self.id == 'thumbnail') or (self.id == 'maxithumbnail'):
-            if self.data and (not self.data['has_preview']):
+            if self.data and self.data.has_key('has_preview') and not self.data['has_preview']:
                 self.src = url("/themes/default/images/preview_not_found.png")
                 self.help_text = ''
             else:
