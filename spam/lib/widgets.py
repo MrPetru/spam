@@ -1259,6 +1259,9 @@ class FormAssetPublish(RestForm):
                     required=True))
     uploader = Upload(label='File(s) to Upload')
     spacer = twf.Spacer()
+    revision = twf.CheckBox()
+    receiver = twf.SingleSelectField(label='send to', options=[],
+            validator=twc.All(StringLength(max=30)), default='')
     comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)
 
 

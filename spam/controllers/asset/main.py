@@ -409,6 +409,11 @@ class Controller(RestController):
                                asset_name_=asset.name,
                               )
         
+        supervisors = asset.supervisors
+        supervisor_choices = []
+        supervisor_choices.extend([s.user_name for s in supervisors])
+        f_publish.child.children.receiver.options = supervisor_choices
+        
         name, ext = os.path.splitext(asset.name)
         f_publish.child.children.uploader.ext = ext
         tmpl_context.form = f_publish
@@ -420,7 +425,7 @@ class Controller(RestController):
     @require(is_asset_owner())
     @expose('json')
     @validate(f_publish, error_handler=get_publish)
-    def post_publish(self, proj, asset_id, uploaded, comment=None,
+    def post_publish(self, proj, asset_id, uploaded, receiver, revision=False, comment=None,
                                                                 uploader=None):
         """Publish a new version of an asset.
 
@@ -487,6 +492,9 @@ class Controller(RestController):
 
         # notify clients
         notify.send(updates)
+
+        if revision:
+            return self.post_submit(proj, asset_id, user.id, "", receiver, comment, uploader)
 
         return dict(msg=msg, status='ok', updates=updates)
 
