@@ -1371,6 +1371,36 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
                             icon_class='icon_history',
                             help_text='asset history'),
                 ]),
+                twl.ActionButton(id='newattach',
+                    index = '1',
+                    condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+                    action=url('/attach/%(proj_id)s/%(id)s/attach'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='newattach',
+                            icon_class='icon_edit',
+                            help_text='add note'),
+                ]),
+                twl.Link(id='download_link',
+                    index = '2',
+                    condition='data.current_ver && data.current_ver>0',
+                    dest=url('/asset/%(proj_id)s/%(current_id)s/download'),
+                    children=[
+                        twl.Icon(id='download',
+                            icon_class='icon_download',
+                            help_text='download',
+                        )
+                ]),
+                twl.ActionButton(id='newtask',
+                        index = '13',
+                        condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
+                        action=url('/task/%(proj_id)s/%(id)s/new'),
+                        dialog=True,
+                        children=[
+                            twl.Icon(id='newtask',
+                                icon_class='icon_task',
+                                help_text='new task'),
+                ]),
                 twl.ActionButton(id='checkout',
                     index = '3',
                     condition=('!data["checkedout"] && !data["approved"] '
@@ -1393,27 +1423,6 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
                             icon_class='icon_release',
                             help_text='release'),
                 ]),
-                twl.ActionButton(id='publish',
-                        index = '5',
-                        condition=('data.checkedout '
-                            '&& data.user_id==data.owner_id'),
-                        action=url('/asset/%(proj_id)s/%(id)s/publish'),
-                        dialog=True,
-                        children=[
-                            twl.Icon(id='publish',
-                                icon_class='icon_publish',
-                                help_text='publish a new version'),
-                ]),
-                twl.Link(id='download_link',
-                    index = '2',
-                    condition='data.current_ver && data.current_ver>0',
-                    dest=url('/asset/%(proj_id)s/%(current_id)s/download'),
-                    children=[
-                        twl.Icon(id='download',
-                            icon_class='icon_download',
-                            help_text='download',
-                        )
-                ]),
                 twl.ActionButton(id='open_link',
                     index = '12',
                     condition=('data.approved '
@@ -1425,15 +1434,62 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
                             icon_class='icon_open',
                             help_text='open'),
                 ]),
-                twl.ActionButton(id='newtask',
-                        index = '13',
-                        condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
-                        action=url('/task/%(proj_id)s/%(id)s/new'),
+                twl.ActionButton(id='publish',
+                        index = '5',
+                        condition=('data.checkedout '
+                            '&& data.user_id==data.owner_id'),
+                        action=url('/asset/%(proj_id)s/%(id)s/publish'),
                         dialog=True,
                         children=[
-                            twl.Icon(id='newtask',
-                                icon_class='icon_task',
-                                help_text='new task'),
+                            twl.Icon(id='publish',
+                                icon_class='icon_publish',
+                                help_text='publish a new version'),
+                ]),
+                
+                twl.ActionButton(id='submit', icon_class='submit',
+                    index = '6',
+                    condition=('data["checkedout"] && data["current_ver"]>0 '
+                        '&& !data["submitted"] && !data["approved"] '
+                        '&& data["user_id"]==data["owner_id"]'),
+                    action=url('/asset/%(proj_id)s/%(id)s/submit'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='submit',
+                            icon_class='icon_submit',
+                            help_text='submit for revision'),
+                ]),
+                twl.ActionButton(id='recall',
+                    index = '7',
+                    condition=('data["submitted"] && !data["approved"] '
+                        '&& data["user_id"]==data["owner_id"]'),
+                    action=url('/asset/%(proj_id)s/%(id)s/recall'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='recall',
+                            icon_class='icon_recall',
+                            help_text='recall submission'),
+                ]),
+                twl.ActionButton(id='sendback',
+                    index = '9',
+                    condition=('data.submitted && !data.approved '
+                        '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
+                    action=url('/asset/%(proj_id)s/%(id)s/sendback'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='sendback',
+                            icon_class='icon_sendback',
+                            help_text='send back for revisions'),
+                ]),
+                twl.ActionButton(id='approve',
+                    index = '8',
+                    condition=('data.submitted && !data.approved '
+                        '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
+                    action=url('/asset/%(proj_id)s/%(id)s/approve'),
+                    dialog=True,
+                    children=[
+                        twl.Icon(id='approve',
+                            icon_class='icon_approve',
+                            help_text='approve'),
                 ]),
                 ])
             )
@@ -1505,84 +1561,6 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
                 ),
             ]),
         
-        ##########
-        
-        taskactions = twl.LiveCompoundWidget(
-            template = 'mako:spam.templates.task.compound',
-            maker_template = 'mako:spam.templates.task.compound_maker',
-            css_class = 'taskactions', # rightside
-            parent_css_class = '',
-            actions = twl.BoxAction(
-
-            children=[
-#                twl.Button(id='addnote',
-#                    index = '1',
-#                    action=url('/note/%(proj_id)s/%(current_id)s/new'),
-#                    dialog=True,
-#                    children=[
-#                        twl.Icon(id='addnote',
-#                            icon_class='icon_edit',
-#                            help_text='add note'),
-#                ]),
-                twl.ActionButton(id='submit', icon_class='submit',
-                    index = '6',
-                    condition=('data["checkedout"] && data["current_ver"]>0 '
-                        '&& !data["submitted"] && !data["approved"] '
-                        '&& data["user_id"]==data["owner_id"]'),
-                    action=url('/asset/%(proj_id)s/%(id)s/submit'),
-                    dialog=True,
-                    children=[
-                        twl.Icon(id='submit',
-                            icon_class='icon_submit',
-                            help_text='submit for revision'),
-                ]),
-                twl.ActionButton(id='recall',
-                    index = '7',
-                    condition=('data["submitted"] && !data["approved"] '
-                        '&& data["user_id"]==data["owner_id"]'),
-                    action=url('/asset/%(proj_id)s/%(id)s/recall'),
-                    dialog=True,
-                    children=[
-                        twl.Icon(id='recall',
-                            icon_class='icon_recall',
-                            help_text='recall submission'),
-                ]),
-                twl.ActionButton(id='sendback',
-                    index = '9',
-                    condition=('data.submitted && !data.approved '
-                        '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
-                    action=url('/asset/%(proj_id)s/%(id)s/sendback'),
-                    dialog=True,
-                    children=[
-                        twl.Icon(id='sendback',
-                            icon_class='icon_sendback',
-                            help_text='send back for revisions'),
-                ]),
-                twl.ActionButton(id='approve',
-                    index = '8',
-                    condition=('data.submitted && !data.approved '
-                        '&& $.inArray(data.user_id, data.supervisor_ids)>=0'),
-                    action=url('/asset/%(proj_id)s/%(id)s/approve'),
-                    dialog=True,
-                    children=[
-                        twl.Icon(id='approve',
-                            icon_class='icon_approve',
-                            help_text='approve'),
-                ]),
-                twl.ActionButton(id='newattach',
-                    index = '1',
-                    condition='$.inArray(data.user_id, data.project.admin_ids)>=0',
-                    action=url('/attach/%(proj_id)s/%(id)s/attach'),
-                    dialog=True,
-                    children=[
-                        twl.Icon(id='newattach',
-                            icon_class='icon_edit',
-                            help_text='add note'),
-                ]),
-            ])
-            ),
-        
-        ##########
         current_task_notes = twl.LiveRepeating(
             id = 'current_task_notes',
             template = 'mako:spam.templates.task.repeating',
