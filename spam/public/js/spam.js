@@ -127,6 +127,32 @@ spam_init = function (cookiebase) {
         formdata = typeof(formdata)!='undefined' ? formdata : null;
         var xhr = new XMLHttpRequest();
         var method = formdata ? "POST" : "GET"
+        
+        /*
+        separate actions for opam and opamd
+        */
+        var targets = target.split("_opamd")
+        target = targets[0]
+        
+        if (targets.length == 2) {
+            /*
+            make a silent call to opamd
+            */
+            
+            var xhr_opamd = new XMLHttpRequest();
+            var method_opamd = "GET"
+            var target_opamd = targets[1]
+            
+            xhr_opamd.open(method_opamd, target_opamd, false);
+            
+            try {
+                xhr_opamd.send(formdata);
+            } catch(e) {
+                // do nothing on error
+            }
+        
+        }
+        
         xhr.open(method, target, false);
 
         try {

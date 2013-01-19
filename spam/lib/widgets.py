@@ -518,7 +518,7 @@ class TableAssets(twl.LiveTable):
                 condition=('!data.checkedout && !data.approved '
                     '&& ($.inArray(data.user_id, data.supervisor_ids)>=0 '
                     '|| $.inArray(data.user_id, data.artist_ids)>=0)'),
-                action=url('/asset/%(proj_id)s/%(id)s/checkout'),
+                action=url('/asset/%(proj_id)s/%(id)s/checkout_opamdhttp://localhost:8083/createdirectory?path=%(proj_id)s/%(path)s'),
                 children=[
                     twl.Icon(id='checkout',
                         icon_class='icon_checkout',
@@ -1406,7 +1406,7 @@ class TaskAssetDescription(twl.LiveContainer): # repeating widget
                     condition=('!data["checkedout"] && !data["approved"] '
                         '&& ($.inArray(data["user_id"], data["supervisor_ids"])>=0 '
                         '|| $.inArray(data["user_id"], data["artist_ids"])>=0)'),
-                    action=url('/asset/%(proj_id)s/%(id)s/checkout'),
+                    action=url('/asset/%(proj_id)s/%(id)s/checkout_opamdhttp://localhost:8083/createdirectory?path=%(proj_id)s/%(path)s'),
                     children=[
                         twl.Icon(id='checkout',
                             icon_class='icon_checkout',
