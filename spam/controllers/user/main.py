@@ -216,7 +216,7 @@ class Controller(RestController):
                       'add_admins', 'remove_admin',
                       'add_supervisors', 'remove_supervisor',
                       'add_artists', 'remove_artist',
-                      'change_password',
+                      'change_password', 'change_user_password',
                      ]
                      
     @require(not_anonymous())
@@ -234,6 +234,26 @@ class Controller(RestController):
         user = tmpl_context.user
         user.password = new_password
         msg = '%s %s' % (_('Changed password for User:'), user.user_id)
+
+        # log into Journal
+        journal.add(user, '%s' % msg)
+
+        # notify clients
+        updates = [dict(item=user, type='updated', topic=TOPIC_USERS)]
+        notify.send(updates)
+        return dict(msg=msg, status='ok', updates=updates)
+        
+    @require(in_group('administrators'))
+    @expose('json')
+    @expose('spam.templates.forms.result')
+    #@validate(f_change_password, error_handler=get_change_password)
+    def get_change_user_password(self, user_id, new_password):
+        """Change password for targetuser"""
+        user = tmpl_context.user
+        user.password = new_password
+        targetuser = user_get(user_id)
+        targetuser.password = new_password
+        msg = '%s %s %s' % (user.user_id, _(' changed password for User:'), targetuser.user_id)
 
         # log into Journal
         journal.add(user, '%s' % msg)
