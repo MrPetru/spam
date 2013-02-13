@@ -114,7 +114,7 @@ class Controller(RestController):
         project = tmpl_context.project
         user = tmpl_context.user
         
-        # get all tasks for current user
+        # get all tasks
         tasks = task_get_all().filter(Task.parent_asset!=None).all()
         
         all_filter_values = ['wip', 'idle', 'approved', 'submitted', 'rejected', 'library', 'scene', 'None', 'modified']
@@ -123,6 +123,11 @@ class Controller(RestController):
         assets = []
         for t in tasks:
             if t.parent_asset.project == project:
+				# if current user is in project admin list the show all tasks
+                if user in project.admins:
+                    assets.append(t.parent_asset)
+                    all_filter_values.append(t.parent_asset.name)
+                    continue
                 if (t.receiver == user or t.sender == user or t.parent_asset.owner == user):
                     assets.append(t.parent_asset)
                     all_filter_values.append(t.parent_asset.name)
