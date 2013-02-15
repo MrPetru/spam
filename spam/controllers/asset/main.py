@@ -654,7 +654,10 @@ class Controller(RestController):
             
             old_task = asset.current_task
             task_name = u'Recalled: %s' % old_task.previous_task.name
-            new_task = Task(task_name, comment, asset, old_task.receiver, receiver)
+            if old_task.receiver == None:
+                new_task = Task(task_name, comment, asset, receiver, receiver)
+            else:
+                new_task = Task(task_name, comment, asset, old_task.receiver, receiver)
             new_task.previous_task = old_task
             
             asset.current.notes.append(Note(user, action, text, new_task))
