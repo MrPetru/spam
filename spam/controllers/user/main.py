@@ -87,7 +87,7 @@ class Controller(RestController):
     def get_one(self, name):
         """Handle the `home` page."""
         return dict(page="%s's home" % tmpl_context.user.user_name,
-                                                    sidebar=('user', 'home'))
+                                                    sidebar=('user', 'home'), status='ok')
 
     @require(in_group('administrators'))
     @expose('spam.templates.forms.form')

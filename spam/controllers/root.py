@@ -150,6 +150,9 @@ class RootController(SPAMBaseController):
         path = os.path.join(G.REPOSITORY, path)
         if not os.path.exists(path):
             raise HTTPNotFound().exception
+
+        if os.path.isdir(path):
+            raise HTTPNotFound().exception
         
         # set the correct content-type so the browser will know what to do
         content_type, encoding = mimetypes.guess_type(path)

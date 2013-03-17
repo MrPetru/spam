@@ -299,9 +299,33 @@ class Controller(RestController):
     
     # Custom REST-like actions
     _custom_actions = ['checkout', 'release', 'publish', 'submit', 'recall',
-                      'sendback', 'approve', 'revoke', 'download']
+                      'sendback', 'approve', 'revoke', 'download', 'id']
     
     
+    @project_set_active
+    @require(Any(is_project_admin(), is_project_user()))
+    @expose('json')
+    def get_id(self, proj, path):
+
+        user = tmpl_context.user
+        #print(path, proj)
+
+        updates = None
+        session = session_get()
+        assetAll = session.query(Asset).all()
+        for a in assetAll:
+            if a.path == path:
+                if a.proj_id == proj:
+                    assetInfo = dict()
+                    if a.owner != user:
+                        assetInfo["own"] = False
+                    else:
+                        assetInfo["own"] = True
+                    assetInfo.update(dict(assetId=a.id, containerType=a.parent.association_type, containerId=a.parent.id))
+                    return dict(msg="got id", status="ok", updates=[assetInfo])
+
+        return dict(msg="can't find id for specified file", status="error", updates = [])
+
     @project_set_active
     @asset_set_active
     @require(Any(is_asset_supervisor(), is_asset_artist()))
