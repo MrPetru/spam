@@ -20,13 +20,14 @@
 spam_init = function (cookiebase) {
     /* we put all of our functions and objects inside "spam" so we don't clutter
      * the namespace */
-    spam = new(Object);
-    spam.temp = new(Object);
+    spam = new (Object);
+    spam.temp = new (Object);
 
     /* if firebug is not active we create a fake "console" */
-    if (typeof(console)=="undefined") {
-        console = new(Object);
-        console.log = function() {};
+    if (typeof(console) == "undefined") {
+        console = new (Object);
+        console.log = function () {
+        };
     }
 
 
@@ -34,44 +35,44 @@ spam_init = function (cookiebase) {
      * Toggles
      **********************************************************************/
     spam.toggles_activate = function (select) {
-        if (typeof(select)=="undefined" || select==null) {
+        if (typeof(select) == "undefined" || select == null) {
             select = "";
         }
 
         /* set toggle state based on cookies (toggles without an id are skipped)*/
-        $(select + " .toggle").each(function() {
+        $(select + " .toggle").each(function () {
             id = this.id;
             if (id) {
-                if ($.cookie('spam_toggle_'+id)=="expanded")
+                if ($.cookie('spam_toggle_' + id) == "expanded")
                     $(this).addClass("expanded");
-                else if ($.cookie('spam_toggle_'+id)=="collapsed")
+                else if ($.cookie('spam_toggle_' + id) == "collapsed")
                     $(this).removeClass("expanded");
             }
-        });            
-        
+        });
+
         /* instrument arrows to open and close the toggle */
-        $(select + " .toggle_arrow").click(function(event){
+        $(select + " .toggle_arrow").click(function (event) {
             toggle = $(this).parents(".toggle:first");
             id = toggle.attr("id");
-            
+
             if (toggle.hasClass('expanded')) {
                 $('> .toggleable', toggle).hide('fast');
                 if (id)
-                    $.cookie('spam_toggle_'+id, "collapsed", {path: cookiebase});
+                    $.cookie('spam_toggle_' + id, "collapsed", {path: cookiebase});
             } else {
                 $('> .toggleable', toggle).show('fast');
                 if (id)
-                    $.cookie('spam_toggle_'+id, "expanded", {path: cookiebase});
+                    $.cookie('spam_toggle_' + id, "expanded", {path: cookiebase});
             }
             toggle.toggleClass('expanded');
             return false;
         });
 
-    }
-    
+    };
+
     spam.toggles_activate_oldtasks = function () {
         /* set toggle function for old tasks */
-        $("#oldtasks .oldtasks").click(function(event){
+        $("#oldtasks").find(".oldtasks").click(function (event) {
             toggle = $(this).parents("div:first");
             if (toggle.hasClass('expanded')) {
                 $('> .taskbody', toggle).hide('fast');
@@ -81,107 +82,108 @@ spam_init = function (cookiebase) {
             toggle.toggleClass('expanded');
             return false;
         });
-    }
+    };
 
 
     /****************************************
      * Sidebar
      ****************************************/
-    spam.sidebar_set_active = function(sidebar, item) {
+    spam.sidebar_set_active = function (sidebar, item) {
         if (sidebar && item) {
-            sbid = "#sb_"+sidebar;
-            itemclass = "."+item;
-            
+            sbid = "#sb_" + sidebar;
+            itemclass = "." + item;
+
             $(sbid).addClass("active");
             $(itemclass, $(sbid)).addClass("active");
         }
-    }
+    };
 
 
     /****************************************
      * Notification
      ****************************************/
-    spam.notify = function(msg, status) {
-        $("#notify div").attr("class", status).html(msg).slideDown(function() {
-            setTimeout(function() {
-                $("#notify div").slideUp();
+    spam.notify = function (msg, status) {
+        $("#notif").find("div").attr("class", status).html(msg).slideDown(function () {
+            setTimeout(function () {
+                $("#notify").find("div").slideUp();
             }, 2500);
         });
-    }
+    };
 
 
     /****************************************
      * tw2.livewidgets
      ****************************************/
-    if (typeof(lw)!='undefined') {
+    if (typeof(lw) != 'undefined') {
         spam.widget_update = lw.update;
     } else {
-        spam.widget_update = function() {};
+        spam.widget_update = function () {
+        };
     }
 
 
     /****************************************
      * Actions
      ****************************************/
-    spam.action = function(target, formdata) {
-        formdata = typeof(formdata)!='undefined' ? formdata : null;
+    spam.action = function (target, formdata) {
+        formdata = typeof(formdata) != 'undefined' ? formdata : null;
         var xhr = new XMLHttpRequest();
-        var method = formdata ? "POST" : "GET"
-        
+        var method = formdata ? "POST" : "GET";
+
         /*
-        separate actions for opam and opamd
-        */
-        var targets = target.split("_opamd")
-        target = targets[0]
-        
+         separate actions for opam and opamd
+         */
+        var targets = target.split("_opamd");
+        target = targets[0];
+
         if (targets.length == 2) {
             /*
-            make a silent call to opamd
-            */
-            
+             make a silent call to opamd
+             */
+
             var xhr_opamd = new XMLHttpRequest();
-            var method_opamd = "GET"
-            var target_opamd = targets[1]
-            
+            var method_opamd = "GET";
+            var target_opamd = targets[1];
+
             xhr_opamd.open(method_opamd, target_opamd, false);
-            
+
             try {
                 xhr_opamd.send(formdata);
-            } catch(e) {
+            } catch (e) {
                 // do nothing on error
             }
-        
+
         }
-        
+
         xhr.open(method, target, false);
 
         try {
             xhr.send(formdata);
-        } catch(e) {
+        } catch (e) {
             spam.notify('OPAMD service is unavailable', 'error');
-            return {'status':'error', 'xhr':''}
+            return {'status': 'error', 'xhr': ''}
         }
 
         if (xhr.status == 200 || xhr.status == 0) {
             if (xhr.getResponseHeader("Content-Type") == 'application/json; charset=utf-8') {
                 var result = JSON.parse(xhr.responseText);
-                $.each(result.updates, function() {
+                $.each(result.updates, function () {
                     var topic = this.topic;
                     var item = this.item;
-                    var type = this.type!=null ? this.type : 'updated';
-                    var show_updates = this.show_updates!=null ? this.show_updates : true;
-                    var extra_data = this.extra_data!=null ? this.extra_data : {};
-                    var filter = this.filter!=null ? this.filter : '';
+                    var type = this.type != null ? this.type : 'updated';
+                    var show_updates = this.show_updates != null ? this.show_updates : true;
+                    var extra_data = this.extra_data != null ? this.extra_data : {};
+                    var filter = this.filter != null ? this.filter : '';
                     spam.widget_update(topic, type, item, show_updates, extra_data, filter);
                 });
                 spam.notify(result.msg, result.status);
-                return {'status':'ok', 'xhr': xhr};
+                return {'status': 'ok', 'xhr': xhr};
             } else {
-                return {'status':'notjson', 'xhr': xhr};
+                return {'status': 'notjson', 'xhr': xhr};
             }
         } else {
             spam.notify(xhr.statusText, 'error');
-            return {'status':'error', 'xhr': xhr};
+            return {'status': 'error', 'xhr': xhr};
         }
     }
 
@@ -189,37 +191,38 @@ spam_init = function (cookiebase) {
     /****************************************
      * Dialog
      ****************************************/
-	spam.dialog_load = function(elem) {
-        $("#dialog").dialog("destroy").dialog({
-	        modal: true,
+    spam.dialog_load = function (elem) {
+        var dialog_el = $("#dialog");
+        dialog_el.dialog("destroy").dialog({
+            modal: true,
             width: "70%",
-	        height: 600,
-	        closeText: '',
+            height: 600,
+            closeText: ''
         });
         $(".ui-dialog").addClass("loading");
-        $("#dialog").hide().html("").load(elem.href, function(response, status, xhr) {
+        dialog_el.hide().html("").load(elem.href, function (response, status, xhr) {
             $(".ui-dialog").removeClass("loading");
-            if (status=='error') {
-	            $(".ui-dialog-titlebar > span").html("error: " + xhr.status);
+            if (status == 'error') {
+                $(".ui-dialog-titlebar > span").html("error: " + xhr.status);
                 $("#dialog").html(xhr.statusText);
             } else {
-                $("#dialog h1").hide();
+                dialog_el.find("h1").hide();
                 $(".ui-dialog-titlebar > span").html($("#dialog h1").html());
             }
-            $("#dialog").fadeIn();
-            if ( $("#comment", this).length != 0 ) {
+            dialog_el.fadeIn();
+            if ($("#comment", this).length != 0) {
                 $("#comment", this).cleditor();
             } else {
                 $("#description", this).cleditor();
-            };
+            }
         });
-    }
+    };
 
-    spam.submit_dialog = function(form) {
+    spam.submit_dialog = function (form) {
         $(form).addClass("loading");
         $("#submit", form).attr("disabled", "disabled");
         var target = $(form).attr("action") + '.json';
-        if ( $("#uploader:file").length > 0 ) {
+        if ($("#uploader:file").length > 0) {
             $("#uploader:file")[0].value = ""
         }
         var formdata = new FormData(form);
@@ -227,32 +230,32 @@ spam_init = function (cookiebase) {
         $(form).removeClass("loading");
         $("#submit", form).removeAttr("disabled");
 
-        if (result.status=='ok') {
+        if (result.status == 'ok') {
             $("#dialog").dialog("destroy");
-        } else if (result.status=='notjson') {
+        } else if (result.status == 'notjson') {
             $("#dialog").hide().html(result.xhr.responseText);
-            $("#dialog h1").hide();
+            $("#dialog").find("h1").hide();
             $("#dialog").fadeIn();
-            
-            if ( $("#comment").length != 0 ) {
+
+            if ($("#comment").length != 0) {
                 $("#comment").cleditor();
             } else {
                 $("#description").cleditor();
-            };
-            
+            }
+
         } else {
             $("#dialog").dialog("destroy");
         }
-    }
-    
+    };
+
     /* instrument action to get description */
-    spam.task_tab_activate = function() {
-        $(".actiondescription").live("click", function(e) {
+    spam.task_tab_activate = function () {
+        $(".actiondescription").live("click", function (e) {
             $(".actiondescription > td").removeClass("onfocus");
             $.ajax({
                 type: "GET",
                 url: $(this).children('.actionurl').attr("value"),
-                success: function(msg){
+                success: function (msg) {
                     $(".assetdescription").hide().html(msg).fadeIn('fast');
                 }
             });
@@ -260,51 +263,51 @@ spam_init = function (cookiebase) {
 
             return false;
         });
-    }
-    
+    };
+
     /* toggle visibiliti of side bar */
-    spam.toggle_side_bar = function() {
-        $("#sidetogglevisible").live("click", function(e) {
+    spam.toggle_side_bar = function () {
+        $("#sidetogglevisible").live("click", function (e) {
             var position = $("#side").position();
             if (position.left == 0) {
-                $("#side").css("left","-205px");
+                $("#side").css("left", "-205px");
             } else {
-                $("#side").css("left","0");
+                $("#side").css("left", "0");
             }
         });
     }
 
 
-
     /****************************************
      * Startup function
      ****************************************/
-    $(function() {
+    $(function () {
         spam.toggles_activate();
 
         /* make #flash slide in and out */
-        $("#flash div").hide().slideDown(function() {
-            setTimeout(function() {
-                $("#flash div").slideUp();
+        $("#flash").find("div").hide().slideDown(function () {
+            setTimeout(function () {
+                $("#flash").find("div").slideUp();
             }, 2500);
         });
 
-	    /* instrument action buttons */
-	    $(".action").live("click", function(e) {
-	        spam.action($(this).attr("href"));
-	        return false;
+        /* instrument action buttons */
+        $(".action").live("click", function (e) {
+            spam.action($(this).attr("href"));
+            return false;
         });
 
-	    /* instrument dialog buttons */
-	    $(".dialog").live("click", function(e) {
-	        spam.dialog_load(this);
-	        return false;
+        /* instrument dialog buttons */
+        $(".dialog").live("click", function (e) {
+
+            spam.dialog_load(this);
+            return false;
         });
-        
+
         spam.task_tab_activate();
         spam.toggle_side_bar();
-        
-     });
-}
+
+    });
+};
 
 

@@ -36,7 +36,7 @@ from utils import MappedList, mapped_list, diff_dicts, compute_status
 # Global session manager: DBSession() returns the Thread-local
 # session object appropriate for the current web request.
 maker = sessionmaker(autoflush=True, autocommit=False,
-                     extension=ZopeTransactionExtension())
+                     extension=ZopeTransactionExtension(), expire_on_commit=False)
 DBSession = scoped_session(maker)
 
 # Migrate versioning
@@ -62,6 +62,6 @@ from helpers import attach_get, modifier_send, modifier_delete_all
 # Init model
 def init_model(engine):
     """Call me before using any of the tables or classes in the model."""
-    
+
     DBSession.configure(bind=engine)
 

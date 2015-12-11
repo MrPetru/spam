@@ -24,7 +24,7 @@ from datetime import datetime
 from pylons import cache
 from tg import config
 from sqlalchemy import create_engine, and_
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from spam.lib.exceptions import SPAMDBError, SPAMDBNotFound
 from spam.model import DBSession, Project, Scene, Shot, Libgroup, Asset

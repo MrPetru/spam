@@ -32,7 +32,9 @@
 			        tab.removeClass('loading');
 		        });
 		    }
-	    }).history();
+	    });
+	    // this function is not working and for now I can't find an alternative.
+	    //.history();
     });
 </script>
 

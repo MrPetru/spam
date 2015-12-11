@@ -37,7 +37,7 @@ import sqlalchemy
 def is_saobject(obj):
     return hasattr(obj, '_sa_class_manager')
 
-from sqlalchemy.engine.base import ResultProxy, RowProxy
+from sqlalchemy.engine import ResultProxy, RowProxy
 
 
 # JSON Encoder class

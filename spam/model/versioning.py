@@ -22,7 +22,8 @@
 
 from tg import config
 from migrate.versioning import api as migrate_api
-from migrate.versioning.exceptions import DatabaseAlreadyControlledError
+# from migrate.versioning.exceptions import DatabaseAlreadyControlledError
+from migrate.exceptions import DatabaseAlreadyControlledError
 from spam.model import DBSession
 
 # DB versioning
@@ -54,11 +55,11 @@ def db_upgrade(name, version=None):
     db_url = config.db_url_tmpl % name
     migrate_repo = config.db_migrate_repo
     migrate_api.upgrade(db_url, migrate_repo, version)
-    
+
 def db_downgrade(name, version):
     """Downgrade database ``name`` schema."""
     db_url = config.db_url_tmpl % name
     migrate_repo = config.db_migrate_repo
     migrate_api.downgrade(db_url, migrate_repo, version)
-    
+
 

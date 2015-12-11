@@ -48,6 +48,8 @@ base_config.package = spam
 base_config.default_renderer = 'mako'
 base_config.renderers.append('mako')
 base_config.renderers.append('json')
+
+base_config.custom_tw2_config['rendering_extension_lookup'] = {'mako': 'mak'}
 # if you want raw speed and have installed chameleon.genshi
 # you should try to use this renderer instead.
 # warning: for the moment chameleon does not handle i18n translations

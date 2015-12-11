@@ -20,23 +20,24 @@
 #
 """Scene main controller"""
 
+import logging
+
+from pylons.i18n import ugettext as _
 from tg import expose, url, tmpl_context, validate, require
 from tg.controllers import RestController
 from tg.decorators import with_trailing_slash
-from pylons.i18n import ugettext as _, lazy_ugettext as l_
-from spam.model import session_get, project_get, scene_get, Scene, diff_dicts
+
+from spam.lib import repo
+from spam.lib.decorators import project_set_active
+from spam.lib.journaling import journal
+from spam.lib.notifications import TOPIC_PROJECT_STRUCTURE
+from spam.lib.notifications import notify, TOPIC_SCENES
+from spam.lib.predicates import is_project_user, is_project_admin
 from spam.lib.widgets import FormSceneNew, FormSceneEdit, FormSceneConfirm
 from spam.lib.widgets import TableScenes
-from spam.lib import repo
-from spam.lib.notifications import notify, TOPIC_SCENES
-from spam.lib.notifications import TOPIC_PROJECT_STRUCTURE
-from spam.lib.journaling import journal
-from spam.lib.decorators import project_set_active
-from spam.lib.predicates import is_project_user, is_project_admin
-
+from spam.model import session_get, scene_get, Scene, diff_dicts
 from tabs import TabController
 
-import logging
 log = logging.getLogger(__name__)
 
 # form widgets
@@ -47,11 +48,12 @@ f_confirm = FormSceneConfirm(action=url('/scene'))
 # livetable widgets
 t_scenes = TableScenes(id='t_scenes')
 
+
 class Controller(RestController):
     """REST controller for managing scenes."""
-    
+
     tab = TabController()
-    
+
     @project_set_active
     @require(is_project_user())
     @expose('json')
@@ -72,7 +74,7 @@ class Controller(RestController):
 
         t_scenes.value = project.scenes
         t_scenes.extra_data = dict(project=project, user_id=user.user_id)
-        t_scenes.display_w=display
+        t_scenes.display_w = display
         tmpl_context.t_scenes = t_scenes
         return dict(page='scenes', sidebar=('projects', project.id), scenes=project.scenes)
 
@@ -92,13 +94,13 @@ class Controller(RestController):
     def get_one(self, proj, sc):
         """Return a `tabbed` page for scene tabs."""
         scene = scene_get(proj, sc)
-        
+
         tabs = [('Summary', 'tab/summary'),
                 ('Shots', url('/shot/%s/%s/' % (scene.project.id, scene.name))),
                 ('My Tasks', url('/task/get_all/%s' % scene.project.id)),
-               ]
-        return dict(page='%s' % scene.path, scene=scene, tabs=tabs, 
-                                        sidebar=('projects', scene.project.id))
+                ]
+        return dict(page='%s' % scene.path, scene=scene, tabs=tabs,
+                    sidebar=('projects', scene.project.id))
 
     @project_set_active
     @require(is_project_admin())
@@ -121,15 +123,15 @@ class Controller(RestController):
         session = session_get()
         user = tmpl_context.user
         project = tmpl_context.project
-        
+
         # add scene to db
         scene = Scene(project.id, sc, description)
         session.add(scene)
         session.flush()
-        
+
         # create directories
         repo.scene_create_dirs(project.id, scene)
-        
+
         # invalidate project cache
         project.touch()
 
@@ -137,15 +139,15 @@ class Controller(RestController):
 
         # log into Journal
         journal.add(user, '%s - %s' % (msg, scene))
-        
+
         # notify clients
         updates = [
             dict(item=scene, type='added', topic=TOPIC_SCENES),
             dict(item=project, type='updated', topic=TOPIC_PROJECT_STRUCTURE),
-            ]
+        ]
         notify.send(updates)
         return dict(msg=msg, status='ok', updates=updates)
-    
+
     @project_set_active
     @require(is_project_admin())
     @expose('spam.templates.forms.form')
@@ -158,10 +160,10 @@ class Controller(RestController):
                             project_name_=scene.project.name,
                             scene_name_=scene.name,
                             description=scene.description,
-                           )
+                            )
         tmpl_context.form = f_edit
         return dict(title='%s %s' % (_('Edit scene:'), scene.path))
-        
+
     @project_set_active
     @require(is_project_admin())
     @expose('json')
@@ -178,7 +180,7 @@ class Controller(RestController):
         if description is not None and not scene.description == description:
             scene.description = description
             modified = True
-        
+
         if modified:
             new = scene.__dict__.copy()
 
@@ -186,13 +188,13 @@ class Controller(RestController):
 
             # log into Journal
             journal.add(user, '%s - %s' % (msg, diff_dicts(old, new)))
-            
+
             # notify clients
             updates = [dict(item=scene, type='updated', topic=TOPIC_SCENES)]
             notify.send(updates)
             return dict(msg=msg, status='ok', updates=updates)
         return dict(msg='%s %s' % (_('Scene is unchanged:'), scene.path),
-                                                    status='info', updates=[])
+                    status='info', updates=[])
 
     @project_set_active
     @require(is_project_admin())
@@ -207,12 +209,12 @@ class Controller(RestController):
                                project_name_=scene.project.name,
                                scene_name_=scene.name,
                                description_=scene.description,
-                              )
+                               )
         warning = _('This will only delete the scene entry in the database. '
                     'The data must be deleted manually if needed.')
         tmpl_context.form = f_confirm
         return dict(title='%s %s?' % (_('Are you sure you want to delete:'),
-                                                scene.path), warning=warning)
+                                      scene.path), warning=warning)
 
     @project_set_active
     @require(is_project_admin())
@@ -230,12 +232,12 @@ class Controller(RestController):
         session = session_get()
         user = tmpl_context.user
         scene = scene_get(proj, sc)
-        
+
         if scene.shots:
             return dict(msg='%s %s' % (
-                    _('Cannot delete scene because it contains shots:'),
-                    scene.path),
-                status='error', updates=[])
+                _('Cannot delete scene because it contains shots:'),
+                scene.path),
+                        status='error', updates=[])
 
         session.delete(scene)
 
@@ -251,16 +253,15 @@ class Controller(RestController):
 
         # log into Journal
         journal.add(user, '%s - %s' % (msg, scene))
-        
+
         # notify clients
         updates = [
             dict(item=scene, type='deleted', topic=TOPIC_SCENES),
             dict(item=project, type='updated', topic=TOPIC_PROJECT_STRUCTURE),
-            ]
+        ]
         notify.send(updates)
 
         return dict(msg=msg, status='ok', updates=updates)
-    
+
     # Custom REST-like actions
     _custom_actions = []
-

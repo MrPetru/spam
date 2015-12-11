@@ -41,9 +41,10 @@ def project_set_active(func, *args, **kwargs):
     else:
         raise SPAMError('No project defined')
 
+
     tmpl_context.project = project_get(proj)
     return func(*args, **kwargs)
-    
+
 @decorator
 def asset_set_active(func, *args, **kwargs):
     """Extract the current asset id from the args passed to the function
@@ -60,5 +61,5 @@ def asset_set_active(func, *args, **kwargs):
     project = tmpl_context.project
     tmpl_context.asset = asset_get(project.id, asset_id)
     return func(*args, **kwargs)
-    
+
 

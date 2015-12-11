@@ -66,6 +66,7 @@ class RootController(SPAMBaseController):
     journal = journal.Controller()
     task = task.Controller()
     attach = attach.Controller()
+
     
     @expose()
     def index(self):

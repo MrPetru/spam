@@ -22,9 +22,9 @@
 
 import sys, os, time, thread
 import gobject
-import pygst
+#import pygst
 #pygst.require("0.10")
-import gst
+#import gst
 from tg import app_globals as G
 import gtk
 
@@ -48,70 +48,70 @@ PIPELINE_THUMB_FROM_IMAGE = 'filesrc location=%(src)s ! decodebin ! '\
 
 loop = gobject.MainLoop()
 
-class PipelineRunner(object):
-    def __init__(self, pipeline, **kwargs):
-        #log.debug(pipeline % kwargs)
-        self.pipeline = gst.parse_launch(pipeline % kwargs)
-        bus = self.pipeline.get_bus()
-        bus.add_signal_watch()
-        bus.connect("message", self.on_message)
-
-    def start(self):
-        self.pipeline.set_state(gst.STATE_PLAYING)
-        self.working = True
-        while self.working:
-            time.sleep(.1)
-        loop.quit()
-
-    def on_message(self, bus, message):
-        t = message.type
-        #log.debug(t, message)
-        if t == gst.MESSAGE_EOS:
-            self.pipeline.set_state(gst.STATE_NULL)
-            self.working = False
-        elif t == gst.MESSAGE_ERROR:
-            err, debug = message.parse_error()
-            #log.debug("Error: %s" % err, debug)
-            self.pipeline.set_state(gst.STATE_NULL)
-            self.working = False
-
-
-def pipeline_run(pipeline, **kwargs):
-    maker = PipelineRunner(pipeline, **kwargs)
-    thread.start_new_thread(maker.start, ())
-    gobject.threads_init()
-    loop.run()
-
-def make_preview(asset):
-    pass
-
-def old_make_thumb(asset):
-    image_types = ['.png', '.jpg', '.tif']
-    
-    repo_path = os.path.join(G.REPOSITORY, asset.proj_id)
-    previews_path = os.path.join(G.REPOSITORY, asset.proj_id, G.PREVIEWS)
-    dirname, basename = os.path.split(asset.path)
-    name, ext = os.path.splitext(basename)
-    
-    if not asset.is_sequence:
-        if ext in image_types:
-            src = os.path.join(repo_path, asset.path)
-            dest_name = '%s_%s-thumb.png' % (name, asset.current.fmtver)
-            dest = os.path.join(previews_path, dirname, dest_name)
-            if not os.path.exists(os.path.dirname(dest)):
-                os.makedirs(os.path.dirname(dest))
-            pipeline_run(PIPELINE_THUMB_FROM_IMAGE, width=THUMB_WIDTH,
-                         height=THUMB_HEIGHT, src=src, dest=dest)
-
-            unversioned_dest_name = '%s-thumb.png' % name
-            unversioned_dest = os.path.join(previews_path, dirname,
-                                                        unversioned_dest_name)
-            if os.path.exists(unversioned_dest):
-                os.remove(unversioned_dest)
-            try:
-                os.symlink(dest_name, unversioned_dest)
-            except OSError:
-                os.link(dest_name, unversioned_dest)
+#class PipelineRunner(object):
+#    def __init__(self, pipeline, **kwargs):
+#        #log.debug(pipeline % kwargs)
+#        self.pipeline = gst.parse_launch(pipeline % kwargs)
+#        bus = self.pipeline.get_bus()
+#        bus.add_signal_watch()
+#        bus.connect("message", self.on_message)
+#
+#    def start(self):
+#        self.pipeline.set_state(gst.STATE_PLAYING)
+#        self.working = True
+#        while self.working:
+#            time.sleep(.1)
+#        loop.quit()
+#
+#    def on_message(self, bus, message):
+#        t = message.type
+#        #log.debug(t, message)
+#        if t == gst.MESSAGE_EOS:
+#            self.pipeline.set_state(gst.STATE_NULL)
+#            self.working = False
+#        elif t == gst.MESSAGE_ERROR:
+#            err, debug = message.parse_error()
+#            #log.debug("Error: %s" % err, debug)
+#            self.pipeline.set_state(gst.STATE_NULL)
+#            self.working = False
+#
+#
+#def pipeline_run(pipeline, **kwargs):
+#    maker = PipelineRunner(pipeline, **kwargs)
+#    thread.start_new_thread(maker.start, ())
+#    gobject.threads_init()
+#    loop.run()
+#
+#def make_preview(asset):
+#    pass
+#
+#def old_make_thumb(asset):
+#    image_types = ['.png', '.jpg', '.tif']
+#    
+#    repo_path = os.path.join(G.REPOSITORY, asset.proj_id)
+#    previews_path = os.path.join(G.REPOSITORY, asset.proj_id, G.PREVIEWS)
+#    dirname, basename = os.path.split(asset.path)
+#    name, ext = os.path.splitext(basename)
+#    
+#    if not asset.is_sequence:
+#        if ext in image_types:
+#            src = os.path.join(repo_path, asset.path)
+#            dest_name = '%s_%s-thumb.png' % (name, asset.current.fmtver)
+#            dest = os.path.join(previews_path, dirname, dest_name)
+#            if not os.path.exists(os.path.dirname(dest)):
+#                os.makedirs(os.path.dirname(dest))
+#            pipeline_run(PIPELINE_THUMB_FROM_IMAGE, width=THUMB_WIDTH,
+#                         height=THUMB_HEIGHT, src=src, dest=dest)
+#
+#            unversioned_dest_name = '%s-thumb.png' % name
+#            unversioned_dest = os.path.join(previews_path, dirname,
+#                                                        unversioned_dest_name)
+#            if os.path.exists(unversioned_dest):
+#                os.remove(unversioned_dest)
+#            try:
+#                os.symlink(dest_name, unversioned_dest)
+#            except OSError:
+#                os.link(dest_name, unversioned_dest)
 
 
 def make_thumb(asset):

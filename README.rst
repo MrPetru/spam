@@ -73,3 +73,6 @@ Log-in as::
 
 
 Enjoy :)
+
+Note: install mercurial
+pip install https://www.mercurial-scm.org/release/mercurial-1.9.tar.gz
