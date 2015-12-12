@@ -81,10 +81,10 @@ loop = gobject.MainLoop()
 #    thread.start_new_thread(maker.start, ())
 #    gobject.threads_init()
 #    loop.run()
-#
-#def make_preview(asset):
-#    pass
-#
+
+def make_preview(asset):
+    pass
+
 #def old_make_thumb(asset):
 #    image_types = ['.png', '.jpg', '.tif']
 #    
