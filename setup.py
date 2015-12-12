@@ -30,7 +30,7 @@ setup(
         "repoze.tm2",
         "repoze.what-quickstart",
         "repoze.what-pylons==1.0",
-        "mercurial == 1.9",
+        "mercurial == 1.9.3",
         # if we dont use mysql as database backend we can omit this package
         # to avoid cluttering of our sistem with unided stuff
         #"MySQL-python",
