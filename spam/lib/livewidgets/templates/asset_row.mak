@@ -18,7 +18,7 @@
 
 
 <tr class="item-${w.item_id} ${w.widgets_class} status ${w.item_status}">
-    <input type='hidden' class='actionurl' value='${"/opam/task/%(proj_id)s/%(id)s" % w.data}'/>
+    <input type='hidden' class='actionurl' value='${"/spam/task/%(proj_id)s/%(id)s" % w.data}'/>
     <input type='hidden' class='filtertags' value='${"%(status)s,%(owner_user_name)s," % w.data}${path_string}'/>
     % for c in w.children:
         <td class="${c.parent_css_class}">

@@ -9,7 +9,7 @@ if (data['modified'][data['user_id']]) {
 };
 
 content += '<tr class="item-' + data["id"] + ' actiondescription status ' +data["status"] + '">';
-content += '<input type="hidden" class="actionurl" value="/opam/task/'+ data["proj_id"]+'/' + data["id"] +'"/>';
+content += '<input type="hidden" class="actionurl" value="/spam/task/'+ data["proj_id"]+'/' + data["id"] +'"/>';
 content += '<input type="hidden" class="filtertags" value="'+data["status"]+','+data["owner_user_name"]+','+path_string +'"/>';
     $.each(field_makers, function() {
         if (this.condition(data)) {
