@@ -359,7 +359,12 @@ class Controller(RestController):
             asset_directory_path = os.path.split(asset_directory_path)[0]
             if not os.path.exists(asset_directory_path):
                 os.makedirs(asset_directory_path)
-            shutil.os.chmod(asset_directory_path, 0777)
+            try:
+                shutil.os.chmod(asset_directory_path, 0777)
+            except OSError:
+                # on a  shared samba storage some time is not possible to change mode of files and directories
+                print "could not change file or folder permission"
+                pass
 
             # log into Journal
             journal.add(user, '%s - %s' % (msg, asset))
@@ -402,7 +407,12 @@ class Controller(RestController):
             status = 'ok'
             asset_directory_path = os.path.join(G.REPOSITORY, proj, asset.path)
             asset_directory_path = os.path.split(asset_directory_path)[0]
-            shutil.os.chmod(asset_directory_path, 0755)
+            try:
+                shutil.os.chmod(asset_directory_path, 0755)
+            except OSError:
+                # on a  shared samba storage some time is not possible to change mode of files and directories
+                print "could not change file or folder permission"
+                pass
 
             # log into Journal
             journal.add(user, '%s - %s' % (msg, asset))

@@ -20,18 +20,24 @@
 #
 """Mercurial repository management."""
 
-import os, shutil, tempfile, zipfile, glob, time
+import logging
+
+import glob
+import os
+import shutil
+import tempfile
+import zipfile
 from mercurial import ui, hg, commands, match
 from mercurial.error import RepoError
 from tg import app_globals as G
-from spam.lib.exceptions import SPAMRepoError, SPAMRepoNotFound
-from spam.model import session_get, libgroup_get
 
-import logging
+from spam.lib.exceptions import SPAMRepoError, SPAMRepoNotFound
+
 log = logging.getLogger(__name__)
 
 repo_ui = ui.ui()
 repo_ui.setconfig('ui', 'interactive', 'False')
+
 
 # Repository
 def repo_get(proj):
@@ -42,6 +48,7 @@ def repo_get(proj):
     except RepoError:
         raise SPAMRepoNotFound('"%s" is not a valid HG repository' % repo_path)
 
+
 def repo_init(proj):
     """Init a new mercurial repository for ``proj``."""
     repo_path = os.path.join(G.REPOSITORY, proj)
@@ -50,46 +57,52 @@ def repo_init(proj):
     except SPAMRepoNotFound:
         commands.init(repo_ui, repo_path)
         repo = repo_get(proj)
-    
+
     hgignore_path = os.path.join(G.REPOSITORY, proj, '.hgignore')
     if not os.path.exists(hgignore_path):
         hgignore = open(hgignore_path, 'w')
         hgignore.write('syntax: regexp\n')
         hgignore.write('^.previews/')
         hgignore.close()
-    
+
     if not '.hgignore' in repo['tip']:
         commands.add(repo_ui, repo, hgignore_path)
         matched = match.exact(repo.root, repo.getcwd(), ['.hgignore'])
         commit_id = repo.commit('add .hgignore', user='system', match=matched)
+
 
 # Commit
 def commit_single(proj, asset, filename, text, username=None):
     """Commit a single file to the repository and returns the revision id."""
     repo_path = os.path.join(G.REPOSITORY, proj)
     repo = repo_get(proj)
-    
+
     if isinstance(filename, list):
         raise SPAMRepoError('expected a single file for asset %s' % asset.id)
 
-    #text = u'asset %s - %s' % (asset.id, text)
+    # text = u'asset %s - %s' % (asset.id, text)
     text = u'asset %s' % (asset.id)
     encodedtext = text.encode('utf-8')
     targets = []
-    
+
     uploadedfile = os.path.join(G.UPLOAD, filename)
     target_path = asset.path.encode()
     target_repo_path = os.path.join(repo_path, target_path)
     if not os.path.exists(os.path.dirname(target_repo_path)):
         os.makedirs(os.path.dirname(target_repo_path))
     shutil.move(uploadedfile, target_repo_path)
-    shutil.os.chmod(target_repo_path, 0775) 
-    
+    try:
+        shutil.os.chmod(target_repo_path, 0775)
+    except OSError:
+        # on a  shared samba storage some time is not possible to change mode of files and directories
+        print "could not change file or folder permission"
+        pass
+
     if not target_path in repo['tip']:
         commands.add(repo_ui, repo, target_repo_path)
 
     targets.append(target_path)
-    
+
     matched = match.exact(repo.root, repo.getcwd(), targets)
     commit_id = repo.commit(encodedtext, user=username, match=matched)
     if commit_id:
@@ -97,20 +110,21 @@ def commit_single(proj, asset, filename, text, username=None):
     else:
         return None
 
+
 def commit_multi(proj, asset, filenames, text, username=None):
     """Commit multiple files to the repository and returns the revision id."""
     repo_path = os.path.join(G.REPOSITORY, proj)
     repo = repo_get(proj)
-    
+
     if not isinstance(filenames, list):
         raise SPAMRepoError('expected a list of files for asset %s' % asset.id)
 
-    #text = u'asset %s - %s' % (asset.id, text)
+    # text = u'asset %s - %s' % (asset.id, text)
     text = u'asset %s' % (asset.id)
     encodedtext = text.encode('utf-8')
     target_sequence_path = asset.path.replace('#', '%04d')
     targets = []
-    
+
     for i, filename in enumerate(filenames):
         n = i + 1
         uploadedfile = os.path.join(G.UPLOAD, filename)
@@ -119,19 +133,25 @@ def commit_multi(proj, asset, filenames, text, username=None):
         if not os.path.exists(os.path.dirname(target_repo_path)):
             os.makedirs(os.path.dirname(target_repo_path))
         shutil.move(uploadedfile, target_repo_path)
-        shutil.os.chmod(target_repo_path, 0775)
-        
+        try:
+            shutil.os.chmod(target_repo_path, 0775)
+        except OSError:
+            # on a  shared samba storage some time is not possible to change mode of files and directories
+            print "could not change file or folder permission"
+            pass
+
         if not target_path in repo['tip']:
             commands.add(repo_ui, repo, target_repo_path)
-    
+
         targets.append(target_path)
-        
+
     matched = match.exact(repo.root, repo.getcwd(), targets)
     commit_id = repo.commit(encodedtext, user=username, match=matched)
     if commit_id:
         return repo[commit_id].hex()
     else:
         return None
+
 
 def commit(proj, asset, filenames, text, username=None):
     """Helper to commit a new version of an asset to the repository.
@@ -142,18 +162,20 @@ def commit(proj, asset, filenames, text, username=None):
     else:
         return commit_single(proj, asset, filenames[0], text, username=None)
 
+
 # Cat
 def cat_single(proj, assetver):
     """Return the file corresponding to the given asset version, retriving it
     from the mercurial repository."""
     repo_path = os.path.join(G.REPOSITORY, proj)
     repo = repo_get(proj)
-    
+
     target_file_name = os.path.join(repo_path, assetver.asset.path)
     temp = tempfile.NamedTemporaryFile()
     commands.cat(repo_ui, repo, target_file_name, output=temp.name,
-                                                            rev=assetver.repoid)
+                 rev=assetver.repoid)
     return temp
+
 
 def cat_multi(proj, assetver):
     """Return the files corresponding to the given asset version in a zip
@@ -161,11 +183,11 @@ def cat_multi(proj, assetver):
     repository."""
     if not assetver.asset.is_sequence:
         raise SPAMRepoError('asset %s is not a sequence of files' %
-                                                            assetver.asset.id)
-    
+                            assetver.asset.id)
+
     repo_path = os.path.join(G.REPOSITORY, proj)
     repo = repo_get(proj)
-    
+
     target_path = assetver.asset.path.replace('#', '*').encode()
     target_filename = os.path.join(repo_path, target_path).encode()
     targets = glob.glob(target_filename)
@@ -175,7 +197,7 @@ def cat_multi(proj, assetver):
     for target in targets:
         temp = tempfile.NamedTemporaryFile()
         commands.cat(repo_ui, repo, target, output=temp.name,
-                                                            rev=assetver.repoid)
+                     rev=assetver.repoid)
         name = os.path.basename(target)
         name, ext = os.path.splitext(name)
         name, frame = os.path.splitext(name)
@@ -187,6 +209,7 @@ def cat_multi(proj, assetver):
     zfile.close()
     return ztemp
 
+
 def cat(proj, assetver):
     """Helper to retrive the file(s) corresponding to a specific asset version
     from the repository.
@@ -196,6 +219,7 @@ def cat(proj, assetver):
         return cat_multi(proj, assetver)
     else:
         return cat_single(proj, assetver)
+
 
 # Directories
 def project_create_dirs(proj):
@@ -207,9 +231,9 @@ def project_create_dirs(proj):
             os.makedirs(os.path.join(repo_path, d))
     except OSError, error:
         # error 17 is "file exists", in that case we just skip the exception
-        if not error.errno==17:
-            raise SPAMRepoError("Couldn't create directories for project %s" %
-                                                                        path)
+        if not error.errno == 17:
+            raise SPAMRepoError("Couldn't create directories for project %s" % proj)
+
 
 def scene_create_dirs(proj, scene):
     """Create directories in the repository for ``scene``."""
@@ -220,9 +244,9 @@ def scene_create_dirs(proj, scene):
         os.makedirs(previews_path)
     except OSError, error:
         # error 17 is "file exists", in that case we just skip the exception
-        if not error.errno==17:
+        if not error.errno == 17:
             raise SPAMRepoError("Couldn't create directories for scene %s" %
-                                                                        path)
+                                path)
     # create directory for scene attachements
     path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, scene.path)
     previews_path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, G.PREVIEWS, scene.path)
@@ -231,9 +255,10 @@ def scene_create_dirs(proj, scene):
         os.makedirs(previews_path)
     except OSError, error:
         # error 17 is "file exists", in that case we just skip the exception
-        if not error.errno==17:
+        if not error.errno == 17:
             raise SPAMRepoError("Couldn't create directories for scene %s" %
-                                                                        path)
+                                path)
+
 
 def shot_create_dirs(proj, shot):
     """Create directories in the repository for ``shot``."""
@@ -244,9 +269,9 @@ def shot_create_dirs(proj, shot):
         os.makedirs(previews_path)
     except OSError, error:
         # error 17 is "file exists", in that case we just skip the exception
-        if not error.errno==17:
+        if not error.errno == 17:
             raise SPAMRepoError("Couldn't create directories for shot %s" %
-                                                                        path)
+                                path)
     # create directory for shot attachements
     path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, shot.path)
     previews_path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, G.PREVIEWS, shot.path)
@@ -255,9 +280,10 @@ def shot_create_dirs(proj, shot):
         os.makedirs(previews_path)
     except OSError, error:
         # error 17 is "file exists", in that case we just skip the exception
-        if not error.errno==17:
+        if not error.errno == 17:
             raise SPAMRepoError("Couldn't create directories for shot %s" %
-                                                                        path)
+                                path)
+
 
 def libgroup_create_dirs(proj, libgroup):
     """Create directories in the repository for ``libgroup``."""
@@ -268,10 +294,10 @@ def libgroup_create_dirs(proj, libgroup):
         os.makedirs(previews_path)
     except OSError, error:
         # error 17 is "file exists", in that case we just skip the exception
-        if not error.errno==17:
+        if not error.errno == 17:
             raise SPAMRepoError("Couldn't create directories for libgroup %s" %
-                                                                        path)
-    
+                                path)
+
     path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, libgroup.path)
     previews_path = os.path.join(G.REPOSITORY, proj, G.ATTACHMENTS, G.PREVIEWS, libgroup.path)
     try:
@@ -279,8 +305,6 @@ def libgroup_create_dirs(proj, libgroup):
         os.makedirs(previews_path)
     except OSError, error:
         # error 17 is "file exists", in that case we just skip the exception
-        if not error.errno==17:
+        if not error.errno == 17:
             raise SPAMRepoError("Couldn't create directories for libgroup %s" %
-                                                                        path)
-
-
+                                path)
