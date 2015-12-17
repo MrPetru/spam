@@ -1258,6 +1258,7 @@ class FormAssetPublish(RestForm):
                          },
                     required=True))
     uploader = Upload(label='File(s) to Upload')
+    preserve_frame_index = twf.CheckBox(value=True)
     spacer = twf.Spacer()
     revision = twf.CheckBox()
     receiver = twf.SingleSelectField(label='send to', options=[],

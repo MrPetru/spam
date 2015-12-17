@@ -460,7 +460,7 @@ class Controller(RestController):
     @expose('json')
     @validate(f_publish, error_handler=get_publish)
     def post_publish(self, proj, asset_id, uploaded, receiver, revision=False, comment=None,
-                                                                uploader=None):
+                                                                uploader=None, preserve_frame_index=True):
         """Publish a new version of an asset.
 
         This will commit to the repo the file(s) already uploaded in a temporary
@@ -494,7 +494,7 @@ class Controller(RestController):
         header = u'[%s %s v%03d]' % (_('published'), asset.path,
                                                             asset.current.ver+1)
         text = comment and u'%s\n%s' % (header, comment) or header
-        repo_id = repo.commit(proj, asset, uploaded, text, user.user_name)
+        repo_id = repo.commit(proj, asset, uploaded, text, user.user_name, preserve_frame_index)
         if not repo_id:
             msg = '%s %s' % (_('The latest version is already:'), uploaded)
             return dict(msg=msg, status='info', updates=[])

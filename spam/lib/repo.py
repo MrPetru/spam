@@ -20,13 +20,13 @@
 #
 """Mercurial repository management."""
 
-import logging
-
 import glob
-import os
+import logging
 import shutil
 import tempfile
 import zipfile
+
+import os
 from mercurial import ui, hg, commands, match
 from mercurial.error import RepoError
 from tg import app_globals as G
@@ -111,7 +111,7 @@ def commit_single(proj, asset, filename, text, username=None):
         return None
 
 
-def commit_multi(proj, asset, filenames, text, username=None):
+def commit_multi(proj, asset, filenames, text, username=None, preserve_frame_index=True):
     """Commit multiple files to the repository and returns the revision id."""
     repo_path = os.path.join(G.REPOSITORY, proj)
     repo = repo_get(proj)
@@ -122,11 +122,47 @@ def commit_multi(proj, asset, filenames, text, username=None):
     # text = u'asset %s - %s' % (asset.id, text)
     text = u'asset %s' % (asset.id)
     encodedtext = text.encode('utf-8')
-    target_sequence_path = asset.path.replace('#', '%04d')
+
+    padding = 4
+    start_index = None
+    end_index = None
+    if preserve_frame_index:
+        print "eseguiamo procedura mantenimento indice"
+        # calculate padding
+        # calculate start and end index
+
+        # filenames contiene la lista dei file da committare
+        # order list
+        filenames.sort()
+        start_file = filenames[0]
+        end_file = filenames[-1]
+        if start_file == end_file:
+            raise Exception("non sequence found")
+
+        # parse start index
+        start_file_comps = start_file.split('.')
+        start_index = start_file_comps[-2]
+        padding = len(start_index)
+        start_index = int(start_index)
+
+        end_file_comps = end_file.split('.')
+        end_index = end_file_comps[-2]
+        end_index = int(end_index)
+
+        if (end_index - start_index + 1) != len(filenames):
+            raise Exception("sequence is incomplete")
+
+    padding_str = "%%0%dd" % padding
+    target_sequence_path = asset.path.replace('#', padding_str)
     targets = []
 
     for i, filename in enumerate(filenames):
-        n = i + 1
+
+        if start_index is None:
+            n = i + 1
+        else:
+            n = start_index + i
+
         uploadedfile = os.path.join(G.UPLOAD, filename)
         target_path = (target_sequence_path % n).encode()
         target_repo_path = os.path.join(repo_path, target_path)
@@ -153,12 +189,12 @@ def commit_multi(proj, asset, filenames, text, username=None):
         return None
 
 
-def commit(proj, asset, filenames, text, username=None):
+def commit(proj, asset, filenames, text, username=None, preserve_frame_index=True):
     """Helper to commit a new version of an asset to the repository.
     
     Call :meth:``commit_multi`` or :meth:``commit_single`` based on the asset type."""
     if asset.is_sequence:
-        return commit_multi(proj, asset, filenames, text, username=None)
+        return commit_multi(proj, asset, filenames, text, username=None, preserve_frame_index=preserve_frame_index)
     else:
         return commit_single(proj, asset, filenames[0], text, username=None)
 
