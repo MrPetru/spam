@@ -90,7 +90,13 @@ def commit_single(proj, asset, filename, text, username=None):
     target_repo_path = os.path.join(repo_path, target_path)
     if not os.path.exists(os.path.dirname(target_repo_path)):
         os.makedirs(os.path.dirname(target_repo_path))
-    shutil.move(uploadedfile, target_repo_path)
+    try:
+        shutil.move(uploadedfile, target_repo_path)
+    except OSError:
+        # copy with stats failed, try to do a normal copy
+        shutil.copy(uploadedfile, target_repo_path)
+        os.unlink(uploadedfile)
+
     try:
         shutil.os.chmod(target_repo_path, 0775)
     except OSError:
@@ -168,7 +174,13 @@ def commit_multi(proj, asset, filenames, text, username=None, preserve_frame_ind
         target_repo_path = os.path.join(repo_path, target_path)
         if not os.path.exists(os.path.dirname(target_repo_path)):
             os.makedirs(os.path.dirname(target_repo_path))
-        shutil.move(uploadedfile, target_repo_path)
+        try:
+            shutil.move(uploadedfile, target_repo_path)
+        except OSError:
+            # copy with stats failed, try to do a normal copy
+            shutil.copy(uploadedfile, target_repo_path)
+            os.unlink(uploadedfile)
+
         try:
             shutil.os.chmod(target_repo_path, 0775)
         except OSError:
