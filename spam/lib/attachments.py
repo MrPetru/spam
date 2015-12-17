@@ -55,7 +55,7 @@ def put(asset, filename):
         shutil.move(uploaded_file, final_file_path)
     except OSError:
         # copy with stats failed, try to do a normal copy
-        shutil.copy(uploaded_file, final_file_path)
+        shutil.copyfile(uploaded_file, final_file_path)
         os.unlink(uploaded_file)
     
     images = ['.png', '.jpg', '.tif', '.tiff']

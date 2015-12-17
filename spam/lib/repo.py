@@ -94,7 +94,7 @@ def commit_single(proj, asset, filename, text, username=None):
         shutil.move(uploadedfile, target_repo_path)
     except OSError:
         # copy with stats failed, try to do a normal copy
-        shutil.copy(uploadedfile, target_repo_path)
+        shutil.copyfile(uploadedfile, target_repo_path)
         os.unlink(uploadedfile)
 
     try:
@@ -178,7 +178,7 @@ def commit_multi(proj, asset, filenames, text, username=None, preserve_frame_ind
             shutil.move(uploadedfile, target_repo_path)
         except OSError:
             # copy with stats failed, try to do a normal copy
-            shutil.copy(uploadedfile, target_repo_path)
+            shutil.copyfile(uploadedfile, target_repo_path)
             os.unlink(uploadedfile)
 
         try:
