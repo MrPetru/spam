@@ -178,10 +178,15 @@ class User(DeclarativeBase):
     
     @property
     def projects(self):
-        return (set(self.projects_as_supervisor) |
-                set(self.projects_as_artist) |
-                set(self.projects_as_admin))
-    
+        """Return an ordered list of projects where current user acts like admin or supervisor or artist.
+        """
+
+        projects_set = set(self.projects_as_supervisor) | set(self.projects_as_artist) | set(self.projects_as_admin)
+        projects_list = list(projects_set)
+        projects_list.sort(key=lambda x: x.id)
+
+        return projects_list
+
     @property
     def project_ids(self):
         return [p.id for p in self.projects]
