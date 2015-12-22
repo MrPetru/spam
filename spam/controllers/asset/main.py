@@ -528,7 +528,7 @@ class Controller(RestController):
         notify.send(updates)
 
         if revision:
-            return self.post_submit(proj, asset_id, user.id, "", receiver, comment, uploader)
+            return self.post_submit(proj, asset_id, user.id, receiver, comment, "", uploader)
 
         return dict(msg=msg, status='ok', updates=updates)
 
