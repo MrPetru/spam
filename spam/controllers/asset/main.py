@@ -955,7 +955,7 @@ class Controller(RestController):
         if not assetver:
             assetver = assetversion_get(proj, assetver_id)
 
-        f = repo.cat(proj, assetver)
+        # f = repo.cat(proj, assetver)
 
         if assetver.asset.is_sequence:
             name = os.path.split(assetver.path)[0]
@@ -971,6 +971,15 @@ class Controller(RestController):
                                             os.path.basename(path)).encode())
 
         # copy file content in the response body
-        shutil.copyfileobj(f, response.body_file)
-        f.close()
-        return
+        """
+        For a compatibility issue trough Pylons==1.0 and WebOp==1.1.1 (Required by TurboGears)
+        we are not able to use shutil.copyfileobj(f, response.body_file) in code below, we we will try to serve
+        file content directly.
+
+            # replaced code is
+            shutil.copyfileobj(f, response.body_file)
+            f.close()
+            return
+
+        """
+        return repo.cat(proj, assetver)
