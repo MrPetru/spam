@@ -20,25 +20,24 @@
 #
 """Main Controller"""
 
-import os.path, datetime, shutil, mimetypes
+import mimetypes
+import shutil
 
-from tg import expose, flash, require, url, request, redirect, override_template
-from tg import response, config, tmpl_context, app_globals as G
-from tg.exceptions import HTTPNotFound
-from tg.controllers import CUSTOM_CONTENT_TYPE
+import os.path
 from pylons.i18n import ugettext as _, lazy_ugettext as l_
 from repoze.what.predicates import not_anonymous
+from tg import expose, flash, require, url, request, redirect
+from tg import response, app_globals as G
+from tg.exceptions import HTTPNotFound
 
-from spam.lib.base import SPAMBaseController
-from spam.model import User, Group, Permission, Project
-from spam.controllers.error import ErrorController
-from spam.controllers.sandbox import SandboxController
-from spam.controllers import user, category, tag, note, journal
 from spam.controllers import project, scene, shot, asset, libgroup
 from spam.controllers import task, attach
+from spam.controllers import user, category, tag, note, journal
+from spam.controllers.error import ErrorController
+from spam.controllers.sandbox import SandboxController
+from spam.lib.base import SPAMBaseController
 from spam.lib.decorators import project_set_active
-from spam.lib.predicates import is_project_user, is_project_admin
-
+from spam.lib.predicates import is_project_user
 
 __all__ = ['RootController']
 
@@ -51,7 +50,7 @@ class RootController(SPAMBaseController):
     the projects repository.
     All other functionalities are mounted as subcontrollers.
     """
-    
+
     error = ErrorController()
     user = user.Controller()
     sandbox = SandboxController()
@@ -67,7 +66,6 @@ class RootController(SPAMBaseController):
     task = task.Controller()
     attach = attach.Controller()
 
-    
     @expose()
     def index(self):
         """Redirect to the user home.
@@ -84,7 +82,7 @@ class RootController(SPAMBaseController):
             flash(_('Wrong credentials'), 'warning')
         return dict(page='login', login_counter=str(login_counter),
                     came_from=came_from)
-    
+
     @expose()
     def post_login(self, came_from='/'):
         """
@@ -93,7 +91,7 @@ class RootController(SPAMBaseController):
         """
         if not request.identity:
             login_counter = request.environ['repoze.who.logins'] + 1
-            redirect(url('login', came_from=came_from, __logins=login_counter))
+            redirect(url('login', params=dict(came_from=came_from, __logins=login_counter)))
         userid = request.identity['repoze.who.userid']
         flash(_('Welcome back, %s!') % userid)
         redirect(came_from)
@@ -106,7 +104,7 @@ class RootController(SPAMBaseController):
         """
         flash(_('See you soon!'))
         redirect(came_from)
-    
+
     @expose('json')
     @require(not_anonymous(msg=l_('Please login')))
     def upload(self, uploadfile, uploader=None):
@@ -118,6 +116,7 @@ class RootController(SPAMBaseController):
         The path for this storage area can be configured in the .ini file with
         the "upload_dir" variable.
         """
+
         uploaded = []
         if isinstance(uploadfile, list):
             for uf in uploadfile:
@@ -131,7 +130,7 @@ class RootController(SPAMBaseController):
             tmpf.close()
             uploaded.append(uploadfile.filename)
         return dict(msg='uploaded file(s) "%s"' % ', '.join(uploaded),
-                                                            result='success')
+                    result='success')
 
     @project_set_active
     @require(is_project_user())
@@ -154,16 +153,15 @@ class RootController(SPAMBaseController):
 
         if os.path.isdir(path):
             raise HTTPNotFound().exception
-        
+
         # set the correct content-type so the browser will know what to do
         content_type, encoding = mimetypes.guess_type(path)
         response.headers['Content-Type'] = content_type
         response.headers['Content-Disposition'] = (
-                ('attachment; filename=%s' % os.path.basename(path)).encode())
-        
+            ('attachment; filename=%s' % os.path.basename(path)).encode())
+
         # copy file content in the response body
         f = open(path)
         shutil.copyfileobj(f, response.body_file)
         f.close()
         return
-
