@@ -1288,15 +1288,15 @@ class FormAssetStatusAttach(RestForm):
     container_ = twf.LabelField()
     category_id_ = twf.LabelField()
     asset_name_ = twf.LabelField(label='Name')
-    uploaded = twf.HiddenField(validator=twc.ListLengthValidator(
-                    min=0, max=MAX_UPLOAD_FILES,
-                    msgs={'tooshort': ('list_tooshort',
-                                       'Please choose the file(s) to upload'),
-                          'toolong': ('list_toolong',
-                                      'Too many files selected'),
-                         }))
-    uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
-    spacer = twf.Spacer()
+    # uploaded = twf.HiddenField(validator=twc.ListLengthValidator(
+    #                 min=0, max=MAX_UPLOAD_FILES,
+    #                 msgs={'tooshort': ('list_tooshort',
+    #                                    'Please choose the file(s) to upload'),
+    #                       'toolong': ('list_toolong',
+    #                                   'Too many files selected'),
+    #                      }))
+    # uploader = Upload(template = 'mako:spam.templates.widgets.upload_single', label='File to Upload')
+    # spacer = twf.Spacer()
     receiver = twf.SingleSelectField(label='send to', options=[],
             validator=twc.All(StringLength(max=30)), default='')
     comment = twf.TextArea(cols=TEXT_AREA_COLS, rows=TEXT_AREA_ROWS)

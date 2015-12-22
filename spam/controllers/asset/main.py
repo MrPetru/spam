@@ -83,7 +83,7 @@ class Controller(RestController):
         * ``open``  (:meth:`open`)
     """
     wa = widget_actions()
-    
+
     @project_set_active
     @require(is_project_user())
     @expose('spam.templates.asset.get_all')
@@ -96,7 +96,7 @@ class Controller(RestController):
             * :meth:`spam.controllers.libgroup.main.get_one`.
         """
         project = tmpl_context.project
-        
+
         user = tmpl_context.user
         t_assets.user = user
         actions_display_status = []
@@ -104,7 +104,7 @@ class Controller(RestController):
         tmpl_context.t_assets = t_assets
 #        tmpl_context.b_status = b_status
         container = container_get(proj, container_type, container_id)
-        
+
         return dict(page='assets', sidebar=('projects', project.id),
                 container_type=container_type, container_id=container_id,
                 container=container,actions_display_status = actions_display_status)
@@ -122,7 +122,7 @@ class Controller(RestController):
         """Return a `standalone` page with the asset history"""
         tmpl_context.t_history = t_history
         asset = asset_get(proj, asset_id)
-        
+
         # thumb, ver, note
         history = []
         for ver in asset.versions:
@@ -132,7 +132,7 @@ class Controller(RestController):
             history.append(dict(id=None, proj_id=None, thumbnail=None,
                                 ver=None, fmtver=None, header='',
                                 text='', lines=[]))
-            
+
             history[-1]['id'] = ver.id
             history[-1]['proj_id'] = ver.asset.proj_id
             history[-1]['text'] = ver.notes[-1].text
@@ -141,7 +141,7 @@ class Controller(RestController):
             history[-1]['ver'] = ver.ver
             history[-1]['fmtver'] = ver.fmtver
             history[-1]['user_name'] = ver.user.user_name
-        
+
         return dict(asset=asset, history=history)
 
     @project_set_active
@@ -152,27 +152,27 @@ class Controller(RestController):
         project = tmpl_context.project
         user = tmpl_context.user
         container = container_get(project.id, container_type, container_id)
-        
+
         f_new.value = dict(proj=project.id,
                            container_type=container_type,
                            container_id=container_id,
                            project_name_=project.name,
                           )
-    
+
         if tmpl_context.user in project.admins:
             query = session_get().query(Category)
             categories = query.order_by('ordering', 'id')
-            
+
         else:
-        
+
             query = session_get().query(Category).filter(or_(Category.artists.any(user = user),
                                                 Category.supervisors.any(user = user)))
-                                                
+
             query = query.filter(or_(Category.artists.any(project = project),
                                                 Category.supervisors.any(project = project)))
-            
+
             categories = query.order_by("ordering", "id")
-        
+
         category_choices = ['']
         category_choices.extend([cat.id for cat in categories])
         f_new.child.children.category_id.options = category_choices
@@ -214,7 +214,7 @@ class Controller(RestController):
         notify.send(updates)
 
         return dict(msg=msg, status='ok', updates=updates)
-    
+
     @project_set_active
     @require(is_project_admin())
     @expose('spam.templates.forms.form')
@@ -230,7 +230,7 @@ class Controller(RestController):
                                asset_id=asset.id,
                                asset_name_=asset.name,
                               )
-                     
+
         warning = ('This will only delete the asset entry in the database. '
                    'The data must be deleted manually if needed.')
         tmpl_context.form = f_confirm
@@ -252,7 +252,7 @@ class Controller(RestController):
         session = session_get()
         user = tmpl_context.user
         asset = asset_get(proj, asset_id)
-        
+
         if asset.current_task:
             for n in asset.current_task.notes:
                 if n.attachment:
@@ -261,13 +261,13 @@ class Controller(RestController):
                 session.delete(n)
             session.delete(asset.current_task)
         session.flush()
-        
+
         for n in asset.modified_entries:
             session.delete(n)
         session.flush()
-        
+
         session.refresh(asset)
-        
+
         session.delete(asset)
         session.flush()
         #get tasks an delete him
@@ -296,12 +296,12 @@ class Controller(RestController):
         notify.send(updates)
 
         return dict(msg=msg, status='ok', updates=updates)
-    
+
     # Custom REST-like actions
     _custom_actions = ['checkout', 'release', 'publish', 'submit', 'recall',
                       'sendback', 'approve', 'revoke', 'download', 'id']
-    
-    
+
+
     @project_set_active
     @require(Any(is_project_admin(), is_project_user()))
     @expose('json')
@@ -340,15 +340,15 @@ class Controller(RestController):
         session = session_get()
         asset = asset_get(proj, asset_id)
         user = tmpl_context.user
-        
+
         if not asset.checkedout:
             asset.checkout(user)
-            
+
             action = u'[%s v%03d]' % (_('checkedout'), asset.current.ver)
             task = asset.current_task
             asset.current.notes.append(Note(user, action, task=task))
             session.refresh(asset.current.annotable)
-            
+
             asset2 = asset_get(proj, asset_id)
             msg = '%s %s' % (_('Checkedout Asset:'), asset.path)
             updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
@@ -394,12 +394,12 @@ class Controller(RestController):
 
         if asset.checkedout:
             asset.release()
-            
+
             action = u'[%s v%03d]' % (_('released'), asset.current.ver)
             task = asset.current_task
             asset.current.notes.append(Note(user, action, task=task))
             session.refresh(asset.current.annotable)
-            
+
             msg = '%s %s' % (_('Released Asset:'), asset.path)
             updates = [dict(item=asset, type='updated', topic=TOPIC_ASSETS,
                         extra_data = dict(user_id=user.id,
@@ -442,12 +442,12 @@ class Controller(RestController):
                                category_id_=asset.category.id,
                                asset_name_=asset.name,
                               )
-        
+
         supervisors = asset.supervisors
         supervisor_choices = []
         supervisor_choices.extend([s.user_name for s in supervisors])
         f_publish.child.children.receiver.options = supervisor_choices
-        
+
         name, ext = os.path.splitext(asset.name)
         f_publish.child.children.uploader.ext = ext
         tmpl_context.form = f_publish
@@ -539,9 +539,9 @@ class Controller(RestController):
     def get_submit(self, proj, asset_id, **kwargs):
         """Display a SUBMIT form."""
         asset = asset_get(proj, asset_id)
-        
+
         sender = tmpl_context.user.id
-        
+
         f_status_attach.custom_method = 'SUBMIT'
         f_status_attach.value = dict(proj=asset.project.id,
                               asset_id=asset.id,
@@ -566,14 +566,14 @@ class Controller(RestController):
     @require(is_asset_owner())
     @expose('json')
     @validate(f_status_attach, error_handler=get_submit)
-    def post_submit(self, proj, asset_id, sender, uploaded, receiver, comment=None, uploader=None):
+    def post_submit(self, proj, asset_id, sender, receiver, comment=None, uploaded=u'', uploader=None):
         """Submit an asset to supervisors for approval."""
         session = session_get()
         user = tmpl_context.user
         asset = asset_get(proj, asset_id)
-        
+
         sender = user_get(sender)
-        
+
         if receiver:
             receiver = user_get(receiver)
         else:
@@ -588,34 +588,34 @@ class Controller(RestController):
                 uploaded = [uf for uf in uploaded if uf]
             else:
                 uploaded = [uploaded]
-            
+
             if uploaded[0] != u'':
                 result = attachments.put(asset, uploaded[0])
                 new_attachment = Attach(result['file_name'], result['file_path'], result['preview_path'])
                 new_attachment.order = 1
             else:
                 new_attachment = None
-            
+
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('submitted'), asset.current.ver)
-            
+
             #delete old modifiers
             modifier_delete_all(asset)
             # mark asset as modified for supervisor or supervisors
             modifier_send(asset, sender, receiver, action, user)
-            
+
             if asset.current_task:
                 old_task = asset.current_task
             else:
                 old_task = None
-                
+
             task_name = u'Submitted For Revision'
             new_task = Task(task_name, comment, asset, sender, receiver)
             new_task.previous_task = old_task
-            
+
             new_note = Note(user, action, text=comment, task=new_task)
             new_note.attachment = new_attachment
-            
+
             asset.current.notes.append(new_note)
             session.refresh(asset.current.annotable)
 
@@ -636,7 +636,7 @@ class Controller(RestController):
             status = 'error'
 
         return dict(msg=msg, status=status, updates=updates)
-    
+
     @project_set_active
     @asset_set_active
     @require(is_asset_owner())
@@ -644,9 +644,9 @@ class Controller(RestController):
     def get_recall(self, proj, asset_id, **kwargs):
         """Display a RECALL form."""
         asset = asset_get(proj, asset_id)
-        
+
         sender = tmpl_context.user.id
-        
+
         f_status.custom_method = 'RECALL'
         f_status.value = dict(proj=asset.project.id,
                               asset_id=asset.id,
@@ -661,7 +661,7 @@ class Controller(RestController):
 #        user_choices = ['']
 #        user_choices.extend([u.user_name for u in users])
 #        f_status.child.children.receiver.options = user_choices
-        
+
         tmpl_context.form = f_status
         return dict(title='%s: %s' % (_('Recall submission for'), asset.path))
 
@@ -675,7 +675,7 @@ class Controller(RestController):
         session = session_get()
         user = tmpl_context.user
         asset = asset_get(proj, asset_id)
-        
+
         sender = user_get(sender)
         receiver = user
 
@@ -685,7 +685,7 @@ class Controller(RestController):
 #                                                                comment or '')
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('recalled'), asset.current.ver)
-            
+
             old_task = asset.current_task
             task_name = u'Recalled: %s' % old_task.previous_task.name
             if old_task.receiver == None:
@@ -693,7 +693,7 @@ class Controller(RestController):
             else:
                 new_task = Task(task_name, comment, asset, old_task.receiver, receiver)
             new_task.previous_task = old_task
-            
+
             asset.current.notes.append(Note(user, action, text, new_task))
             session.refresh(asset.current.annotable)
 
@@ -723,7 +723,7 @@ class Controller(RestController):
     def get_sendback(self, proj, asset_id, **kwargs):
         """Display a SENDBACK form."""
         asset = asset_get(proj, asset_id)
-        
+
         sender = tmpl_context.user.id
 
         f_status_attach.custom_method = 'SENDBACK'
@@ -735,14 +735,14 @@ class Controller(RestController):
                               category_id_=asset.category.id,
                               asset_name_=asset.name,
                              )
-        
+
 #        query = session_get().query(User)
 #        users = query.order_by('user_name')
         users = asset.artists
         user_choices = []
         user_choices.extend([u.user_name for u in users])
         f_status_attach.child.children.receiver.options = user_choices
-        
+
         tmpl_context.form = f_status_attach
         return dict(title='%s: %s' % (_('Send back for revisions'), asset.path))
 
@@ -751,15 +751,14 @@ class Controller(RestController):
     @require(is_asset_supervisor())
     @expose('json')
     @validate(f_status_attach, error_handler=get_submit)
-    def post_sendback(self, proj, asset_id, sender, uploaded, receiver, comment=None,
-                                                                uploader=None):
+    def post_sendback(self, proj, asset_id, sender, receiver, comment=None, uploaded=u'', uploader=None):
         """Send back an asset for revision."""
         session = session_get()
         user = tmpl_context.user
         asset = asset_get(proj, asset_id)
-        
+
         sender = user_get(sender)
-        
+
         if receiver:
             receiver = user_get(receiver)
         else:
@@ -774,30 +773,30 @@ class Controller(RestController):
                 uploaded = [uf for uf in uploaded if uf]
             else:
                 uploaded = [uploaded]
-            
+
             if uploaded[0] != u'':
                 result = attachments.put(asset, uploaded[0])
                 new_attachment = Attach(result['file_name'], result['file_path'], result['preview_path'])
                 new_attachment.order = 1
             else:
                 new_attachment = None
-                
+
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('sent back for revisions'), asset.current.ver)
-            
+
             # delete old modifiers
             modifier_delete_all(asset)
             # mark asset a modified for receiver or receivers    
             modifier_send(asset, sender, receiver, action, user)
-            
+
             old_task = asset.current_task
             task_name = u'Sent Back For Revision'
             new_task = Task(task_name, comment, asset, sender, receiver)
             new_task.previous_task = old_task
-            
+
             new_note = Note(user, action, text=comment, task=new_task)
             new_note.attachment = new_attachment
-            
+
             asset.current.notes.append(new_note)
             session.refresh(asset.current.annotable)
 
@@ -827,7 +826,7 @@ class Controller(RestController):
     def get_approve(self, proj, asset_id, **kwargs):
         """Display a APPROVE form."""
         asset = asset_get(proj, asset_id)
-        
+
         sender = tmpl_context.user.user_name
 
         f_status.custom_method = 'APPROVE'
@@ -839,10 +838,10 @@ class Controller(RestController):
                               category_id_=asset.category.id,
                               asset_name_=asset.name,
                              )
-        
+
 #        user_choices = [tmpl_context.user.user_name]
 #        f_status.child.children.receiver.options = user_choices
-                     
+
         tmpl_context.form = f_status
         return dict(title='%s: %s' % (_('Approve'), asset.path))
 
@@ -865,12 +864,12 @@ class Controller(RestController):
             task_name = u'Approved'
             new_task = Task(task_name, comment, asset, user, old_task.sender)
             new_task.previous_task = old_task
-            
+
             text = u'%s' % (comment or '')
             action = u'[%s v%03d]' % (_('approved'), asset.current.ver)
             asset.current.notes.append(Note(user, action, text, new_task))
             session.refresh(asset.current.annotable)
-            
+
             modifier_send(asset, asset.current_task.sender, asset.current_task.receiver, action, user)
 
             msg = '%s %s' % (_('Approved Asset:'), asset.path)
@@ -907,7 +906,7 @@ class Controller(RestController):
                               category_id_=asset.category.id,
                               asset_name_=asset.name,
                              )
-                     
+
         tmpl_context.form = f_status
         return dict(title='%s: %s' % (_('Revoke approval for'), asset.path))
 
@@ -955,22 +954,22 @@ class Controller(RestController):
         attachment in the response body."""
         if not assetver:
             assetver = assetversion_get(proj, assetver_id)
-            
+
         f = repo.cat(proj, assetver)
-        
+
         if assetver.asset.is_sequence:
             name = os.path.split(assetver.path)[0]
             path = '%s.zip' % name
         else:
             path = assetver.path
-        
+
         # set the correct content-type so the browser will know what to do
         content_type, encoding = mimetypes.guess_type(path)
         response.headers['Content-Type'] = content_type
         response.headers['Content-Disposition'] = (
                                         ('attachment; filename=%s' %
                                             os.path.basename(path)).encode())
-        
+
         # copy file content in the response body
         shutil.copyfileobj(f, response.body_file)
         f.close()
